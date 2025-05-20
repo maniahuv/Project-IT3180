@@ -8,33 +8,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 import database.JDBCUtil;
-import model.HoKhau;
+import model.TaiKhoan;
 
-public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
+public class TaiKhoanDAO implements DataAccessObjectI<TaiKhoan> {
 
-	public static HoKhauDAO instance = new HoKhauDAO();
+	public static TaiKhoanDAO instance = new TaiKhoanDAO();
 
 	@Override
-	public int insert(HoKhau hoKhau) {
+	public int insert(TaiKhoan taiKhoan) {
 		int ketQua = 0;
 		try {
 			// Tao ket noi
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thuc thi lenh sql
-			String sql = "INSERT INTO HoKhau (ID,OwnerName,OwnerNID,PhoneNumber,Email,"
-					+ "Address,DateOfRegistration,Active) VALUES (?,?,?,?,?,?,?,?)";
+			String sql = "INSERT INTO TaiKhoan (ID,Email,Password,Name,NhanKhauID,"
+					+ "AccessLevel,PhoneNumber) VALUES (?,?,?,?,?,?,?)";
 
 			// Tao statement
 			PreparedStatement pst = conn.prepareStatement(sql);
-			pst.setInt(1, hoKhau.getID());
-			pst.setString(2, hoKhau.getOwnerName());
-			pst.setString(3, hoKhau.getOwnerNID());
-			pst.setString(4, hoKhau.getPhoneNumber());
-			pst.setString(5, hoKhau.getEmail());
-			pst.setString(6, hoKhau.getAddress());
-			pst.setDate(7, hoKhau.getDateOfRegistration());
-			pst.setBoolean(8, hoKhau.isActive());
+			pst.setInt(1, taiKhoan.getID());
+			pst.setString(2, taiKhoan.getEmail());
+			pst.setInt(3, taiKhoan.getPassword());
+			pst.setString(4, taiKhoan.getName());
+			pst.setInt(5, taiKhoan.getNhanKhauID());
+			pst.setInt(6, taiKhoan.getAccessLevel());
+			pst.setString(7, taiKhoan.getPhoneNumber());
 
 			ketQua = pst.executeUpdate();
 			System.out.println("Có " + ketQua + " dòng thay đổi");
@@ -48,7 +47,7 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 	}
 
 	@Override
-	public int update(HoKhau hoKhau) {
+	public int update(TaiKhoan taiKhoan) {
 		// TODO Auto-generated method stub
 		int ketQua = 0;
 		try {
@@ -56,12 +55,12 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "UPDATE HoKhau SET Active=? WHERE ID=?";
+			String sql = "UPDATE TaiKhoan SET Password=? WHERE ID=?";
 
 			// Tao statement
 			PreparedStatement pst = conn.prepareStatement(sql);
-			pst.setBoolean(1, hoKhau.isActive());
-			pst.setInt(2, hoKhau.getID());
+			pst.setInt(1, taiKhoan.getPassword());
+			pst.setInt(2, taiKhoan.getID());
 
 			ketQua = pst.executeUpdate();
 //					System.out.println(sql);
@@ -78,7 +77,7 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 	}
 
 	@Override
-	public int delete(HoKhau t) {
+	public int delete(TaiKhoan t) {
 		// TODO Auto-generated method stub
 		int ketQua = 0;
 		try {
@@ -86,7 +85,7 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql1 = "DELETE FROM HoKhau WHERE ID=?";
+			String sql1 = "DELETE FROM TaiKhoan WHERE ID=?";
 
 			// Tao statement
 			PreparedStatement pst1 = conn.prepareStatement(sql1);
@@ -105,14 +104,14 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 		return 0;
 	}
 
-	public HoKhau selectByID(int id) {
-		HoKhau ketQua = null;
+	public TaiKhoan selectByID(int id) {
+		TaiKhoan ketQua = null;
 		try {
 			// Tao ket noi
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "SELECT * FROM HoKhau WHERE ID='" + id + "'";
+			String sql = "SELECT * FROM TaiKhoan WHERE ID='" + id + "'";
 
 			// Tao statement
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -134,15 +133,15 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 	}
 
 	@Override
-	public List<HoKhau> selectALL() {
+	public List<TaiKhoan> selectALL() {
 		// TODO Auto-generated method stub
-		List<HoKhau> ketQua = new ArrayList<HoKhau>();
+		List<TaiKhoan> ketQua = new ArrayList<TaiKhoan>();
 		try {
 			// Tao ket noi
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "SELECT * FROM HoKhau ";
+			String sql = "SELECT * FROM TaiKhoan ";
 
 			// Tao statement
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -164,20 +163,19 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 		return ketQua;
 	}
 
-	private HoKhau newFromResultSet(ResultSet rs) throws SQLException {
-		return new HoKhau(rs.getInt("ID"), rs.getString("OwnerName"), rs.getString("OwnerNID"),
-				rs.getString("PhoneNumber"), rs.getString("Email"), rs.getString("Address"),
-				rs.getDate("DateOfRegistration"), rs.getBoolean("Active"));
+	private TaiKhoan newFromResultSet(ResultSet rs) throws SQLException {
+		return new TaiKhoan(rs.getInt("ID"), rs.getString("Email"), rs.getInt("Password"), rs.getString("Name"),
+				rs.getInt("NhanKhauID"), rs.getInt("AccessLevel"), rs.getString("PhoneNumber"));
 	}
 
 	@Override
-	public HoKhau selectByID(HoKhau t) {
+	public TaiKhoan selectByID(TaiKhoan t) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<HoKhau> selectALL(String condition) {
+	public ArrayList<TaiKhoan> selectALL(String condition) {
 		// TODO Auto-generated method stub
 		return null;
 	}

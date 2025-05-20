@@ -8,33 +8,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import database.JDBCUtil;
-import model.HoKhau;
+import model.ChangeLog;
 
-public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
+public class ChangeLogDAO implements DataAccessObjectI<ChangeLog> {
 
-	public static HoKhauDAO instance = new HoKhauDAO();
+	public static ChangeLogDAO instance = new ChangeLogDAO();
 
 	@Override
-	public int insert(HoKhau hoKhau) {
+	public int insert(ChangeLog changeLog) {
 		int ketQua = 0;
 		try {
 			// Tao ket noi
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thuc thi lenh sql
-			String sql = "INSERT INTO HoKhau (ID,OwnerName,OwnerNID,PhoneNumber,Email,"
-					+ "Address,DateOfRegistration,Active) VALUES (?,?,?,?,?,?,?,?)";
+			String sql = "INSERT INTO ChangeLog (ID,Time,Type,Details) VALUES (?,?,?,?)";
 
 			// Tao statement
 			PreparedStatement pst = conn.prepareStatement(sql);
-			pst.setInt(1, hoKhau.getID());
-			pst.setString(2, hoKhau.getOwnerName());
-			pst.setString(3, hoKhau.getOwnerNID());
-			pst.setString(4, hoKhau.getPhoneNumber());
-			pst.setString(5, hoKhau.getEmail());
-			pst.setString(6, hoKhau.getAddress());
-			pst.setDate(7, hoKhau.getDateOfRegistration());
-			pst.setBoolean(8, hoKhau.isActive());
+			pst.setInt(1, changeLog.getID());
+			pst.setDate(2, changeLog.getChangeTime());
+			pst.setInt(3, changeLog.getChangeType());
+			pst.setString(4, changeLog.getChangeDetails());
 
 			ketQua = pst.executeUpdate();
 			System.out.println("Có " + ketQua + " dòng thay đổi");
@@ -47,38 +42,15 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 		return ketQua;
 	}
 
+	@Deprecated
 	@Override
-	public int update(HoKhau hoKhau) {
-		// TODO Auto-generated method stub
-		int ketQua = 0;
-		try {
-			// Tao ket noi
-			Connection conn = JDBCUtil.getConnection();
-
-			// Thucthi lenh sql
-			String sql = "UPDATE HoKhau SET Active=? WHERE ID=?";
-
-			// Tao statement
-			PreparedStatement pst = conn.prepareStatement(sql);
-			pst.setBoolean(1, hoKhau.isActive());
-			pst.setInt(2, hoKhau.getID());
-
-			ketQua = pst.executeUpdate();
-//					System.out.println(sql);
-			System.out.println("Có " + ketQua + " dòng thay đổi");
-
-			// Ngat ket noi
-			JDBCUtil.closeConnetion(conn);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+	public int update(ChangeLog changeLog) {
 		return 0;
 	}
 
+	@Deprecated
 	@Override
-	public int delete(HoKhau t) {
+	public int delete(ChangeLog t) {
 		// TODO Auto-generated method stub
 		int ketQua = 0;
 		try {
@@ -86,7 +58,7 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql1 = "DELETE FROM HoKhau WHERE ID=?";
+			String sql1 = "DELETE FROM ChangeLog WHERE ID=?";
 
 			// Tao statement
 			PreparedStatement pst1 = conn.prepareStatement(sql1);
@@ -105,14 +77,14 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 		return 0;
 	}
 
-	public HoKhau selectByID(int id) {
-		HoKhau ketQua = null;
+	public ChangeLog selectByID(int id) {
+		ChangeLog ketQua = null;
 		try {
 			// Tao ket noi
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "SELECT * FROM HoKhau WHERE ID='" + id + "'";
+			String sql = "SELECT * FROM ChangeLog WHERE ID='" + id + "'";
 
 			// Tao statement
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -134,15 +106,15 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 	}
 
 	@Override
-	public List<HoKhau> selectALL() {
+	public List<ChangeLog> selectALL() {
 		// TODO Auto-generated method stub
-		List<HoKhau> ketQua = new ArrayList<HoKhau>();
+		List<ChangeLog> ketQua = new ArrayList<ChangeLog>();
 		try {
 			// Tao ket noi
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "SELECT * FROM HoKhau ";
+			String sql = "SELECT * FROM ChangeLog ";
 
 			// Tao statement
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -164,20 +136,18 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 		return ketQua;
 	}
 
-	private HoKhau newFromResultSet(ResultSet rs) throws SQLException {
-		return new HoKhau(rs.getInt("ID"), rs.getString("OwnerName"), rs.getString("OwnerNID"),
-				rs.getString("PhoneNumber"), rs.getString("Email"), rs.getString("Address"),
-				rs.getDate("DateOfRegistration"), rs.getBoolean("Active"));
+	private ChangeLog newFromResultSet(ResultSet rs) throws SQLException {
+		return new ChangeLog(rs.getInt("ID"), rs.getDate("Time"), rs.getInt("Type"), rs.getString("Details"));
 	}
 
 	@Override
-	public HoKhau selectByID(HoKhau t) {
+	public ChangeLog selectByID(ChangeLog t) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<HoKhau> selectALL(String condition) {
+	public ArrayList<ChangeLog> selectALL(String condition) {
 		// TODO Auto-generated method stub
 		return null;
 	}
