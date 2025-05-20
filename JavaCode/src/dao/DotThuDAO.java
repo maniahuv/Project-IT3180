@@ -8,33 +8,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 import database.JDBCUtil;
-import model.HoKhau;
+import model.DotThu;
 
-public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
+public class DotThuDAO implements DataAccessObjectI<DotThu> {
 
-	public static HoKhauDAO instance = new HoKhauDAO();
+	public static DotThuDAO instance = new DotThuDAO();
 
 	@Override
-	public int insert(HoKhau hoKhau) {
+	public int insert(DotThu dotThu) {
 		int ketQua = 0;
 		try {
 			// Tao ket noi
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thuc thi lenh sql
-			String sql = "INSERT INTO HoKhau (ID,OwnerName,OwnerNID,PhoneNumber,Email,"
-					+ "Address,DateOfRegistration,Active) VALUES (?,?,?,?,?,?,?,?)";
+			String sql = "INSERT INTO DotThu (ID,StartDate,EndDate,TotalFee,OnGoing) VALUES (?,?,?,?,?)";
 
 			// Tao statement
 			PreparedStatement pst = conn.prepareStatement(sql);
-			pst.setInt(1, hoKhau.getID());
-			pst.setString(2, hoKhau.getOwnerName());
-			pst.setString(3, hoKhau.getOwnerNID());
-			pst.setString(4, hoKhau.getPhoneNumber());
-			pst.setString(5, hoKhau.getEmail());
-			pst.setString(6, hoKhau.getAddress());
-			pst.setDate(7, hoKhau.getDateOfRegistration());
-			pst.setBoolean(8, hoKhau.isActive());
+			pst.setInt(1, dotThu.getID());
+			pst.setDate(2, dotThu.getStartDate());
+			pst.setDate(3, dotThu.getEndDate());
+			pst.setInt(4, dotThu.getTotalFee());
+			pst.setBoolean(5, dotThu.isOnGoing());
 
 			ketQua = pst.executeUpdate();
 			System.out.println("Có " + ketQua + " dòng thay đổi");
@@ -48,7 +44,7 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 	}
 
 	@Override
-	public int update(HoKhau hoKhau) {
+	public int update(DotThu dotThu) {
 		// TODO Auto-generated method stub
 		int ketQua = 0;
 		try {
@@ -56,12 +52,13 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "UPDATE HoKhau SET Active=? WHERE ID=?";
+			String sql = "UPDATE DotThu SET TotalFee=?,OnGoing=? WHERE ID=?";
 
 			// Tao statement
 			PreparedStatement pst = conn.prepareStatement(sql);
-			pst.setBoolean(1, hoKhau.isActive());
-			pst.setInt(2, hoKhau.getID());
+			pst.setInt(1, dotThu.getTotalFee());
+			pst.setBoolean(2, dotThu.isOnGoing());
+			pst.setInt(3, dotThu.getID());
 
 			ketQua = pst.executeUpdate();
 //					System.out.println(sql);
@@ -78,7 +75,7 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 	}
 
 	@Override
-	public int delete(HoKhau t) {
+	public int delete(DotThu t) {
 		// TODO Auto-generated method stub
 		int ketQua = 0;
 		try {
@@ -86,7 +83,7 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql1 = "DELETE FROM HoKhau WHERE ID=?";
+			String sql1 = "DELETE FROM DotThu WHERE ID=?";
 
 			// Tao statement
 			PreparedStatement pst1 = conn.prepareStatement(sql1);
@@ -105,14 +102,14 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 		return 0;
 	}
 
-	public HoKhau selectByID(int id) {
-		HoKhau ketQua = null;
+	public DotThu selectByID(int id) {
+		DotThu ketQua = null;
 		try {
 			// Tao ket noi
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "SELECT * FROM HoKhau WHERE ID='" + id + "'";
+			String sql = "SELECT * FROM DotThu WHERE ID='" + id + "'";
 
 			// Tao statement
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -134,15 +131,15 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 	}
 
 	@Override
-	public List<HoKhau> selectALL() {
+	public List<DotThu> selectALL() {
 		// TODO Auto-generated method stub
-		List<HoKhau> ketQua = new ArrayList<HoKhau>();
+		List<DotThu> ketQua = new ArrayList<DotThu>();
 		try {
 			// Tao ket noi
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "SELECT * FROM HoKhau ";
+			String sql = "SELECT * FROM DotThu ";
 
 			// Tao statement
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -164,20 +161,19 @@ public class HoKhauDAO implements DataAccessObjectI<HoKhau> {
 		return ketQua;
 	}
 
-	private HoKhau newFromResultSet(ResultSet rs) throws SQLException {
-		return new HoKhau(rs.getInt("ID"), rs.getString("OwnerName"), rs.getString("OwnerNID"),
-				rs.getString("PhoneNumber"), rs.getString("Email"), rs.getString("Address"),
-				rs.getDate("DateOfRegistration"), rs.getBoolean("Active"));
+	private DotThu newFromResultSet(ResultSet rs) throws SQLException {
+		return new DotThu(rs.getInt("ID"), rs.getDate("StartDate"), rs.getDate("StartEndDate"), rs.getInt("TotalFee"),
+				rs.getBoolean("OnGoing"));
 	}
 
 	@Override
-	public HoKhau selectByID(HoKhau t) {
+	public DotThu selectByID(DotThu t) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ArrayList<HoKhau> selectALL(String condition) {
+	public ArrayList<DotThu> selectALL(String condition) {
 		// TODO Auto-generated method stub
 		return null;
 	}
