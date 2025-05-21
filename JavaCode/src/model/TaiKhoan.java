@@ -53,6 +53,10 @@ public class TaiKhoan {
 		return accessLevel;
 	}
 
+	public void setAccessLevel(int accessLevel) {
+		this.accessLevel = accessLevel;
+	}
+
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}

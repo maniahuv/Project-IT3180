@@ -55,12 +55,13 @@ public class TaiKhoanDAO implements DataAccessObjectI<TaiKhoan> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "UPDATE TaiKhoan SET Password=? WHERE ID=?";
+			String sql = "UPDATE TaiKhoan SET Password=?,AccessLevel=? WHERE ID=?";
 
 			// Tao statement
 			PreparedStatement pst = conn.prepareStatement(sql);
 			pst.setInt(1, taiKhoan.getPassword());
-			pst.setInt(2, taiKhoan.getID());
+			pst.setInt(2, taiKhoan.getAccessLevel());
+			pst.setInt(3, taiKhoan.getID());
 
 			ketQua = pst.executeUpdate();
 //					System.out.println(sql);
