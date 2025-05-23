@@ -4,24 +4,25 @@ import java.util.Objects;
 
 public class TaiKhoan {
 
-	
-
 	public static final int NO_ACCESS = 0;
 	public static final int FINANCE_ACCESS = 1;
 	public static final int FULL_ACCESS = 2;
 
 	private String maTaiKhoan;
-    private String email;
-    private String matKhau;
-    private String tenNguoiDung;
-    private String soDienThoai;
-    private VaiTro vaiTro;
-    private String maNhanKhau;
-    private boolean trangThai;
-    public TaiKhoan() {}
-    public TaiKhoan(String maTaiKhoan, String email, String matKhau, String tenNguoiDung,
-            String soDienThoai,  VaiTro vaiTro, String maNhanKhau, boolean trangThai) {
-    	this.maTaiKhoan = maTaiKhoan;
+	private String email;
+	private String matKhau;
+	private String tenNguoiDung;
+	private String soDienThoai;
+	private VaiTro vaiTro;
+	private String maNhanKhau;
+	private boolean trangThai;
+
+	public TaiKhoan() {
+	}
+
+	public TaiKhoan(String maTaiKhoan, String email, String matKhau, String tenNguoiDung, String soDienThoai,
+			VaiTro vaiTro, String maNhanKhau, boolean trangThai) {
+		this.maTaiKhoan = maTaiKhoan;
 		this.email = email;
 		this.matKhau = matKhau;
 		this.tenNguoiDung = tenNguoiDung;
@@ -29,83 +30,84 @@ public class TaiKhoan {
 		this.vaiTro = vaiTro;
 		this.maNhanKhau = maNhanKhau;
 		this.trangThai = trangThai;
-}
+	}
 
+	public String getMaTaiKhoan() {
+		return maTaiKhoan;
+	}
 
+	public void setMaTaiKhoan(String maTaiKhoan) {
+		this.maTaiKhoan = maTaiKhoan;
+	}
 
-    public String getMaTaiKhoan() {
-        return maTaiKhoan;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setMaTaiKhoan(String maTaiKhoan) {
-        this.maTaiKhoan = maTaiKhoan;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public String getMatKhau() {
+		return matKhau;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setMatKhau(String matKhau) {
+		this.matKhau = matKhau;
+	}
 
-    public String getMatKhau() {
-        return matKhau;
-    }
+	public String getTenNguoiDung() {
+		return tenNguoiDung;
+	}
 
-    public void setMatKhau(String matKhau) {
-        this.matKhau = matKhau;
-    }
+	public void setTenNguoiDung(String tenNguoiDung) {
+		this.tenNguoiDung = tenNguoiDung;
+	}
 
-    public String getTenNguoiDung() {
-        return tenNguoiDung;
-    }
+	public String getSoDienThoai() {
+		return soDienThoai;
+	}
 
-    public void setTenNguoiDung(String tenNguoiDung) {
-        this.tenNguoiDung = tenNguoiDung;
-    }
+	public void setSoDienThoai(String soDienThoai) {
+		this.soDienThoai = soDienThoai;
+	}
 
-    public String getSoDienThoai() {
-        return soDienThoai;
-    }
+	public VaiTro getVaiTro() {
+		return vaiTro;
+	}
 
-    public void setSoDienThoai(String soDienThoai) {
-        this.soDienThoai = soDienThoai;
-    }
+	public void setVaiTro(VaiTro vaiTro) {
+		this.vaiTro = vaiTro;
+	}
 
-    public VaiTro getVaiTro() {
-        return vaiTro;
-    }
+	public String getMaNhanKhau() {
+		return maNhanKhau;
+	}
 
-    public void setVaiTro(VaiTro vaiTro) {
-        this.vaiTro = vaiTro;
-    }
+	public void setMaNhanKhau(String maNhanKhau) {
+		this.maNhanKhau = maNhanKhau;
+	}
 
-    public String getMaNhanKhau() {
-        return maNhanKhau;
-    }
+	public boolean isTrangThai() {
+		return trangThai;
+	}
 
-    public void setMaNhanKhau(String maNhanKhau) {
-        this.maNhanKhau = maNhanKhau;
-    }
+	public void setTrangThai(boolean trangThai) {
+		this.trangThai = trangThai;
+	}
 
-    public boolean isTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(boolean trangThai) {
-        this.trangThai = trangThai;
-    }
-    @Override
+	@Override
 	public String toString() {
 		return "TaiKhoan [maTaiKhoan=" + maTaiKhoan + ", email=" + email + ", matKhau=" + matKhau + ", tenNguoiDung="
 				+ tenNguoiDung + ", soDienThoai=" + soDienThoai + ", vaiTro=" + vaiTro + ", maNhanKhau=" + maNhanKhau
 				+ ", trangThai=" + trangThai + "]";
 	}
-    @Override
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(email, maNhanKhau, maTaiKhoan, matKhau, soDienThoai, tenNguoiDung, trangThai, vaiTro);
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -120,20 +122,35 @@ public class TaiKhoan {
 				&& Objects.equals(soDienThoai, other.soDienThoai) && Objects.equals(tenNguoiDung, other.tenNguoiDung)
 				&& trangThai == other.trangThai && Objects.equals(vaiTro, other.vaiTro);
 	}
-	public enum VaiTro {
-        KE_TOAN,
-        TO_TRUONG,
-        TO_PHO;
-        
 
-        @Override
-        public String toString() {
-            switch (this) {
-                case KE_TOAN: return "Kế toán";
-                case TO_TRUONG: return "Tổ trưởng";
-                case TO_PHO: return "Tổ phó";
-                default: return super.toString();
-            }
-        }
-    }
+	public enum VaiTro {
+		KE_TOAN, TO_TRUONG, TO_PHO;
+
+		@Override
+		public String toString() {
+			switch (this) {
+			case KE_TOAN:
+				return "Kế toán";
+			case TO_TRUONG:
+				return "Tổ trưởng";
+			case TO_PHO:
+				return "Tổ phó";
+			default:
+				return super.toString();
+			}
+		}
+
+		public static VaiTro get(String string) {
+			switch (string) {
+			case "Kế toán":
+				return KE_TOAN;
+			case "Tổ trưởng":
+				return TO_TRUONG;
+			case "Tổ phó":
+				return TO_PHO;
+			default:
+				return null;
+			}
+		}
+	}
 }
