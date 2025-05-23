@@ -4,42 +4,85 @@ import java.sql.Date;
 
 public class DotThu {
 
-	private int ID;
-	private Date startDate;
-	private Date endDate;
-	private int totalFee;
-	private boolean onGoing;
+    public enum TrangThaiDotThu {
+        DANG_DIEN_RA("Đang diễn ra"),
+        DA_KET_THUC("Đã kết thúc");
 
-	public DotThu(int iD, Date startDate, Date endDate, int totalFee, boolean onGoing) {
-		ID = iD;
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.totalFee = totalFee;
-		this.onGoing = onGoing;
-	}
+        private final String moTa;
 
-	public int getTotalFee() {
-		return totalFee;
-	}
+        TrangThaiDotThu(String moTa) {
+            this.moTa = moTa;
+        }
 
-	public void setTotalFee(int totalFee) {
-		this.totalFee = totalFee;
-	}
+        @Override
+        public String toString() {
+            return moTa;
+        }
+    }
 
-	public int getID() {
-		return ID;
-	}
+    private String maDotThu;
+    private String tenDotThu;
+    private Date thoiGianBatDau;
+    private Date thoiGianKetThuc;
+    private String moTa;
+    private TrangThaiDotThu trangThai;
 
-	public Date getStartDate() {
-		return startDate;
-	}
+    // Constructor đầy đủ
+    public DotThu(String maDotThu, String tenDotThu, Date thoiGianBatDau, Date thoiGianKetThuc, String moTa, TrangThaiDotThu trangThai) {
+        this.maDotThu = maDotThu;
+        this.tenDotThu = tenDotThu;
+        this.thoiGianBatDau = thoiGianBatDau;
+        this.thoiGianKetThuc = thoiGianKetThuc;
+        this.moTa = moTa;
+        this.trangThai = trangThai;
+    }
 
-	public Date getEndDate() {
-		return endDate;
-	}
+    // Getter và Setter
+    public String getMaDotThu() {
+        return maDotThu;
+    }
 
-	public boolean isOnGoing() {
-		return onGoing;
-	}
+    public void setMaDotThu(String maDotThu) {
+        this.maDotThu = maDotThu;
+    }
 
+    public String getTenDotThu() {
+        return tenDotThu;
+    }
+
+    public void setTenDotThu(String tenDotThu) {
+        this.tenDotThu = tenDotThu;
+    }
+
+    public Date getThoiGianBatDau() {
+        return thoiGianBatDau;
+    }
+
+    public void setThoiGianBatDau(Date thoiGianBatDau) {
+        this.thoiGianBatDau = thoiGianBatDau;
+    }
+
+    public Date getThoiGianKetThuc() {
+        return thoiGianKetThuc;
+    }
+
+    public void setThoiGianKetThuc(Date thoiGianKetThuc) {
+        this.thoiGianKetThuc = thoiGianKetThuc;
+    }
+
+    public String getMoTa() {
+        return moTa;
+    }
+
+    public void setMoTa(String moTa) {
+        this.moTa = moTa;
+    }
+
+    public TrangThaiDotThu getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(TrangThaiDotThu trangThai) {
+        this.trangThai = trangThai;
+    }
 }

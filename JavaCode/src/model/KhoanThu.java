@@ -1,6 +1,7 @@
 package model;
 
 import java.sql.Date;
+import java.util.Objects;
 
 public class KhoanThu {
 
@@ -8,58 +9,123 @@ public class KhoanThu {
 	public static final int PARTIAL_PAID = 1;
 	public static final int UNPAID = 2;
 
-	private int ID;
-	private int dotThuID;
-	private int hoKhauID;
-	private int feeToPay;
-	private int paidAmount;
-	private int paidStatus;
-	private Date dateOfPaid;
+	private String maKhoanThu;
+	private String maDotThu;
+	private String maHoKhau;
+	private String maLoaiKHoanThu ;
+	private Double soTienPhaiNop;
+	private String trangThaiThanhToan;
+	private Date ngayNop;
+	public enum TrangThai {
+        DA_NOP,
+       CHUA_NOP;
+        
 
-	public KhoanThu(int iD, int dotThuID, int hoKhauID, int feeToPay, int paidAmount, int paidStatus, Date dateOfPaid) {
-		ID = iD;
-		this.dotThuID = dotThuID;
-		this.hoKhauID = hoKhauID;
-		this.feeToPay = feeToPay;
-		this.paidAmount = paidAmount;
-		this.paidStatus = paidStatus;
-		this.dateOfPaid = dateOfPaid;
+        @Override
+        public String toString() {
+            switch (this) {
+                case DA_NOP: return "đã thu";
+                case CHUA_NOP: return "chưa thu";
+               
+                default: return super.toString();
+            }
+        }
 	}
 
-	public int getPaidAmount() {
-		return paidAmount;
+	public KhoanThu(String maKhoanThu, String maDotThu, String maHoKhau, String maLoaiKHoanThu ,  Double soTienPhaiNop,String trangThaiThanhToan, Date ngayNop) {
+		this.maKhoanThu=maKhoanThu;
+		this.maDotThu = maDotThu;
+		this.maHoKhau = maHoKhau;
+		this. maLoaiKHoanThu =  maLoaiKHoanThu;
+		this.soTienPhaiNop= soTienPhaiNop;
+		this.trangThaiThanhToan = trangThaiThanhToan;
+		this.ngayNop = ngayNop;
 	}
 
-	public void setPaidAmount(int paidAmount) {
-		this.paidAmount = paidAmount;
+	public String getMaKhoanThu() {
+		return maKhoanThu;
 	}
 
-	public int getPaidStatus() {
-		return paidStatus;
+	public void setMaKhoanThu(String maKhoanThu) {
+		this.maKhoanThu = maKhoanThu;
 	}
 
-	public void setPaidStatus(int paidStatus) {
-		this.paidStatus = paidStatus;
+	public String getMaDotThu() {
+		return maDotThu;
 	}
 
-	public int getID() {
-		return ID;
+	public void setMaDotThu(String maDotThu) {
+		this.maDotThu = maDotThu;
 	}
 
-	public int getDotThuID() {
-		return dotThuID;
+	public String getMaHoKhau() {
+		return maHoKhau;
 	}
 
-	public int getHoKhauID() {
-		return hoKhauID;
+	public void setMaHoKhau(String maHoKhau) {
+		this.maHoKhau = maHoKhau;
 	}
 
-	public int getFeeToPay() {
-		return feeToPay;
+	public String getMaLoaiKHoanThu() {
+		return maLoaiKHoanThu;
 	}
 
-	public Date getDateOfPaid() {
-		return dateOfPaid;
+	public void setMaLoaiKHoanThu(String maLoaiKHoanThu) {
+		this.maLoaiKHoanThu = maLoaiKHoanThu;
 	}
 
+	public Double getSoTienPhaiNop() {
+		return soTienPhaiNop;
+	}
+
+	public void setSoTienPhaiNop(Double soTienPhaiNop) {
+		this.soTienPhaiNop = soTienPhaiNop;
+	}
+
+	public String getTrangThaiThanhToan() {
+		return trangThaiThanhToan;
+	}
+
+	public void setTrangThaiThanhToan(String trangThaiThanhToan) {
+		this.trangThaiThanhToan = trangThaiThanhToan;
+	}
+
+	public Date getNgayNop() {
+		return ngayNop;
+	}
+
+	public void setNgayNop(Date ngayNop) {
+		this.ngayNop = ngayNop;
+	}
+
+	@Override
+	public String toString() {
+		return "KhoanThu [maKhoanThu=" + maKhoanThu + ", maDotThu=" + maDotThu + ", maHoKhau=" + maHoKhau
+				+ ", maLoaiKHoanThu=" + maLoaiKHoanThu + ", soTienPhaiNop=" + soTienPhaiNop + ", trangThaiThanhToan="
+				+ trangThaiThanhToan + ", ngayNop=" + ngayNop + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(maDotThu, maHoKhau, maKhoanThu, maLoaiKHoanThu, ngayNop, soTienPhaiNop, trangThaiThanhToan);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		KhoanThu other = (KhoanThu) obj;
+		return Objects.equals(maDotThu, other.maDotThu) && Objects.equals(maHoKhau, other.maHoKhau)
+				&& Objects.equals(maKhoanThu, other.maKhoanThu) && Objects.equals(maLoaiKHoanThu, other.maLoaiKHoanThu)
+				&& Objects.equals(ngayNop, other.ngayNop) && Objects.equals(soTienPhaiNop, other.soTienPhaiNop)
+				&& Objects.equals(trangThaiThanhToan, other.trangThaiThanhToan);
+	}
+
+	
+
+	
 }

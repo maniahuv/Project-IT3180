@@ -3,69 +3,97 @@ package model;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class HoKhau {
 
 	private int ID;
-	private String ownerName;
-	private String ownerNID; // So CCCD
-	private String phoneNumber;
-	private String email;
-	private String address;
-	private Date dateOfRegistration;
-	private boolean active;
-	private List<NhanKhau> listNhauKhau = new ArrayList<NhanKhau>();
+	private String maHoKhau;
+	private String soCanHo; // So CCCD
+	private Double dienTich;
+	private int soNguoi;
+	private String chuHo;
 
-	public HoKhau(int iD, String ownerName, String ownerNID, String phoneNumber, String email, String address,
-			Date dateOfRegistration, boolean active) {
-		ID = iD;
-		this.ownerName = ownerName;
-		this.ownerNID = ownerNID;
-		this.phoneNumber = phoneNumber;
-		this.email = email;
-		this.address = address;
-		this.dateOfRegistration = dateOfRegistration;
-		this.active = active;
-	}
-
-	public boolean isActive() {
-		return active;
-	}
-
-	public void setActive(boolean active) {
-		this.active = active;
+	public HoKhau(String maHoKhau, String soCanHo, double dienTich, int soNguoi, String chuHo) {
+	    this.maHoKhau = maHoKhau;
+	    this.soCanHo = soCanHo;
+	    this.dienTich = dienTich;
+	    this.soNguoi = soNguoi;
+	    this.chuHo = chuHo;
 	}
 
 	public int getID() {
 		return ID;
 	}
 
-	public String getOwnerName() {
-		return ownerName;
+	public void setID(int iD) {
+		ID = iD;
 	}
 
-	public String getOwnerNID() {
-		return ownerNID;
+	public String getMaHoKhau() {
+		return maHoKhau;
 	}
 
-	public String getPhoneNumber() {
-		return phoneNumber;
+	public void setMaHoKhau(String maHoKhau) {
+		this.maHoKhau = maHoKhau;
 	}
 
-	public String getEmail() {
-		return email;
+	public String getSoCanHo() {
+		return soCanHo;
 	}
 
-	public String getAddress() {
-		return address;
+	public void setSoCanHo(String soCanHo) {
+		this.soCanHo = soCanHo;
 	}
 
-	public Date getDateOfRegistration() {
-		return dateOfRegistration;
+	public Double getDienTich() {
+		return dienTich;
 	}
 
-	public List<NhanKhau> getListNhauKhau() {
-		return listNhauKhau;
+	public void setDienTich(Double dienTich) {
+		this.dienTich = dienTich;
 	}
+
+	public int getSoNguoi() {
+		return soNguoi;
+	}
+
+	public void setSoNguoi(int soNguoi) {
+		this.soNguoi = soNguoi;
+	}
+
+	public String getChuHo() {
+		return chuHo;
+	}
+
+	public void setChuHo(String chuHo) {
+		this.chuHo = chuHo;
+	}
+
+	@Override
+	public String toString() {
+		return "HoKhau [ID=" + ID + ", maHoKhau=" + maHoKhau + ", soCanHo=" + soCanHo + ", dienTich=" + dienTich
+				+ ", soNguoi=" + soNguoi + ", chuHo=" + chuHo + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(ID, chuHo, dienTich, maHoKhau, soCanHo, soNguoi);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		HoKhau other = (HoKhau) obj;
+		return ID == other.ID && Objects.equals(chuHo, other.chuHo) && Objects.equals(dienTich, other.dienTich)
+				&& Objects.equals(maHoKhau, other.maHoKhau) && Objects.equals(soCanHo, other.soCanHo)
+				&& soNguoi == other.soNguoi;
+	}
+
 
 }
