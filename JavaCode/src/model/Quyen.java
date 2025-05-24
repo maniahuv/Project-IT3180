@@ -3,9 +3,9 @@ package model;
 public class Quyen {
 
 	private String idQuyen;
-	private TenQuyen tenQuyen;
+	private int tenQuyen;
 
-	Quyen(String idQuyen, TenQuyen tenQuyen) {
+	public Quyen(String idQuyen, int tenQuyen) {
 		this.idQuyen = idQuyen;
 		this.tenQuyen = tenQuyen;
 	}
@@ -14,7 +14,7 @@ public class Quyen {
 		return idQuyen;
 	}
 
-	public TenQuyen getTenQuyen() {
+	public int getTenQuyen() {
 		return tenQuyen;
 	}
 
@@ -22,23 +22,24 @@ public class Quyen {
 		this.idQuyen = idQuyen;
 	}
 
-	public void setTenQuyen(TenQuyen tenQuyen) {
+	public void setTenQuyen(int tenQuyen) {
 		this.tenQuyen = tenQuyen;
 	}
 
-	public enum TenQuyen {
+	public static class TenQuyen {
 
-		XEM("xem"), SUA("sua");
+		public static final int XEM = 0;
+		public static final int SUA = 1;
 
-		private final String tenQuyen;
-
-		TenQuyen(String tenQuyen) {
-			this.tenQuyen = tenQuyen;
-		}
-
-		@Override
-		public String toString() {
-			return tenQuyen;
+		public static String toString(int id) {
+			switch (id) {
+			case XEM:
+				return "xem";
+			case SUA:
+				return "sua";
+			default:
+				return "";
+			}
 		}
 
 	}

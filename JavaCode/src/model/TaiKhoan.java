@@ -4,16 +4,12 @@ import java.util.Objects;
 
 public class TaiKhoan {
 
-	public static final int NO_ACCESS = 0;
-	public static final int FINANCE_ACCESS = 1;
-	public static final int FULL_ACCESS = 2;
-
 	private String maTaiKhoan;
 	private String email;
 	private String matKhau;
 	private String tenNguoiDung;
 	private String soDienThoai;
-	private VaiTro vaiTro;
+	private int vaiTro;
 	private String maNhanKhau;
 	private boolean trangThai;
 
@@ -21,7 +17,7 @@ public class TaiKhoan {
 	}
 
 	public TaiKhoan(String maTaiKhoan, String email, String matKhau, String tenNguoiDung, String soDienThoai,
-			VaiTro vaiTro, String maNhanKhau, boolean trangThai) {
+			int vaiTro, String maNhanKhau, boolean trangThai) {
 		this.maTaiKhoan = maTaiKhoan;
 		this.email = email;
 		this.matKhau = matKhau;
@@ -72,11 +68,11 @@ public class TaiKhoan {
 		this.soDienThoai = soDienThoai;
 	}
 
-	public VaiTro getVaiTro() {
+	public int getVaiTro() {
 		return vaiTro;
 	}
 
-	public void setVaiTro(VaiTro vaiTro) {
+	public void setVaiTro(int vaiTro) {
 		this.vaiTro = vaiTro;
 	}
 
@@ -123,12 +119,14 @@ public class TaiKhoan {
 				&& trangThai == other.trangThai && Objects.equals(vaiTro, other.vaiTro);
 	}
 
-	public enum VaiTro {
-		KE_TOAN, TO_TRUONG, TO_PHO;
+	public static class VaiTro {
 
-		@Override
-		public String toString() {
-			switch (this) {
+		public static final int KE_TOAN = 0;
+		public static final int TO_TRUONG = 1;
+		public static final int TO_PHO = 2;
+
+		public static String toString(int vaiTro) {
+			switch (vaiTro) {
 			case KE_TOAN:
 				return "Kế toán";
 			case TO_TRUONG:
@@ -136,21 +134,9 @@ public class TaiKhoan {
 			case TO_PHO:
 				return "Tổ phó";
 			default:
-				return super.toString();
+				return "";
 			}
 		}
 
-		public static VaiTro get(String string) {
-			switch (string) {
-			case "Kế toán":
-				return KE_TOAN;
-			case "Tổ trưởng":
-				return TO_TRUONG;
-			case "Tổ phó":
-				return TO_PHO;
-			default:
-				return null;
-			}
-		}
 	}
 }
