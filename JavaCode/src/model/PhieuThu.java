@@ -9,72 +9,88 @@ public class PhieuThu {
 	private String maDotThu;
 	private Date ngayThu;
 	private double tongTien;
-    private TrangThai trangThai;
-    private String duongDanDuongTep;
-    
-    public PhieuThu(String maPhieuThu, String maHoKhau, String maDotThu, Date ngayThu,
-            double tongTien, TrangThai trangThai, String duongDanDuongTep) {
-	this.maPhieuThu = maPhieuThu;
-	this.maHoKhau = maHoKhau;
-	this.maDotThu = maDotThu;
-	this.ngayThu = ngayThu;
-	this.tongTien = tongTien;
-	this.trangThai = trangThai;
-	this.duongDanDuongTep = duongDanDuongTep;
-}
+	private int trangThai;
+	private String duongDanDuongTep;
+
+	public PhieuThu(String maPhieuThu, String maHoKhau, String maDotThu, Date ngayThu, double tongTien, int trangThai,
+			String duongDanDuongTep) {
+		this.maPhieuThu = maPhieuThu;
+		this.maHoKhau = maHoKhau;
+		this.maDotThu = maDotThu;
+		this.ngayThu = ngayThu;
+		this.tongTien = tongTien;
+		this.trangThai = trangThai;
+		this.duongDanDuongTep = duongDanDuongTep;
+	}
 
 	public String getMaPhieuThu() {
 		return maPhieuThu;
 	}
+
 	public void setMaPhieuThu(String maPhieuThu) {
 		this.maPhieuThu = maPhieuThu;
 	}
+
 	public String getMaHoKhau() {
 		return maHoKhau;
 	}
+
 	public void setMaHoKhau(String maHoKhau) {
 		this.maHoKhau = maHoKhau;
 	}
+
 	public String getMaDotThu() {
 		return maDotThu;
 	}
+
 	public void setMaDotThu(String maDotThu) {
 		this.maDotThu = maDotThu;
 	}
+
 	public Date getNgayThu() {
 		return ngayThu;
 	}
+
 	public void setNgayThu(Date ngayThu) {
 		this.ngayThu = ngayThu;
 	}
+
 	public double getTongTien() {
 		return tongTien;
 	}
+
 	public void setTongTien(double tongTien) {
 		this.tongTien = tongTien;
 	}
-	public TrangThai getTrangThai() {
+
+	public int getTrangThai() {
 		return trangThai;
 	}
-	public void setTrangThai(TrangThai trangThai) {
+
+	public void setTrangThai(int trangThai) {
 		this.trangThai = trangThai;
 	}
+
 	public String getDuongDanDuongTep() {
 		return duongDanDuongTep;
 	}
+
 	public void setDuongDanDuongTep(String duongDanDuongTep) {
 		this.duongDanDuongTep = duongDanDuongTep;
 	}
+
 	@Override
 	public String toString() {
 		return "PhieuThu [maPhieuThu=" + maPhieuThu + ", maHoKhau=" + maHoKhau + ", maDotThu=" + maDotThu + ", ngayThu="
 				+ ngayThu + ", tongTien=" + tongTien + ", trangThai=" + trangThai + ", duongDanDuongTep="
 				+ duongDanDuongTep + "]";
 	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(duongDanDuongTep, maDotThu, maHoKhau, maPhieuThu, ngayThu, tongTien, trangThai);
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -90,21 +106,21 @@ public class PhieuThu {
 				&& Double.doubleToLongBits(tongTien) == Double.doubleToLongBits(other.tongTien)
 				&& Objects.equals(trangThai, other.trangThai);
 	}
-	public enum TrangThai {
-        DA_THU,
-       CHUA_THU;
-        
 
-        @Override
-        public String toString() {
-            switch (this) {
-                case DA_THU: return "đã thu";
-                case CHUA_THU: return "chưa thu";
-               
-                default: return super.toString();
-            }
-        }
+	public static class TrangThai {
+		public static final int DA_THU = 0;
+		public static final int CHUA_THU = 1;
+
+		public static String toString(int id) {
+			switch (id) {
+			case DA_THU:
+				return "đã thu";
+			case CHUA_THU:
+				return "chưa thu";
+			default:
+				return "";
+			}
+		}
 	}
-	
 
 }

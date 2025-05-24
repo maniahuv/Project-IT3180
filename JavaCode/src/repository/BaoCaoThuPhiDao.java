@@ -25,7 +25,7 @@ public class BaoCaoThuPhiDao extends DataAccessObject<BaoCaoThuPhi> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thuc thi lenh sql
-			String sql = "INSERT INTO ChangeLog (ID,TieuDe,NgayTao,MaTaiKhoan,MaDotThu,DuLieuTongHop,DuongDanFile) VALUES (?,?,?,?,?,?,?)";
+			String sql = "INSERT INTO BaoCaoThuPhi (ID,TieuDe,NgayTao,MaTaiKhoan,MaDotThu,DuLieuTongHop,DuongDanFile) VALUES (?,?,?,?,?,?,?)";
 
 			// Tao statement
 			PreparedStatement pst = conn.prepareStatement(sql);

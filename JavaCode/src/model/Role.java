@@ -3,9 +3,9 @@ package model;
 public class Role {
 
 	private String idRole;
-	private TenRole tenRole;
+	private int tenRole;
 
-	Role(String idRole, TenRole tenRole) {
+	public Role(String idRole, int tenRole) {
 		this.idRole = idRole;
 		this.tenRole = tenRole;
 	}
@@ -14,7 +14,7 @@ public class Role {
 		return idRole;
 	}
 
-	public TenRole getTenRole() {
+	public int getTenRole() {
 		return tenRole;
 	}
 
@@ -22,23 +22,27 @@ public class Role {
 		this.idRole = idRole;
 	}
 
-	public void setTenRole(TenRole tenRole) {
+	public void setTenRole(int tenRole) {
 		this.tenRole = tenRole;
 	}
 
-	public enum TenRole {
+	public static class TenRole {
 
-		KHACH("khach"), TO_TRUONG("totrg"), KE_TOAN("ketoan");
+		public static final int KHACH = 0;
+		public static final int TO_TRUONG = 1;
+		public static final int KE_TOAN = 2;
 
-		private final String tenRole;
-
-		TenRole(String tenRole) {
-			this.tenRole = tenRole;
-		}
-
-		@Override
-		public String toString() {
-			return tenRole;
+		public static String toString(int id) {
+			switch (id) {
+			case KHACH:
+				return "khach";
+			case TO_TRUONG:
+				return "totrg";
+			case KE_TOAN:
+				return "ketoan";
+			default:
+				return "";
+			}
 		}
 
 	}

@@ -5,39 +5,37 @@ import java.util.Objects;
 
 public class KhoanThu {
 
-	public static final int PAID = 0;
-	public static final int PARTIAL_PAID = 1;
-	public static final int UNPAID = 2;
-
 	private String maKhoanThu;
 	private String maDotThu;
 	private String maHoKhau;
-	private String maLoaiKHoanThu ;
+	private String maLoaiKHoanThu;
 	private Double soTienPhaiNop;
-	private String trangThaiThanhToan;
+	private int trangThaiThanhToan;
 	private Date ngayNop;
-	public enum TrangThai {
-        DA_NOP,
-       CHUA_NOP;
-        
 
-        @Override
-        public String toString() {
-            switch (this) {
-                case DA_NOP: return "đã thu";
-                case CHUA_NOP: return "chưa thu";
-               
-                default: return super.toString();
-            }
-        }
+	public static class TrangThaiThanhToan {
+		public static final int DA_NOP = 0;
+		public static final int CHUA_NOP = 1;
+
+		public static String toString(int id) {
+			switch (id) {
+			case DA_NOP:
+				return "đã thu";
+			case CHUA_NOP:
+				return "chưa thu";
+			default:
+				return "";
+			}
+		}
 	}
 
-	public KhoanThu(String maKhoanThu, String maDotThu, String maHoKhau, String maLoaiKHoanThu ,  Double soTienPhaiNop,String trangThaiThanhToan, Date ngayNop) {
-		this.maKhoanThu=maKhoanThu;
+	public KhoanThu(String maKhoanThu, String maDotThu, String maHoKhau, String maLoaiKHoanThu, Double soTienPhaiNop,
+			int trangThaiThanhToan, Date ngayNop) {
+		this.maKhoanThu = maKhoanThu;
 		this.maDotThu = maDotThu;
 		this.maHoKhau = maHoKhau;
-		this. maLoaiKHoanThu =  maLoaiKHoanThu;
-		this.soTienPhaiNop= soTienPhaiNop;
+		this.maLoaiKHoanThu = maLoaiKHoanThu;
+		this.soTienPhaiNop = soTienPhaiNop;
 		this.trangThaiThanhToan = trangThaiThanhToan;
 		this.ngayNop = ngayNop;
 	}
@@ -82,11 +80,11 @@ public class KhoanThu {
 		this.soTienPhaiNop = soTienPhaiNop;
 	}
 
-	public String getTrangThaiThanhToan() {
+	public int getTrangThaiThanhToan() {
 		return trangThaiThanhToan;
 	}
 
-	public void setTrangThaiThanhToan(String trangThaiThanhToan) {
+	public void setTrangThaiThanhToan(int trangThaiThanhToan) {
 		this.trangThaiThanhToan = trangThaiThanhToan;
 	}
 
@@ -125,7 +123,4 @@ public class KhoanThu {
 				&& Objects.equals(trangThaiThanhToan, other.trangThaiThanhToan);
 	}
 
-	
-
-	
 }

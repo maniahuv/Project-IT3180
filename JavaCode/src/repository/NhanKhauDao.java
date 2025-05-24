@@ -7,7 +7,6 @@ import java.sql.SQLException;
 
 import dao.DataAccessObject;
 import database.JDBCUtil;
-import model.TaiKhoan.VaiTro;
 import model.NhanKhau;
 
 public class NhanKhauDao extends DataAccessObject<NhanKhau> {
@@ -26,7 +25,7 @@ public class NhanKhauDao extends DataAccessObject<NhanKhau> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thuc thi lenh sql
-			String sql = "INSERT INTO ChangeLog (ID,HoTen,SoCCCD,NgaySinh,GioiTinh,NgheNghiep,QuanHeVoiChuHo,TinhTrangCuTru,MaHoKhau) VALUES (?,?,?,?,?,?,?,?,?)";
+			String sql = "INSERT INTO NhanKhau (ID,HoTen,SoCCCD,NgaySinh,GioiTinh,NgheNghiep,QuanHeVoiChuHo,TinhTrangCuTru,MaHoKhau) VALUES (?,?,?,?,?,?,?,?,?)";
 
 			// Tao statement
 			PreparedStatement pst = conn.prepareStatement(sql);
@@ -34,10 +33,10 @@ public class NhanKhauDao extends DataAccessObject<NhanKhau> {
 			pst.setString(2, t.getHoTen());
 			pst.setString(3, t.getSoCCCD());
 			pst.setDate(4, t.getNgaySinh());
-			pst.setString(5, t.getGioiTinh().toString());
+			pst.setInt(5, t.getGioiTinh());
 			pst.setString(6, t.getNgheNghiep());
-			pst.setString(7, t.getQuanHeVoiChuHo().toString());
-			pst.setString(8, t.getTinhTrangCuTru().toString());
+			pst.setInt(7, t.getQuanHeVoiChuHo());
+			pst.setInt(8, t.getTinhTrangCuTru());
 			pst.setString(9, t.getMaHoKhau());
 
 			ketQua = pst.executeUpdate();
@@ -54,8 +53,8 @@ public class NhanKhauDao extends DataAccessObject<NhanKhau> {
 	@Override
 	public NhanKhau newFromResultSet(ResultSet rs) throws SQLException {
 		return new NhanKhau(rs.getString("ID"), rs.getString("HoTen"), rs.getString("SoCCCD"), rs.getDate("NgaySinh"),
-				rs.getString("GioiTinh"), rs.getString("NgheNghiep"), rs.getString("QuanHeVoiChuHo"),
-				rs.getBoolean("TinhTrangCuTru"), rs.getBoolean("MaHoKhau"));
+				rs.getInt("GioiTinh"), rs.getString("NgheNghiep"), rs.getInt("QuanHeVoiChuHo"),
+				rs.getInt("TinhTrangCuTru"), rs.getString("MaHoKhau"));
 	}
 
 }
