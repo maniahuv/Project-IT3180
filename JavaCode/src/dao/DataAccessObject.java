@@ -93,7 +93,7 @@ public abstract class DataAccessObject<T> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return 0;
+		return ketQua;
 	}
 
 	public T selectByID(String id) {
