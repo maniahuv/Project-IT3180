@@ -1,6 +1,7 @@
 package dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,6 +20,54 @@ public abstract class DataAccessObject<T> {
 	}
 
 	public abstract int insert(T t);
+
+	public int update(String id, String[] dataNames, Object[] data) {
+		// TODO Auto-generated method stub
+		int ketQua = 0;
+		try {
+			// Tao ket noi
+			Connection conn = JDBCUtil.getConnection();
+
+			// Thucthi lenh sql
+			String sql = "UPDATE " + name + " SET " + dataNames[0] + "=?";
+			for (int i = 1; i < dataNames.length; i++) {
+				sql += "," + dataNames[i] + "=?";
+			}
+			sql += " WHERE ID=?";
+
+			// Tao statement
+			PreparedStatement pst = conn.prepareStatement(sql);
+			for (int i = 0; i < data.length; i++) {
+				setData(pst, i, data[i]);
+			}
+			setData(pst, data.length, id);
+
+			ketQua = pst.executeUpdate();
+			System.out.println("Có " + ketQua + " dòng thay đổi");
+
+			// Ngat ket noi
+			JDBCUtil.closeConnetion(conn);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return ketQua;
+	}
+
+	private void setData(PreparedStatement pst, int index, Object data) throws SQLException {
+		if (data instanceof String) {
+			pst.setString(index, (String) data);
+		}
+		if (data instanceof Integer) {
+			pst.setInt(index, (Integer) data);
+		}
+		if (data instanceof Double) {
+			pst.setDouble(index, (Double) data);
+		}
+		if (data instanceof Date) {
+			pst.setDate(index, (Date) data);
+		}
+	}
 
 	public int delete(String id) {
 		// TODO Auto-generated method stub
