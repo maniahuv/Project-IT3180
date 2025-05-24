@@ -67,6 +67,9 @@ public abstract class DataAccessObject<T> {
 		if (data instanceof Date) {
 			pst.setDate(index, (Date) data);
 		}
+		if (data instanceof Boolean) {
+			pst.setBoolean(index, (Boolean) data);
+		}
 	}
 
 	public int delete(String id) {
