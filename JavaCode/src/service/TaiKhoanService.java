@@ -41,7 +41,7 @@ public class TaiKhoanService {
 		return TaiKhoanDao.instance.selectByID(userId);
 	}
 
-	public static boolean khoaMoTaiKhoan(String userId, int trangThai) {
+	public static boolean khoaMoTaiKhoan(String userId, boolean trangThai) {
 		if (TaiKhoanDao.instance.update(userId, new String[] { "TrangThai" }, new Object[] { trangThai }) == 0) {
 			return false;
 		}
