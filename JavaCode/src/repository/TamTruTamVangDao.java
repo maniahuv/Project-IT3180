@@ -14,7 +14,7 @@ public class TamTruTamVangDao extends DataAccessObject<TamTruTamVang> {
 	public static TamTruTamVangDao instance = new TamTruTamVangDao();
 
 	public TamTruTamVangDao() {
-		super("TamTruTamVang");
+		super("3TV", "TamTruTamVang");
 	}
 
 	@Override

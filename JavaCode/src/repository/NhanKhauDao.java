@@ -14,7 +14,7 @@ public class NhanKhauDao extends DataAccessObject<NhanKhau> {
 	public static NhanKhauDao instance = new NhanKhauDao();
 
 	public NhanKhauDao() {
-		super("NhanKhau");
+		super("NK", "NhanKhau");
 	}
 
 	@Override

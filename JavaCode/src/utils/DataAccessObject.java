@@ -12,10 +12,12 @@ import database.JDBCUtil;
 
 public abstract class DataAccessObject<T> {
 
-	private String name;
+	protected String prefix;
+	protected String name;
 
-	public DataAccessObject(String name) {
+	public DataAccessObject(String prefix, String name) {
 		super();
+		this.prefix = prefix;
 		this.name = name;
 	}
 
@@ -154,5 +156,32 @@ public abstract class DataAccessObject<T> {
 	}
 
 	public abstract T newFromResultSet(ResultSet rs) throws SQLException;
+
+	public String generateID() {
+		try {
+			// Tao ket noi
+			Connection conn = JDBCUtil.getConnection();
+
+			// Thucthi lenh sql
+			String sql = String.format("SELECT COUNT(*) FROM %s ", name);
+
+			// Tao statement
+			PreparedStatement st = conn.prepareStatement(sql);
+
+			ResultSet rs = st.executeQuery();
+
+			// Xu ly
+			while (rs.next()) {
+				return String.format("%s%d", prefix, rs.getInt(1));
+			}
+
+			// Ngat ket noi
+			JDBCUtil.closeConnetion(conn);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return null;
+	}
 
 }

@@ -14,7 +14,7 @@ public class LichSuGiaoDichDao extends DataAccessObject<LichSuGiaoDich> {
 	public static LichSuGiaoDichDao instance = new LichSuGiaoDichDao();
 
 	public LichSuGiaoDichDao() {
-		super("LichSuGiaoDich");
+		super("LS", "LichSuGiaoDich");
 	}
 
 	@Override

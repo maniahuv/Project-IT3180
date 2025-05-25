@@ -18,7 +18,7 @@ public class KhoanThuDao extends DataAccessObject<KhoanThu> {
 	public static KhoanThuDao instance = new KhoanThuDao();
 
 	public KhoanThuDao() {
-		super("KhoanThu");
+		super("KT", "KhoanThu");
 	}
 
 	@Override
@@ -58,110 +58,89 @@ public class KhoanThuDao extends DataAccessObject<KhoanThu> {
 				rs.getString("MaLoaiKHoanThu"), rs.getDouble("SoTienPhaiNop"), rs.getInt("TrangThaiThanhToan"),
 				rs.getDate("NgayNop"));
 	}
-	
 
-	    /** 
-	     * Tìm KhoanThu theo các tiêu chí: maHoKhau, maDotThu, trangThai (0/1), khoảng ngày nộp.
-	     */
-	    public List<KhoanThu> timTheoTieuChi(
-	            String maHoKhau,
-	            String maDotThu,
-	            Integer trangThai,
-	            Date tuNgay,
-	            Date denNgay,
-	            String orderBy,
-	            boolean asc,
-	            int limit,
-	            int offset
-	    ) {
-	        List<KhoanThu> list = new ArrayList<>();
-	        StringBuilder sql = new StringBuilder("SELECT * FROM KhoanThu WHERE 1=1");
-	        List<Object> params = new ArrayList<>();
+	/**
+	 * Tìm KhoanThu theo các tiêu chí: maHoKhau, maDotThu, trangThai (0/1), khoảng
+	 * ngày nộp.
+	 */
+	public List<KhoanThu> timTheoTieuChi(String maHoKhau, String maDotThu, Integer trangThai, Date tuNgay, Date denNgay,
+			String orderBy, boolean asc, int limit, int offset) {
+		List<KhoanThu> list = new ArrayList<>();
+		StringBuilder sql = new StringBuilder("SELECT * FROM KhoanThu WHERE 1=1");
+		List<Object> params = new ArrayList<>();
 
-	        if (maHoKhau != null) {
-	            sql.append(" AND MaHoKhau = ?");
-	            params.add(maHoKhau);
-	        }
-	        if (maDotThu != null) {
-	            sql.append(" AND MaDotThu = ?");
-	            params.add(maDotThu);
-	        }
-	        if (trangThai != null) {
-	            sql.append(" AND TrangThaiThanhToan = ?");
-	            params.add(trangThai);
-	        }
-	        if (tuNgay != null) {
-	            sql.append(" AND NgayNop >= ?");
-	            params.add(tuNgay);
-	        }
-	        if (denNgay != null) {
-	            sql.append(" AND NgayNop <= ?");
-	            params.add(denNgay);
-	        }
-	        if (orderBy != null) {
-	            sql.append(" ORDER BY ").append(orderBy).append(asc ? " ASC" : " DESC");
-	        }
-	        if (limit > 0) {
-	            sql.append(" LIMIT ?");
-	            params.add(limit);
-	            if (offset >= 0) {
-	                sql.append(" OFFSET ?");
-	                params.add(offset);
-	            }
-	        }
+		if (maHoKhau != null) {
+			sql.append(" AND MaHoKhau = ?");
+			params.add(maHoKhau);
+		}
+		if (maDotThu != null) {
+			sql.append(" AND MaDotThu = ?");
+			params.add(maDotThu);
+		}
+		if (trangThai != null) {
+			sql.append(" AND TrangThaiThanhToan = ?");
+			params.add(trangThai);
+		}
+		if (tuNgay != null) {
+			sql.append(" AND NgayNop >= ?");
+			params.add(tuNgay);
+		}
+		if (denNgay != null) {
+			sql.append(" AND NgayNop <= ?");
+			params.add(denNgay);
+		}
+		if (orderBy != null) {
+			sql.append(" ORDER BY ").append(orderBy).append(asc ? " ASC" : " DESC");
+		}
+		if (limit > 0) {
+			sql.append(" LIMIT ?");
+			params.add(limit);
+			if (offset >= 0) {
+				sql.append(" OFFSET ?");
+				params.add(offset);
+			}
+		}
 
-	        try (Connection conn = JDBCUtil.getConnection();
-	             PreparedStatement pst = conn.prepareStatement(sql.toString())) {
-	            for (int i = 0; i < params.size(); i++) {
-	                pst.setObject(i+1, params.get(i));
-	            }
-	            try (ResultSet rs = pst.executeQuery()) {
-	            	while (rs.next()) {
-	            		list.add(new KhoanThu(
-	                            rs.getString("ID"),
-	                            rs.getString("MaDotThu"),
-	                            rs.getString("MaHoKhau"),
-	                            rs.getString("MaLoaiKhoanThu"),
-	                            rs.getDouble("SoTienPhaiNop"),
-	                            rs.getInt("TrangThaiThanhToan"),
-	                            rs.getDate("NgayNop")       
-	                        ));
-	                }
-	            }
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        }
-	        return list;
-	    }
+		try (Connection conn = JDBCUtil.getConnection();
+				PreparedStatement pst = conn.prepareStatement(sql.toString())) {
+			for (int i = 0; i < params.size(); i++) {
+				pst.setObject(i + 1, params.get(i));
+			}
+			try (ResultSet rs = pst.executeQuery()) {
+				while (rs.next()) {
+					list.add(new KhoanThu(rs.getString("ID"), rs.getString("MaDotThu"), rs.getString("MaHoKhau"),
+							rs.getString("MaLoaiKhoanThu"), rs.getDouble("SoTienPhaiNop"),
+							rs.getInt("TrangThaiThanhToan"), rs.getDate("NgayNop")));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 
-	    /**
-	     * Thống kê: tổng số khoan thu; số đã đóng (trang_thai=1);
-	     * số chưa đóng (trang_thai=0); số quá hạn chưa đóng.
-	     */
-	    public ThongKeKhoanThu thongKe() {
-	        String sql =
-	            "SELECT " +
-	            " COUNT(*) AS total, " +
-	            " SUM(CASE WHEN trang_thai_thanh_toan=1 THEN 1 ELSE 0 END) AS da_thanh_toan, " +
-	            " SUM(CASE WHEN trang_thai_thanh_toan=0 THEN 1 ELSE 0 END) AS chua_thanh_toan, " +
-	            " SUM(CASE WHEN trang_thai_thanh_toan=0 AND ngay_nop < CURRENT_DATE THEN 1 ELSE 0 END) AS qua_han_chua_thanh_toan " +
-	            "FROM KhoanThu";
+	/**
+	 * Thống kê: tổng số khoan thu; số đã đóng (trang_thai=1); số chưa đóng
+	 * (trang_thai=0); số quá hạn chưa đóng.
+	 */
+	public ThongKeKhoanThu thongKe() {
+		String sql = "SELECT " + name + " COUNT(*) AS total, "
+				+ " SUM(CASE WHEN TrangThaiThanhToan=1 THEN 1 ELSE 0 END) AS da_thanh_toan, "
+				+ " SUM(CASE WHEN TrangThaiThanhToan=0 THEN 1 ELSE 0 END) AS chua_thanh_toan, "
+				+ " SUM(CASE WHEN TrangThaiThanhToan=0 AND NgayNop < CURRENT_DATE THEN 1 ELSE 0 END) AS qua_han_chua_thanh_toan "
+				+ "FROM KhoanThu";
 
-	        try (Connection conn = JDBCUtil.getConnection();
-	             PreparedStatement pst = conn.prepareStatement(sql);
-	             ResultSet rs = pst.executeQuery()) {
-	            if (rs.next()) {
-	                return new ThongKeKhoanThu(
-	                    rs.getInt("total"),
-	                    rs.getInt("da_thanh_toan"),
-	                    rs.getInt("chua_thanh_toan"),
-	                    rs.getInt("qua_han_chua_thanh_toan")
-	                );
-	            }
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        }
-	        return new ThongKeKhoanThu(0,0,0,0);
-	    }
-	
+		try (Connection conn = JDBCUtil.getConnection();
+				PreparedStatement pst = conn.prepareStatement(sql);
+				ResultSet rs = pst.executeQuery()) {
+			if (rs.next()) {
+				return new ThongKeKhoanThu(rs.getInt("total"), rs.getInt("da_thanh_toan"), rs.getInt("chua_thanh_toan"),
+						rs.getInt("qua_han_chua_thanh_toan"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return new ThongKeKhoanThu(0, 0, 0, 0);
+	}
+
 }

@@ -14,7 +14,7 @@ public class RoleDao extends DataAccessObject<Role> {
 	public static RoleDao instance = new RoleDao();
 
 	public RoleDao() {
-		super("Role");
+		super("Ro", "Role");
 	}
 
 	@Override

@@ -14,7 +14,7 @@ public class LoaiKhoanThuDao extends DataAccessObject<LoaiKhoanThu> {
 	public static LoaiKhoanThuDao instance = new LoaiKhoanThuDao();
 
 	public LoaiKhoanThuDao() {
-		super("LoaiKhoanThu");
+		super("LKT", "LoaiKhoanThu");
 	}
 
 	@Override

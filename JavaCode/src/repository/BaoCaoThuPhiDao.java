@@ -14,7 +14,7 @@ public class BaoCaoThuPhiDao extends DataAccessObject<BaoCaoThuPhi> {
 	public static BaoCaoThuPhiDao instance = new BaoCaoThuPhiDao();
 
 	public BaoCaoThuPhiDao() {
-		super("BaoCaoThuPhi");
+		super("RTP", "BaoCaoThuPhi");
 	}
 
 	@Override

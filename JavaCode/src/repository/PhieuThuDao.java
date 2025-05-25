@@ -14,7 +14,7 @@ public class PhieuThuDao extends DataAccessObject<PhieuThu> {
 	public static PhieuThuDao instance = new PhieuThuDao();
 
 	public PhieuThuDao() {
-		super("PhieuThu");
+		super("PT", "PhieuThu");
 	}
 
 	@Override

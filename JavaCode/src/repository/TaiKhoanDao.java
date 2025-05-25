@@ -14,7 +14,7 @@ public class TaiKhoanDao extends DataAccessObject<TaiKhoan> {
 	public static TaiKhoanDao instance = new TaiKhoanDao();
 
 	public TaiKhoanDao() {
-		super("TaiKhoan");
+		super("TK", "TaiKhoan");
 	}
 
 	@Override

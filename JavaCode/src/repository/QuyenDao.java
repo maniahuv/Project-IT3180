@@ -14,7 +14,7 @@ public class QuyenDao extends DataAccessObject<Quyen> {
 	public static QuyenDao instance = new QuyenDao();
 
 	public QuyenDao() {
-		super("Quyen");
+		super("Qy", "Quyen");
 	}
 
 	@Override

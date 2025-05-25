@@ -14,7 +14,7 @@ public class ChiTietPhieuThuDao extends DataAccessObject<ChiTietPhieuThu> {
 	public static ChiTietPhieuThuDao instance = new ChiTietPhieuThuDao();
 
 	public ChiTietPhieuThuDao() {
-		super("ChiTietPhieuThu");
+		super("DPT", "ChiTietPhieuThu");
 	}
 
 	@Override
