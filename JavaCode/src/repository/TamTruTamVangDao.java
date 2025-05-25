@@ -5,16 +5,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import dao.DataAccessObject;
 import database.JDBCUtil;
 import model.TamTruTamVang;
+import utils.DataAccessObject;
 
 public class TamTruTamVangDao extends DataAccessObject<TamTruTamVang> {
 
 	public static TamTruTamVangDao instance = new TamTruTamVangDao();
 
 	public TamTruTamVangDao() {
-		super("TamTruTamVang");
+		super("3TV", "TamTruTamVang");
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class TamTruTamVangDao extends DataAccessObject<TamTruTamVang> {
 			PreparedStatement pst = conn.prepareStatement(sql);
 			pst.setString(1, t.getMaTamTruTamVang());
 			pst.setString(2, t.getMaNhanKhau());
-			pst.setString(3, t.getLoai());
+			pst.setInt(3, t.getLoai());
 			pst.setString(4, t.getNoiTamTruTamVang());
 			pst.setDate(5, t.getTuNgay());
 			pst.setDate(6, t.getDenNgay());
@@ -49,7 +49,7 @@ public class TamTruTamVangDao extends DataAccessObject<TamTruTamVang> {
 
 	@Override
 	public TamTruTamVang newFromResultSet(ResultSet rs) throws SQLException {
-		return new TamTruTamVang(rs.getString("ID"), rs.getString("MaNhanKhau"), rs.getString("Loai"),
+		return new TamTruTamVang(rs.getString("ID"), rs.getString("MaNhanKhau"), rs.getInt("Loai"),
 				rs.getString("NoiTamTruTamVang"), rs.getDate("TuNgay"), rs.getDate("DenNgay"));
 	}
 

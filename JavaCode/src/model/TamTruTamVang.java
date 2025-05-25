@@ -7,12 +7,12 @@ public class TamTruTamVang {
 
 	private String maTamTruTamVang;
 	private String maNhanKhau;
-	private String loai;
+	private int loai;
 	private String noiTamTruTamVang;
 	private Date tuNgay;
 	private Date denNgay;
 
-	public TamTruTamVang(String maTamTruTamVang, String maNhanKhau, String loai, String noiTamTruTamVang, Date tuNgay,
+	public TamTruTamVang(String maTamTruTamVang, String maNhanKhau, int loai, String noiTamTruTamVang, Date tuNgay,
 			Date denNgay) {
 		super();
 		this.maTamTruTamVang = maTamTruTamVang;
@@ -39,11 +39,11 @@ public class TamTruTamVang {
 		this.maNhanKhau = maNhanKhau;
 	}
 
-	public String getLoai() {
+	public int getLoai() {
 		return loai;
 	}
 
-	public void setLoai(String loai) {
+	public void setLoai(int loai) {
 		this.loai = loai;
 	}
 

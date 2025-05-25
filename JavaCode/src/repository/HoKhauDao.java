@@ -5,16 +5,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import dao.DataAccessObject;
 import database.JDBCUtil;
 import model.HoKhau;
+import model.ThongKeHoKhau;
+import utils.DataAccessObject;
 
 public class HoKhauDao extends DataAccessObject<HoKhau> {
 
 	public static HoKhauDao instance = new HoKhauDao();
 
 	public HoKhauDao() {
-		super("HoKhau");
+		super("HK", "HoKhau");
 	}
 
 	@Override
@@ -50,6 +51,26 @@ public class HoKhauDao extends DataAccessObject<HoKhau> {
 	public HoKhau newFromResultSet(ResultSet rs) throws SQLException {
 		return new HoKhau(rs.getString("ID"), rs.getString("SoCanHo"), rs.getDouble("DienTich"), rs.getInt("SoNguoi"),
 				rs.getString("ChuHo"));
+	}
+
+	/**
+	 * Thống kê: tổng số khoan thu; số đã đóng (trang_thai=1); số chưa đóng
+	 * (trang_thai=0); số quá hạn chưa đóng.
+	 */
+	public ThongKeHoKhau thongKe() {
+		String sql = "SELECT " + name + " SUM(DienTich) AS tongDienTich, " + " SUM(SoNguoi) AS tongSoNguoi, "
+				+ "FROM KhoanThu";
+
+		try (Connection conn = JDBCUtil.getConnection();
+				PreparedStatement pst = conn.prepareStatement(sql);
+				ResultSet rs = pst.executeQuery()) {
+			if (rs.next()) {
+				return new ThongKeHoKhau(rs.getInt("da_thanh_toan"), rs.getInt("chua_thanh_toan"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return new ThongKeHoKhau(0, 0);
 	}
 
 }

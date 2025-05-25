@@ -5,16 +5,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import dao.DataAccessObject;
 import database.JDBCUtil;
 import model.Quyen;
+import utils.DataAccessObject;
 
 public class QuyenDao extends DataAccessObject<Quyen> {
 
 	public static QuyenDao instance = new QuyenDao();
 
 	public QuyenDao() {
-		super("Quyen");
+		super("Qy", "Quyen");
 	}
 
 	@Override

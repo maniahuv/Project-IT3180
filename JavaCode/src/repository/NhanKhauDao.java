@@ -5,16 +5,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import dao.DataAccessObject;
 import database.JDBCUtil;
 import model.NhanKhau;
+import utils.DataAccessObject;
 
 public class NhanKhauDao extends DataAccessObject<NhanKhau> {
 
 	public static NhanKhauDao instance = new NhanKhauDao();
 
 	public NhanKhauDao() {
-		super("NhanKhau");
+		super("NK", "NhanKhau");
 	}
 
 	@Override

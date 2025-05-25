@@ -37,6 +37,13 @@ public class TaiKhoanService {
 		return true;
 	}
 
+	public static boolean capNhatMatKhau(String userId, String moi) {
+		if (TaiKhoanDao.instance.update(userId, new String[] { "MatKhau" }, new Object[] { moi }) == 0) {
+			return false;
+		}
+		return true;
+	}
+
 	public static TaiKhoan traCuuThongTin(String userId) {
 		return TaiKhoanDao.instance.selectByID(userId);
 	}

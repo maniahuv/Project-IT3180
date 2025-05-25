@@ -5,16 +5,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import dao.DataAccessObject;
 import database.JDBCUtil;
 import model.ChiTietPhieuThu;
+import utils.DataAccessObject;
 
 public class ChiTietPhieuThuDao extends DataAccessObject<ChiTietPhieuThu> {
 
 	public static ChiTietPhieuThuDao instance = new ChiTietPhieuThuDao();
 
 	public ChiTietPhieuThuDao() {
-		super("ChiTietPhieuThu");
+		super("DPT", "ChiTietPhieuThu");
 	}
 
 	@Override

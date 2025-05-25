@@ -13,6 +13,6 @@
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="com.jgoodies.common_1.8.1.v20240327-0800.jar"/>
 	<classpathentry exported="true" kind="lib" path="com.jgoodies.forms_1.9.0.v20240327-0800.jar"/>
-	<classpathentry excluding="src/" kind="src" path=""/>
+	<classpathentry kind="src" path="asta"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
