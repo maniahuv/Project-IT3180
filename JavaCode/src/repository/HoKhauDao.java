@@ -5,9 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import dao.DataAccessObject;
 import database.JDBCUtil;
 import model.HoKhau;
+import utils.DataAccessObject;
 
 public class HoKhauDao extends DataAccessObject<HoKhau> {
 

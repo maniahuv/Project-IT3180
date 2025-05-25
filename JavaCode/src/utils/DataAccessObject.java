@@ -1,4 +1,4 @@
-package dao;
+package utils;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -29,21 +29,20 @@ public abstract class DataAccessObject<T> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "UPDATE " + name + " SET " + dataNames[0] + "=?";
+			StringBuilder sql = new StringBuilder(String.format("UPDATE %s SET %s=?", name, dataNames[0]));
 			for (int i = 1; i < dataNames.length; i++) {
-				sql += "," + dataNames[i] + "=?";
+				sql.append(String.format(",%s=?", dataNames[i]));
 			}
-			sql += " WHERE ID=?";
+			sql.append(" WHERE ID=?");
 
 			// Tao statement
-			PreparedStatement pst = conn.prepareStatement(sql);
+			PreparedStatement pst = conn.prepareStatement(sql.toString());
 			for (int i = 0; i < data.length; i++) {
 				setData(pst, i, data[i]);
 			}
 			setData(pst, data.length, id);
 
 			ketQua = pst.executeUpdate();
-			System.out.println("Có " + ketQua + " dòng thay đổi");
 
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
@@ -80,7 +79,7 @@ public abstract class DataAccessObject<T> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql1 = "DELETE FROM " + name + " WHERE ID=?";
+			String sql1 = String.format("DELETE FROM %s WHERE ID=?", name);
 
 			// Tao statement
 			PreparedStatement pst1 = conn.prepareStatement(sql1);
@@ -88,7 +87,6 @@ public abstract class DataAccessObject<T> {
 			pst1.setString(1, id);
 
 			ketQua = pst1.executeUpdate();
-			System.out.println("Có " + ketQua + " dòng thay đổi");
 
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
@@ -106,7 +104,7 @@ public abstract class DataAccessObject<T> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "SELECT * FROM " + name + " WHERE ID='" + id + "'";
+			String sql = String.format("SELECT * FROM %s WHERE ID='%s'", name, id);
 
 			// Tao statement
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -134,7 +132,7 @@ public abstract class DataAccessObject<T> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thucthi lenh sql
-			String sql = "SELECT * FROM " + name + " ";
+			String sql = String.format("SELECT * FROM %s ", name);
 
 			// Tao statement
 			PreparedStatement st = conn.prepareStatement(sql);

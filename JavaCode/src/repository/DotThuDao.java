@@ -8,11 +8,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import dao.DataAccessObject;
 import database.JDBCUtil;
 import model.DotThu;
-import model.DotThu.TrangThaiDotThu;
 import model.ThongKeDotThu;
+import utils.DataAccessObject;
 
 public class DotThuDao extends DataAccessObject<DotThu> {
 
