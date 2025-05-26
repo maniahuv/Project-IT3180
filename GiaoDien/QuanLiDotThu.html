@@ -9,6 +9,13 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
   <link rel="stylesheet" href="manHinhQuanLiTaiKhoan.css" />
+  <style>
+    /* Style để highlight hàng tìm được */
+    .highlight {
+      background-color: #a4dba5 !important;
+      transition: background-color 0.5s ease;
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -124,7 +131,19 @@
                 <button class="btn delete" title="Xóa"><i class="fa fa-trash-alt"></i></button>
               </td> 
             </tr>
-            <!-- thêm các dòng dữ liệu tương tự -->
+            <tr>
+              <td>2</td>
+              <td>DT2025-02</td>
+              <td>2025-02-01</td>
+              <td>2025-02-28</td>
+              <td>Đợt thu học phí học kỳ 2 năm 2025</td>
+              <td>Đang thu</td>
+              <td class="actions-cell">
+                <button class="btn edit" title="Sửa"><i class="fa fa-pen"></i></button>
+                <button class="btn delete" title="Xóa"><i class="fa fa-trash-alt"></i></button>
+              </td> 
+            </tr>
+            <!-- có thể thêm các dòng dữ liệu tương tự -->
           </tbody>
         </table>
 
@@ -171,6 +190,7 @@
 
   const tbody = document.querySelector('.data-table tbody');
   const addBtn = document.getElementById('add-btn');
+  const searchBtn = document.getElementById('search-btn');
 
   // Xóa dòng khi click nút delete
   tbody.addEventListener('click', function(e) {
@@ -234,9 +254,8 @@
         return;
       }
 
-      // Tạo dòng dữ liệu với các giá trị nhập vào
-      const newTr = document.createElement('tr');
-      newTr.innerHTML = `
+      // Tạo row hiển thị dữ liệu
+      tr.innerHTML = `
         <td>${values[0]}</td>
         <td>${values[1]}</td>
         <td>${values[2]}</td>
@@ -248,57 +267,98 @@
           <button class="btn delete" title="Xóa"><i class="fa fa-trash-alt"></i></button>
         </td>
       `;
-      tbody.replaceChild(newTr, tr);
+      tr.classList.remove('new-row');
     }
 
     if (cancelBtn) {
-      const tr = cancelBtn.closest('tr');
-      if (tr.classList.contains('new-row')) {
-        tr.remove();
-      }
+      e.target.closest('tr').remove();
     }
   });
 
-  // Sửa dòng hiện có (khi ấn nút Sửa)
+  // Chức năng chỉnh sửa
   tbody.addEventListener('click', function(e) {
-    const btn = e.target.closest('.btn.edit');
-    if (!btn) return;
+    const editBtn = e.target.closest('.btn.edit');
+    if (!editBtn) return;
 
-    const tr = btn.closest('tr');
+    const tr = editBtn.closest('tr');
+    if (tr.classList.contains('new-row')) return; // Đang trong chế độ tạo mới
 
-    if (btn.classList.contains('editing')) {
-      // Lưu lại thay đổi
-      for (let i = 0; i <= 5; i++) {
-        const td = tr.cells[i];
-        const input = td.querySelector('input');
-        if (input) {
-          td.textContent = input.value.trim();
-        }
+    // Lấy dữ liệu hiện tại
+    const cells = tr.querySelectorAll('td');
+    const data = [
+      cells[0].textContent.trim(),
+      cells[1].textContent.trim(),
+      cells[2].textContent.trim(),
+      cells[3].textContent.trim(),
+      cells[4].textContent.trim(),
+      cells[5].textContent.trim(),
+    ];
+
+    // Chuyển thành input để sửa
+    tr.innerHTML = `
+      <td><input type="text" value="${data[0]}" class="input-id" /></td>
+      <td><input type="text" value="${data[1]}" class="input-madotthu" /></td>
+      <td><input type="date" value="${data[2]}" class="input-thoigianbatdau" /></td>
+      <td><input type="date" value="${data[3]}" class="input-thoigianketthuc" /></td>
+      <td><input type="text" value="${data[4]}" class="input-mota" /></td>
+      <td><input type="text" value="${data[5]}" class="input-trangthai" /></td>
+      <td class="actions-cell">
+        <button class="btn save" title="Lưu"><i class="fa fa-floppy-disk"></i></button>
+        <button class="btn cancel" title="Hủy"><i class="fa fa-times"></i></button>
+      </td>
+    `;
+    tr.classList.add('new-row'); // Tạm đặt class new-row để dễ quản lý nút hủy
+  });
+
+  // Tìm kiếm và highlight hàng đầu tiên phù hợp
+  searchBtn.addEventListener('click', () => {
+    const criteria = document.getElementById('search-criteria').value;
+    const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+    if (!keyword) {
+      alert('Vui lòng nhập từ khóa tìm kiếm.');
+      return;
+    }
+
+    // Bản đồ cột: key -> chỉ số cột trong bảng (bắt đầu từ 0)
+    const columnMap = {
+      madotthu: 1,
+      thoigianbatdau: 2,
+      thoigianketthuc: 3,
+      mota: 4,
+      trangthai: 5
+    };
+
+    const colIndex = columnMap[criteria];
+    if (colIndex === undefined) return;
+
+    // Bỏ highlight cũ
+    tbody.querySelectorAll('tr').forEach(tr => tr.classList.remove('highlight'));
+
+    const rows = tbody.querySelectorAll('tr');
+    let foundRow = null;
+
+    for (const row of rows) {
+      const cellText = row.cells[colIndex].textContent.trim().toLowerCase();
+      if (cellText.includes(keyword)) {
+        foundRow = row;
+        break;
       }
-      btn.classList.remove('editing');
-      btn.title = 'Sửa';
-      btn.innerHTML = '<i class="fa fa-pen"></i>';
+    }
+
+    if (foundRow) {
+      // Cuộn đến và highlight
+      foundRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      foundRow.classList.add('highlight');
+
+      // Bỏ highlight sau 3 giây
+      setTimeout(() => {
+        foundRow.classList.remove('highlight');
+      }, 3000);
     } else {
-      // Chuyển sang chế độ chỉnh sửa, đổi các ô thành input
-      for (let i = 0; i <= 5; i++) {
-        const td = tr.cells[i];
-        const text = td.textContent.trim();
-        if (!td.querySelector('input')) {
-          const input = document.createElement('input');
-          input.type = (i === 2 || i === 3) ? 'date' : 'text';
-          input.value = text;
-          input.style.width = '100%';
-          td.textContent = '';
-          td.appendChild(input);
-        }
-      }
-      btn.classList.add('editing');
-      btn.title = 'Lưu';
-      btn.innerHTML = '<i class="fa fa-floppy-disk"></i>';
+      alert('Không tìm thấy kết quả phù hợp.');
     }
   });
-</script>
-
-
+  </script>
+  
 </body>
 </html>

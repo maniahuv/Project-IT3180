@@ -9,6 +9,13 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
   <link rel="stylesheet" href="manHinhQuanLiTaiKhoan.css" />
+  <style>
+    /* Style để highlight hàng tìm được */
+    .highlight {
+      background-color: #a4dba5 !important;
+      transition: background-color 0.5s ease;
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -169,150 +176,177 @@
 
   const tbody = document.querySelector('.data-table tbody');
   const addBtn = document.getElementById('add-btn');
+  const searchBtn = document.getElementById('search-btn');
 
-  // Xóa dòng khi click vào nút delete
+  // Xóa dòng khi click nút delete
   tbody.addEventListener('click', function(e) {
     const btn = e.target.closest('.btn.delete');
     if (!btn) return;
+
+    // Nếu là dòng nhập liệu mới thì hủy nhập
+    if (btn.closest('tr').classList.contains('new-row')) {
+      btn.closest('tr').remove();
+      return;
+    }
+
     if (!confirm('Bạn có chắc muốn xóa hộ khẩu này?')) return;
     btn.closest('tr').remove();
-    // Mở lại nút thêm nếu đang khóa
-    addBtn.disabled = false;
   });
 
-  // Biến cờ để kiểm soát trạng thái thêm mới
-  let isAddingNew = false;
-
-  // Thêm dòng mới khi click Tạo mới
+  // Tạo dòng nhập liệu khi ấn "Tạo mới"
   addBtn.addEventListener('click', function() {
-    if (isAddingNew) return; // Không thêm dòng mới nếu đang có dòng thêm mới đang nhập
+    // Tránh tạo nhiều dòng nhập liệu
+    if (document.querySelector('.new-row')) return;
 
-    isAddingNew = true;
-    addBtn.disabled = true; // khóa nút thêm để tránh thêm nhiều dòng
-
-    // Tạo dòng tr mới có các ô input
+    // Tạo một dòng mới với các ô input giống cấu trúc cột
     const tr = document.createElement('tr');
+    tr.classList.add('new-row');
 
     tr.innerHTML = `
-      <td><input type="text" placeholder="ID" style="width:60px" /></td>
-      <td><input type="text" placeholder="Mã hộ khẩu" /></td>
-      <td><input type="text" placeholder="Số căn hộ" /></td>
-      <td><input type="number" placeholder="Diện tích (m²)" min="0" step="0.1" style="width:80px" /></td>
-      <td><input type="number" placeholder="Số người" min="1" style="width:60px" /></td>
-      <td><input type="text" placeholder="Chủ hộ" /></td>
+      <td><input type="text" placeholder="ID" class="input-id" /></td>
+      <td><input type="text" placeholder="Mã hộ khẩu" class="input-mahokhau" /></td>
+      <td><input type="text" placeholder="Số căn hộ"  class="input-socanho" /></td>
+      <td><input type="text" placeholder="Diện tích"  class="input-dientich" /></td>
+      <td><input type="text" placeholder="Số người" class="input-songuoi" /></td>
+      <td><input type="text" placeholder="Chủ hộ" class="input-chuho" /></td>
       <td class="actions-cell">
-        <button class="btn save" title="Lưu" style="color:green"><i class="fa fa-floppy-disk"></i></button>
-        <button class="btn cancel" title="Hủy" style="color:red"><i class="fa fa-times"></i></button>
+        <button class="btn save" title="Lưu"><i class="fa fa-floppy-disk"></i></button>
+        <button class="btn cancel" title="Hủy"><i class="fa fa-times"></i></button>
       </td>
     `;
 
     tbody.appendChild(tr);
   });
 
-  // Xử lý lưu/hủy dòng thêm mới
+  // Xử lý nút Lưu và Hủy ở dòng nhập liệu mới
   tbody.addEventListener('click', function(e) {
     const saveBtn = e.target.closest('.btn.save');
     const cancelBtn = e.target.closest('.btn.cancel');
+
     if (saveBtn) {
       const tr = saveBtn.closest('tr');
       const inputs = tr.querySelectorAll('input');
-      const values = [];
-      let valid = true;
+      const values = Array.from(inputs).map(input => input.value.trim());
 
-      inputs.forEach(input => {
-        if (!input.value.trim()) {
-          alert('Vui lòng nhập đầy đủ thông tin.');
-          input.focus();
-          valid = false;
-          return false; // thoát forEach
+      // Kiểm tra không để trống trường bắt buộc (ID, Mã đợt thu)
+      if (values[0] === '' || values[1] === '') {
+        alert('Vui lòng nhập đầy đủ ID và Mã hộ khẩu.');
+        return;
+      }
+      if (isNaN(values[3]) || values[3] <= 0) {
+        alert('Diện tích phải là một số dương.');
+        return;
+    }
+      if (!Number.isInteger(Number(values[4])) || values[4] <= 0) {
+        alert('Số người phải là một số nguyên dương.');
+          return;
         }
-        values.push(input.value.trim());
-      });
 
-      if (!valid) return;
-
-      // Kiểm tra giá trị số hợp lệ cho diện tích và số người
-      const dientich = parseFloat(values[3]);
-      const songuoi = parseInt(values[4], 10);
-      if (isNaN(dientich) || dientich <= 0) {
-        alert('Diện tích phải là số lớn hơn 0.');
-        inputs[3].focus();
-        return;
-      }
-      if (isNaN(songuoi) || songuoi <= 0) {
-        alert('Số người phải là số nguyên lớn hơn 0.');
-        inputs[4].focus();
-        return;
-      }
-
-      // Chuyển dòng thành dòng dữ liệu bình thường
+      // Tạo row hiển thị dữ liệu
       tr.innerHTML = `
         <td>${values[0]}</td>
         <td>${values[1]}</td>
         <td>${values[2]}</td>
-        <td>${dientich.toFixed(1)}</td>
-        <td>${songuoi}</td>
+        <td>${values[3]}</td>
+        <td>${values[4]}</td>
         <td>${values[5]}</td>
         <td class="actions-cell">
           <button class="btn edit" title="Sửa"><i class="fa fa-pen"></i></button>
           <button class="btn delete" title="Xóa"><i class="fa fa-trash-alt"></i></button>
         </td>
       `;
-      isAddingNew = false;
-      addBtn.disabled = false;
-    } else if (cancelBtn) {
-      // Hủy thêm mới xóa dòng tr
-      const tr = cancelBtn.closest('tr');
-      tr.remove();
-      isAddingNew = false;
-      addBtn.disabled = false;
+      tr.classList.remove('new-row');
+    }
+
+    if (cancelBtn) {
+      e.target.closest('tr').remove();
     }
   });
 
-  // Xử lý chức năng Sửa/Lưu dòng đã có sẵn
+  // Chức năng chỉnh sửa
   tbody.addEventListener('click', function(e) {
-    const btn = e.target.closest('.btn.edit');
-    if (!btn) return;
+    const editBtn = e.target.closest('.btn.edit');
+    if (!editBtn) return;
 
-    const tr = btn.closest('tr');
+    const tr = editBtn.closest('tr');
+    if (tr.classList.contains('new-row')) return; // Đang trong chế độ tạo mới
 
-    if (btn.classList.contains('editing')) {
-      // Lưu lại dữ liệu sau khi chỉnh sửa
-      for (let i = 0; i <= 5; i++) {
-        const td = tr.cells[i];
-        const input = td.querySelector('input');
-        if (input) {
-          if (!input.value.trim()) {
-            alert('Vui lòng không để trống.');
-            input.focus();
-            return;
-          }
-          td.textContent = input.value.trim();
-        }
+    // Lấy dữ liệu hiện tại
+    const cells = tr.querySelectorAll('td');
+    const data = [
+      cells[0].textContent.trim(),
+      cells[1].textContent.trim(),
+      cells[2].textContent.trim(),
+      cells[3].textContent.trim(),
+      cells[4].textContent.trim(),
+      cells[5].textContent.trim(),
+    ];
+
+    // Chuyển thành input để sửa
+    tr.innerHTML = `
+      <td><input type="text" value="${data[0]}" class="input-id" /></td>
+      <td><input type="text" value="${data[1]}" class="input-mahokhau" /></td>
+      <td><input type="text" value="${data[2]}" class="input-socanho" /></td>
+      <td><input type="text" value="${data[3]}" class="input-dientich" /></td>
+      <td><input type="text" value="${data[4]}" class="input-songuoi" /></td>
+      <td><input type="text" value="${data[5]}" class="input-chuho" /></td>
+      <td class="actions-cell">
+        <button class="btn save" title="Lưu"><i class="fa fa-floppy-disk"></i></button>
+        <button class="btn cancel" title="Hủy"><i class="fa fa-times"></i></button>
+      </td>
+    `;
+    tr.classList.add('new-row'); // Tạm đặt class new-row để dễ quản lý nút hủy
+  });
+
+  // Tìm kiếm và highlight hàng đầu tiên phù hợp
+  searchBtn.addEventListener('click', () => {
+    const criteria = document.getElementById('search-criteria').value;
+    const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+    if (!keyword) {
+      alert('Vui lòng nhập từ khóa tìm kiếm.');
+      return;
+    }
+
+    // Bản đồ cột: key -> chỉ số cột trong bảng (bắt đầu từ 0)
+    const columnMap = {
+      mahokhau: 1,
+      socanho: 2,
+      dientich: 3,
+      songuoi: 4,
+      chuho: 5
+    };
+
+    const colIndex = columnMap[criteria];
+    if (colIndex === undefined) return;
+
+    // Bỏ highlight cũ
+    tbody.querySelectorAll('tr').forEach(tr => tr.classList.remove('highlight'));
+
+    const rows = tbody.querySelectorAll('tr');
+    let foundRow = null;
+
+    for (const row of rows) {
+      const cellText = row.cells[colIndex].textContent.trim().toLowerCase();
+      if (cellText.includes(keyword)) {
+        foundRow = row;
+        break;
       }
-      btn.classList.remove('editing');
-      btn.title = 'Sửa';
-      btn.innerHTML = '<i class="fa fa-pen"></i>';
+    }
+
+    if (foundRow) {
+      // Cuộn đến và highlight
+      foundRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      foundRow.classList.add('highlight');
+
+      // Bỏ highlight sau 3 giây
+      setTimeout(() => {
+        foundRow.classList.remove('highlight');
+      }, 3000);
     } else {
-      // Chuyển sang trạng thái chỉnh sửa
-      for (let i = 0; i <= 5; i++) {
-        const td = tr.cells[i];
-        const text = td.textContent.trim();
-        if (!td.querySelector('input')) {
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.value = text;
-          input.style.width = '100%';
-          td.textContent = '';
-          td.appendChild(input);
-        }
-      }
-      btn.classList.add('editing');
-      btn.title = 'Lưu';
-      btn.innerHTML = '<i class="fa fa-floppy-disk"></i>';
+      alert('Không tìm thấy kết quả phù hợp.');
     }
   });
-</script>
+  </script>
 
 </body>
 </html>

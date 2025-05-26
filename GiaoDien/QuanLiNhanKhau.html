@@ -9,6 +9,13 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
   <link rel="stylesheet" href="manHinhQuanLiTaiKhoan.css" />
+  <style>
+    /* Style để highlight hàng tìm được */
+    .highlight {
+      background-color: #a4dba5 !important;
+      transition: background-color 0.5s ease;
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -156,230 +163,217 @@
   </div>
 
   <script>
-    // Accordion submenu
-    document.querySelectorAll('.submenu-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        btn.nextElementSibling.classList.toggle('open');
-        btn.querySelector('.arrow').classList.toggle('rotated');
-      });
+  // Accordion submenu
+  document.querySelectorAll('.submenu-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.nextElementSibling.classList.toggle('open');
+      btn.querySelector('.arrow').classList.toggle('rotated');
     });
+  });
 
-    // User popover
-    const userMenu = document.querySelector('.user-menu');
-    const popover = userMenu.querySelector('.user-popover');
-    const closeBtn = popover.querySelector('.popover-close');
+  // User menu popover
+  const userMenu = document.querySelector('.user-menu');
+  const popover = userMenu.querySelector('.user-popover');
+  const closeBtn = popover.querySelector('.popover-close');
 
-    userMenu.addEventListener('click', e => {
-      e.stopPropagation();
-      popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
-    });
+  userMenu.addEventListener('click', e => {
+    e.stopPropagation();
+    popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
+  });
 
-    closeBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      popover.style.display = 'none';
-    });
+  closeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    popover.style.display = 'none';
+  });
 
-    document.addEventListener('click', () => {
-      popover.style.display = 'none';
-    });
+  document.addEventListener('click', () => {
+    popover.style.display = 'none';
+  });
 
-    // Xóa dòng khi click vào nút delete
-    const tbody = document.querySelector('.data-table tbody');
-    const addBtn = document.getElementById('add-btn');
+  const tbody = document.querySelector('.data-table tbody');
+  const addBtn = document.getElementById('add-btn');
+  const searchBtn = document.getElementById('search-btn');
 
-    tbody.addEventListener('click', function(e) {
-      // Xóa
-      const btnDelete = e.target.closest('.btn.delete');
-      if (btnDelete) {
-        if (!confirm('Bạn có chắc muốn xóa nhân khẩu này?')) return;
-        btnDelete.closest('tr').remove();
+  // Xóa dòng khi click nút delete
+  tbody.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn.delete');
+    if (!btn) return;
+
+    // Nếu là dòng nhập liệu mới thì hủy nhập
+    if (btn.closest('tr').classList.contains('new-row')) {
+      btn.closest('tr').remove();
+      return;
+    }
+
+    if (!confirm('Bạn có chắc muốn xóa đợt thu này?')) return;
+    btn.closest('tr').remove();
+  });
+
+  // Tạo dòng nhập liệu khi ấn "Tạo mới"
+  addBtn.addEventListener('click', function() {
+    // Tránh tạo nhiều dòng nhập liệu
+    if (document.querySelector('.new-row')) return;
+
+    // Tạo một dòng mới với các ô input giống cấu trúc cột
+    const tr = document.createElement('tr');
+    tr.classList.add('new-row');
+
+    tr.innerHTML = `
+      <td><input type="text" placeholder="ID" class="input-id" /></td>
+      <td><input type="text" placeholder="Mã nhân khẩu" class="input-manhankhau" /></td>
+      <td><input type="text" placeholder="Mã hộ khẩu" class="input-mahokhau" /></td>
+      <td><input type="text" placeholder="Họ và tên" class="input-hovaten" /></td>
+      <td><input type="text" placeholder="Số CCCD" class="input-socccd" /></td>
+      <td><input type="date" placeholder="Ngày sinh" class="input-ngaysinh" /></td>
+      <td><input type="text" placeholder="Giới tính" class="input-gioitinh" /></td>
+      <td><input type="text" placeholder="Nghề Nghiệp" class="input-nghenghiep" /></td>
+      <td><input type="text" placeholder="Tình trạng cư trú" class="input-tinhtrangcutru" /></td>
+      <td><input type="text" placeholder="Quan hệ với chủ hộ" class="input-quanhevoichuho" /></td>
+      <td class="actions-cell">
+        <button class="btn save" title="Lưu"><i class="fa fa-floppy-disk"></i></button>
+        <button class="btn cancel" title="Hủy"><i class="fa fa-times"></i></button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  // Xử lý nút Lưu và Hủy ở dòng nhập liệu mới
+  tbody.addEventListener('click', function(e) {
+    const saveBtn = e.target.closest('.btn.save');
+    const cancelBtn = e.target.closest('.btn.cancel');
+
+    if (saveBtn) {
+      const tr = saveBtn.closest('tr');
+      const inputs = tr.querySelectorAll('input');
+      const values = Array.from(inputs).map(input => input.value.trim());
+
+      // Kiểm tra không để trống trường bắt buộc (ID, Mã đợt thu)
+      if (values[0] === '' || values[1] === '' || values[2] === '' || values[3] === '') {
+        alert('Vui lòng nhập đầy đủ ID, Mã nhân khẩu, Mã hộ khẩu và Họ và tên');
         return;
       }
 
-      // Chỉnh sửa / Lưu
-      const btnEdit = e.target.closest('.btn.edit');
-      if (!btnEdit) return;
-
-      const tr = btnEdit.closest('tr');
-
-      // Kiểm tra trạng thái: nếu đang ở chế độ edit (btn có icon save), thì lưu lại
-      const isEditing = btnEdit.classList.contains('saving');
-
-      if (!isEditing) {
-        // Chuyển sang trạng thái edit
-        btnEdit.classList.add('saving');
-        btnEdit.innerHTML = '<i class="fa fa-save"></i>';
-
-        // Chuyển các cột thành input/select editable
-        const cells = tr.querySelectorAll('td');
-        // Bỏ qua cột ID (index 0) và cột Hành động (cuối)
-        // Chỉ edit cột 1-9 tương ứng các thông tin
-        // Xác định các trường có thể là select (Giới tính, Tình trạng cư trú, Quan hệ với chủ hộ), các trường còn lại input text
-
-        // Mã nhân khẩu (col 1)
-        let mnk = cells[1].innerText;
-        cells[1].innerHTML = `<input type="text" value="${mnk}" />`;
-
-        // Mã hộ khẩu (col 2)
-        let mhk = cells[2].innerText;
-        cells[2].innerHTML = `<input type="text" value="${mhk}" />`;
-
-        // Họ và tên (col 3)
-        let hoten = cells[3].innerText;
-        cells[3].innerHTML = `<input type="text" value="${hoten}" />`;
-
-        // Số CCCD (col 4)
-        let cccd = cells[4].innerText;
-        cells[4].innerHTML = `<input type="text" value="${cccd}" />`;
-
-        // Ngày sinh (col 5)
-        let ngaysinh = cells[5].innerText;
-        cells[5].innerHTML = `<input type="date" value="${formatDateForInput(ngaysinh)}" />`;
-
-        // Giới tính (col 6)
-        let gioitinh = cells[6].innerText;
-        cells[6].innerHTML = `
-          <select>
-            <option value="Nam" ${gioitinh === 'Nam' ? 'selected' : ''}>Nam</option>
-            <option value="Nữ" ${gioitinh === 'Nữ' ? 'selected' : ''}>Nữ</option>
-            <option value="Khác" ${gioitinh !== 'Nam' && gioitinh !== 'Nữ' ? 'selected' : ''}>Khác</option>
-          </select>`;
-
-        // Nghề nghiệp (col 7)
-        let nghenghiep = cells[7].innerText;
-        cells[7].innerHTML = `<input type="text" value="${nghenghiep}" />`;
-
-        // Tình trạng cư trú (col 8)
-        let tinhtrang = cells[8].innerText;
-        cells[8].innerHTML = `
-          <select>
-            <option value="Thường trú" ${tinhtrang === 'Thường trú' ? 'selected' : ''}>Thường trú</option>
-            <option value="Tạm trú" ${tinhtrang === 'Tạm trú' ? 'selected' : ''}>Tạm trú</option>
-            <option value="Khác" ${tinhtrang !== 'Thường trú' && tinhtrang !== 'Tạm trú' ? 'selected' : ''}>Khác</option>
-          </select>`;
-
-        // Quan hệ với chủ hộ (col 9)
-        let quanhe = cells[9].innerText;
-        cells[9].innerHTML = `
-          <select>
-            <option value="Chủ hộ" ${quanhe === 'Chủ hộ' ? 'selected' : ''}>Chủ hộ</option>
-            <option value="Vợ/Chồng" ${quanhe === 'Vợ/Chồng' ? 'selected' : ''}>Vợ/Chồng</option>
-            <option value="Con" ${quanhe === 'Con' ? 'selected' : ''}>Con</option>
-            <option value="Khác" ${['Chủ hộ','Vợ/Chồng','Con'].includes(quanhe) ? '' : 'selected'}>Khác</option>
-          </select>`;
-
-      } else {
-        // Lưu lại và chuyển về trạng thái bình thường
-        btnEdit.classList.remove('saving');
-        btnEdit.innerHTML = '<i class="fa fa-pen"></i>';
-
-        const cells = tr.querySelectorAll('td');
-
-        // Lấy giá trị input/select rồi cập nhật vào innerText
-        // Mã nhân khẩu
-        let mnk = cells[1].querySelector('input').value.trim();
-        cells[1].innerText = mnk;
-
-        // Mã hộ khẩu
-        let mhk = cells[2].querySelector('input').value.trim();
-        cells[2].innerText = mhk;
-
-        // Họ và tên
-        let hoten = cells[3].querySelector('input').value.trim();
-        cells[3].innerText = hoten;
-
-        // Số CCCD
-        let cccd = cells[4].querySelector('input').value.trim();
-        cells[4].innerText = cccd;
-
-        // Ngày sinh
-        let ngaysinh = cells[5].querySelector('input').value;
-        cells[5].innerText = formatDateDisplay(ngaysinh);
-
-        // Giới tính
-        let gioitinh = cells[6].querySelector('select').value;
-        cells[6].innerText = gioitinh;
-
-        // Nghề nghiệp
-        let nghenghiep = cells[7].querySelector('input').value.trim();
-        cells[7].innerText = nghenghiep;
-
-        // Tình trạng cư trú
-        let tinhtrang = cells[8].querySelector('select').value;
-        cells[8].innerText = tinhtrang;
-
-        // Quan hệ với chủ hộ
-        let quanhe = cells[9].querySelector('select').value;
-        cells[9].innerText = quanhe;
-      }
-    });
-
-    // Hàm định dạng ngày (dd/mm/yyyy) -> yyyy-mm-dd (cho input date)
-    function formatDateForInput(str) {
-      // str dạng dd/mm/yyyy
-      const parts = str.split('/');
-      if (parts.length !== 3) return '';
-      return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-    }
-
-    // Hàm định dạng ngày (yyyy-mm-dd) -> dd/mm/yyyy
-    function formatDateDisplay(str) {
-      if (!str) return '';
-      const parts = str.split('-');
-      if (parts.length !== 3) return str;
-      return `${parts[2].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[0]}`;
-    }
-
-    // Nút tạo mới
-    addBtn.addEventListener('click', () => {
-      const tbody = document.querySelector('.data-table tbody');
-      // Tạo một dòng mới với các ô input, id tự động tăng dựa vào dòng cuối cùng
-      const lastRow = tbody.querySelector('tr:last-child');
-      let newId = 1;
-      if (lastRow) {
-        newId = parseInt(lastRow.cells[0].innerText) + 1;
-      }
-
-      // Tạo dòng mới với ô input, ID cố định, các trường còn lại là input/select
-      const newRow = document.createElement('tr');
-      newRow.innerHTML = `
-        <td>${newId}</td>
-        <td><input type="text" placeholder="Mã nhân khẩu" /></td>
-        <td><input type="text" placeholder="Mã hộ khẩu" /></td>
-        <td><input type="text" placeholder="Họ và tên" /></td>
-        <td><input type="text" placeholder="Số CCCD" /></td>
-        <td><input type="date" /></td>
-        <td>
-          <select>
-            <option value="Nam">Nam</option>
-            <option value="Nữ">Nữ</option>
-            <option value="Khác">Khác</option>
-          </select>
-        </td>
-        <td><input type="text" placeholder="Nghề nghiệp" /></td>
-        <td>
-          <select>
-            <option value="Thường trú">Thường trú</option>
-            <option value="Tạm trú">Tạm trú</option>
-            <option value="Khác">Khác</option>
-          </select>
-        </td>
-        <td>
-          <select>
-            <option value="Chủ hộ">Chủ hộ</option>
-            <option value="Vợ/Chồng">Vợ/Chồng</option>
-            <option value="Con">Con</option>
-            <option value="Khác">Khác</option>
-          </select>
-        </td>
+      // Tạo row hiển thị dữ liệu
+      tr.innerHTML = `
+        <td>${values[0]}</td>
+        <td>${values[1]}</td>
+        <td>${values[2]}</td>
+        <td>${values[3]}</td>
+        <td>${values[4]}</td>
+        <td>${values[5]}</td>
+        <td>${values[6]}</td>
+        <td>${values[7]}</td>
+        <td>${values[8]}</td>
+        <td>${values[9]}</td>
         <td class="actions-cell">
-          <button class="btn edit saving"><i class="fa fa-save"></i></button>
-          <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+          <button class="btn edit" title="Sửa"><i class="fa fa-pen"></i></button>
+          <button class="btn delete" title="Xóa"><i class="fa fa-trash-alt"></i></button>
         </td>
       `;
-      tbody.appendChild(newRow);
-    });
+      tr.classList.remove('new-row');
+    }
 
+    if (cancelBtn) {
+      e.target.closest('tr').remove();
+    }
+  });
+
+  // Chức năng chỉnh sửa
+  tbody.addEventListener('click', function(e) {
+    const editBtn = e.target.closest('.btn.edit');
+    if (!editBtn) return;
+
+    const tr = editBtn.closest('tr');
+    if (tr.classList.contains('new-row')) return; // Đang trong chế độ tạo mới
+
+    // Lấy dữ liệu hiện tại
+    const cells = tr.querySelectorAll('td');
+    const data = [
+      cells[0].textContent.trim(),
+      cells[1].textContent.trim(),
+      cells[2].textContent.trim(),
+      cells[3].textContent.trim(),
+      cells[4].textContent.trim(),
+      cells[5].textContent.trim(),
+      cells[6].textContent.trim(),
+      cells[7].textContent.trim(),
+      cells[8].textContent.trim(),
+      cells[9].textContent.trim(),
+    ];
+
+    // Chuyển thành input để sửa
+    tr.innerHTML = `
+      <td><input type="text" value="${data[0]}" class="input-id" /></td>
+      <td><input type="text" value="${data[1]}" class="input-manhankhau" /></td>
+      <td><input type="text" value="${data[2]}" class="input-mahokhau" /></td>
+      <td><input type="text" value="${data[3]}" class="input-hovaten" /></td>
+      <td><input type="text" value="${data[4]}" class="input-socccd" /></td>
+      <td><input type="date" value="${data[5]}" class="input-ngaysinh" /></td>
+      <td><input type="text" value="${data[6]}" class="input-gioitinh" /></td>
+      <td><input type="text" value="${data[7]}" class="input-nghenghiep" /></td>
+      <td><input type="text" value="${data[8]}" class="input-tinhtrangcutru" /></td>
+      <td><input type="text" value="${data[9]}" class="input-quanhevoichuho" /></td>
+      <td class="actions-cell">
+        <button class="btn save" title="Lưu"><i class="fa fa-floppy-disk"></i></button>
+        <button class="btn cancel" title="Hủy"><i class="fa fa-times"></i></button>
+      </td>
+    `;
+    tr.classList.add('new-row'); // Tạm đặt class new-row để dễ quản lý nút hủy
+  });
+
+  // Tìm kiếm và highlight hàng đầu tiên phù hợp
+  searchBtn.addEventListener('click', () => {
+    const criteria = document.getElementById('search-criteria').value;
+    const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+    if (!keyword) {
+      alert('Vui lòng nhập từ khóa tìm kiếm.');
+      return;
+    }
+
+    // Bản đồ cột: key -> chỉ số cột trong bảng (bắt đầu từ 0)
+    const columnMap = {
+      manhankhau: 1,
+      mahokhau: 2,
+      hovaten: 3,
+      socccd: 4,
+      ngaysinh: 5,
+      gioitinh: 6,
+      nghenghiep: 7,
+      tinhtrangcutru: 8,
+      quanhevoichuho: 9
+    };
+
+    const colIndex = columnMap[criteria];
+    if (colIndex === undefined) return;
+
+    // Bỏ highlight cũ
+    tbody.querySelectorAll('tr').forEach(tr => tr.classList.remove('highlight'));
+
+    const rows = tbody.querySelectorAll('tr');
+    let foundRow = null;
+
+    for (const row of rows) {
+      const cellText = row.cells[colIndex].textContent.trim().toLowerCase();
+      if (cellText.includes(keyword)) {
+        foundRow = row;
+        break;
+      }
+    }
+
+    if (foundRow) {
+      // Cuộn đến và highlight
+      foundRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      foundRow.classList.add('highlight');
+
+      // Bỏ highlight sau 3 giây
+      setTimeout(() => {
+        foundRow.classList.remove('highlight');
+      }, 3000);
+    } else {
+      alert('Không tìm thấy kết quả phù hợp.');
+    }
+  });
   </script>
 </body>
 </html>
