@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quản lý Tài Khoản - Xuất báo cáo</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <link rel="stylesheet" href="XuatBaoCao.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="B.png" alt="Logo" class="logo" />
+        <span class="logo-text">Bluemoon</span>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="trang1.html"><i class="fa fa-home"></i> Trang chủ</a></li>
+          <li>
+            <button class="submenu-toggle">
+              <i class="fa fa-cog"></i> Dịch Vụ <i class="fa fa-caret-down arrow"></i>
+            </button>
+            <ul class="submenu">
+              <li><a href="QuanLiNhanKhau.html">Quản lý nhân khẩu</a></li>
+              <li><a href="QuanLiHoKhau.html">Quản lí hộ khẩu</a></li>
+              <li><a href="QuanLiDotThu.html">Quản lí đợt thu</a></li>
+              <li><a href="QuanLiKhoanThu.html">Quản lí khoản thu</a></li>
+              <li><a href="manHinhQuanLiTaiKhoan.html">Quản lí tài khoản</a></li>
+              <li><a href="XemPhieuThu.html">Xem phiếu thu</a></li>
+              <li><a href="XuatBaoCao.html">Xuất báo cáo</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <a href="#" class="help"><i class="fa fa-question-circle"></i> Trợ giúp</a>
+          <div class="user-menu">
+            <img src="ava.png" alt="User" class="avatar"/>
+            <span>Kieu Oanh<i class="fa fa-caret-down"></i></span>
+            <div class="user-popover">
+              <div class="popover-header">
+                <div class="popover-email">nguyenkieuoanh…@gmail.com</div>
+                <button class="popover-close">&times;</button>
+              </div>
+              <div class="popover-account">
+                <img src="ava.png" class="avatar-lg"/>
+                <div class="account-info">
+                  <div class="account-name">Nguyễn Kiều Oanh</div>
+                  <div class="account-manage"><a href="#">Quản lý Tài khoản của bạn</a></div>
+                </div>
+              </div>
+              <ul class="popover-list">
+                <li><a href="#"><i class="fa fa-user"></i> Xem hồ sơ</a></li>
+                <li><a href="manHinhDangNhapDangKi.html"><i class="fa fa-user-plus"></i> Thêm tài khoản khác</a></li>
+                <li><a href="trang1.html"><i class="fa fa-sign-out-alt"></i> Đăng xuất khỏi tất cả các tài khoản</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="content">
+        <h2>Xuất báo cáo</h2>
+        
+        <div class="export-boxes">
+
+          <!-- Box xuất phiếu thu -->
+          <div class="export-box">
+            <h3>Xuất phiếu thu của hộ khẩu</h3>
+            <label for="householdId">Nhập ID hộ khẩu</label>
+            <input type="text" id="householdId" placeholder="Nhập mã hộ khẩu..." />
+            <button id="exportReceiptBtn">Xuất file PDF</button>
+          </div>
+
+          <!-- Box xuất thống kê -->
+          <div class="export-box">
+            <h3>Báo cáo thống kê </h3>
+            <p>Báo cáo tổng hộ  đã đóng và tổng số hộ chưa đóng.</p>
+            <button id="exportStatisticBtn">Xuất thống kê</button>
+          </div>
+
+          <!-- Box xuất tạm trú tạm vắng -->
+          <div class="export-box">
+            <h3>Xuất báo cáo tạm trú tạm vắng</h3>
+            <label for="residentId">Nhập ID nhân khẩu</label>
+            <input type="text" id="residentId" placeholder="Nhập mã nhân khẩu..." />
+            <button id="exportResidentBtn">Xuất file PDF</button>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Accordion submenu
+    document.querySelectorAll('.submenu-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const submenu = btn.nextElementSibling;
+        submenu.classList.toggle('open');
+        btn.querySelector('.arrow').classList.toggle('rotated');
+      });
+    });
+    /* User popover*/
+    const userMenu = document.querySelector('.user-menu');
+    const popover = userMenu.querySelector('.user-popover');
+    const closeBtn = popover.querySelector('.popover-close');
+
+    userMenu.addEventListener('click', e => {
+      e.stopPropagation();
+      popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
+    });
+
+    closeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      popover.style.display = 'none';
+    });
+
+    document.addEventListener('click', () => {
+      popover.style.display = 'none';
+    });
+
+    // Xử lý nút Xuất phiếu thu
+    document.getElementById('exportReceiptBtn').addEventListener('click', () => {
+      const id = document.getElementById('householdId').value.trim();
+      if (!id) {
+        alert('Vui lòng nhập mã hộ khẩu.');
+        return;
+      }
+      alert(`Đã gửi yêu cầu xuất phiếu thu của hộ khẩu ID: ${id}`);
+      // TODO: gọi backend xử lý
+    });
+
+    // Xử lý nút Xuất thống kê
+    document.getElementById('exportStatisticBtn').addEventListener('click', () => {
+      alert('Đã gửi yêu cầu xuất báo cáo thống kê hộ khẩu.');
+      // TODO: gọi backend xử lý
+    });
+
+    // Xử lý nút Xuất tạm trú tạm vắng
+    document.getElementById('exportResidentBtn').addEventListener('click', () => {
+      const id = document.getElementById('residentId').value.trim();
+      if (!id) {
+        alert('Vui lòng nhập mã nhân khẩu.');
+        return;
+      }
+      alert(`Đã gửi yêu cầu xuất báo cáo tạm trú tạm vắng của nhân khẩu ID: ${id}`);
+      // TODO: gọi backend xử lý
+    });
+  </script>
+</body>
+</html>
