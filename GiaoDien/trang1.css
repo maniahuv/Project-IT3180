@@ -54,6 +54,7 @@
   /* Hero Section */
   .hero {
     text-align: center;
+    width: 100%;
     padding: 100px 200px;
     background-color: #1B59F8;
     color: #fff;

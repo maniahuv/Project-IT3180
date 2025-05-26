@@ -1,6 +1,6 @@
 /* Reset & layout */
 * { margin:0; padding:0; box-sizing:border-box; }
-body, .app { height:100vh; display:flex; font-family:'Inter',sans-serif; color:#333; }
+body, .app { width: 100%; height:100vh; display:flex; font-family:'Inter',sans-serif; color:#333; }
 a { text-decoration:none; }
 
 /* Sidebar */
@@ -30,8 +30,9 @@ a { text-decoration:none; }
 .submenu li a { padding-left:40px; }
 
 /* Main & Topbar */
-.main { flex:1; display:flex; flex-direction:column; }
+.main { flex:1; display:flex; flex-direction:column;}
 .topbar {
+  
   height:56px; background:#f4f4f4; display:flex;
   justify-content:space-between; align-items:center;
   padding:0 20px; border-bottom:1px solid #ddd;
@@ -295,3 +296,34 @@ a { text-decoration:none; }
     background: rgba(255,255,255,0.1);
   }
   
+  .data-table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .data-table th,
+  .data-table td {
+    border: none;
+    padding: 6px;
+  }
+
+  /* Thêm đường kẻ ngang giữa các hàng */
+  .data-table tr {
+    border-bottom: 1px solid #ccc;
+  }
+
+  /* Loại bỏ đường viền cột đầu và cuối (nếu có) */
+  .data-table th:first-child,
+  .data-table td:first-child {
+    border-left: none;
+  }
+
+  .data-table th:last-child,
+  .data-table td:last-child {
+    border-right: none;
+  }
+
+  /* Tùy chọn: bỏ đường dưới hàng cuối cùng nếu muốn */
+  .data-table tbody tr:last-child {
+    border-bottom: none;
+  }

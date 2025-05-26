@@ -3,12 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Quản lý tài khoản</title>
+  <title>Quản lý nhân khẩu</title>
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
   <link rel="stylesheet" href="manHinhQuanLiTaiKhoan.css" />
+  <style>
+    /* Hiệu ứng highlight khi tìm kiếm */
+    .highlighted {
+      background-color: #90ee90 !important; /* màu xanh nhạt */
+      transition: background-color 0.5s ease;
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -27,13 +34,13 @@
               <i class="fa fa-caret-down arrow"></i>
             </button>
             <ul class="submenu">
-              <li><a href="#"><i class="fa "></i><span>Quản lý nhân khẩu </span></a></li>
-              <li><a href="#"><i class="fa "></i><span>Quản lí hộ khẩu</span></a></li>
-              <li><a href="#"><i class="fa "></i><span>Quản lí đợt thu</span></a></li>
-              <li><a href="#"><i class="fa "></i><span>Quản lí khoản thu</span></a></li>
+              <li><a href="QuanLiNhanKhau.html"><i class="fa "></i><span>Quản lý nhân khẩu </span></a></li>
+              <li><a href="QuanLiHoKhau.html"><i class="fa "></i><span>Quản lí hộ khẩu</span></a></li>
+              <li><a href="QuanLiDotThu.html"><i class="fa "></i><span>Quản lí đợt thu</span></a></li>
+              <li><a href="QuanLiKhoanThu.html"><i class="fa "></i><span>Quản lí khoản thu</span></a></li>
+              <li><a href="manHinhQuanLiTaiKhoan.html"><i class="fa "></i><span>Quản lí tài khoản</span></a></li>
             </ul>
           </li>
-          <!-- thêm các mục khác tương tự -->
         </ul>
       </nav>
     </aside>
@@ -48,61 +55,62 @@
           <div class="user-menu">
             <img src="ava.png" alt="User" class="avatar"/>
             <span>Kieu Oanh<i class="fa fa-caret-down"></i></span>
-            <!-- Pop-over -->
-  <div class="user-popover">
-    <div class="popover-header">
-      <div class="popover-email">nguyenkieuoanh…@gmail.com</div>
-      <button class="popover-close">&times;</button>
-    </div>
-    <div class="popover-account">
-      <img src="ava.png" class="avatar-lg"/>
-      <div class="account-info">
-        <div class="account-name">Nguyễn Kiều Oanh</div>
-        <div class="account-manage"><a href="#">Quản lý Tài khoản của bạn</a></div>
-      </div>
-    </div>
-    <ul class="popover-list">
-      <li><a href="#"><i class="fa fa-user"></i> Xem hồ sơ</a></li>
-      <li><a href="manHinhDangNhapDangKi.html"><i class="fa fa-user-plus"></i> Thêm tài khoản khác</a></li>
-      <li><a href="trang1.html"><i class="fa fa-sign-out-alt"></i> Đăng xuất khỏi tất cả các tài khoản</a></li>
-    </ul>
-  </div>
-  
+            <div class="user-popover">
+              <div class="popover-header">
+                <div class="popover-email">nguyenkieuoanh…@gmail.com</div>
+                <button class="popover-close">&times;</button>
+              </div>
+              <div class="popover-account">
+                <img src="ava.png" class="avatar-lg"/>
+                <div class="account-info">
+                  <div class="account-name">Nguyễn Kiều Oanh</div>
+                  <div class="account-manage"><a href="#">Quản lý Tài khoản của bạn</a></div>
+                </div>
+              </div>
+              <ul class="popover-list">
+                <li><a href="#"><i class="fa fa-user"></i> Xem hồ sơ</a></li>
+                <li><a href="manHinhDangNhapDangKi.html"><i class="fa fa-user-plus"></i> Thêm tài khoản khác</a></li>
+                <li><a href="trang1.html"><i class="fa fa-sign-out-alt"></i> Đăng xuất khỏi tất cả các tài khoản</a></li>
+              </ul>
+            </div>
+          </div>
         </div>
       </header>
 
       <!-- Content -->
       <section class="content">
-        <h2>Quản lý tài khoản</h2>
+        <h2>Quản lý nhân khẩu</h2>
 
         <div class="actions">
-            <div class="search-group">
-                <select id="search-criteria" class="search-criteria">
-                  <option value="fullname">Họ và tên</option>
-                  <option value="username">Tên đăng nhập</option>
-                  <option value="email">Email</option>
-                  <option value="phone">Số điện thoại</option>
-                  <option value="startDate">Ngày bắt đầu</option>
-                  <option value="role">Phân quyền</option>
-                  <option value="status">Trạng thái</option>
-                </select>
-                <input
-                  type="text"
-                  id="search-input"
-                  placeholder="Nhập từ khóa tìm kiếm"
-                  class="search"
-                />
-                <button id="search-btn" class="btn search-btn">
-                  <i class="fa fa-search"></i> Tìm kiếm
-                </button>
-              </div class="actions">
+          <div class="search-group">
+            <select id="search-criteria" class="search-criteria">
+              <option value="0">ID</option>
+              <option value="1">Mã hộ khẩu</option>
+              <option value="2">Họ và tên</option>
+              <option value="3">Tên đăng nhập</option>
+              <option value="4">Email</option>
+              <option value="5">Số điện thoại</option>
+              <option value="6">Ngày bắt đầu</option>
+              <option value="7">Phân quyền</option>
+              <option value="8">Trạng thái</option>
+            </select>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Nhập từ khóa tìm kiếm"
+              class="search"
+            />
+            <button id="search-btn" class="btn search-btn">
+              <i class="fa fa-search"></i> Tìm kiếm
+            </button>
+          </div>
 
-              <button id="add-btn" class="btn create">
-    <i class="fa fa-plus"></i> Tạo mới
-  </button>
+          <button id="add-btn" class="btn create">
+            <i class="fa fa-plus"></i> Tạo mới
+          </button>
         </div>
 
-        <table class="data-table">
+        <table class="data-table" border="1" cellspacing="0" cellpadding="6">
           <thead>
             <tr>
               <th>ID</th>
@@ -120,35 +128,20 @@
           <tbody>
             <tr>
               <td>1</td>
-              <td>1</td>
-              <td>Phạm Nhung</td>
-              <td>nhungp</td>
-              <td>Nhung@gmail.com</td>
-              <td>0984065666</td>
-              <td class="date-cell">
-                <input type="text" placeholder="DD/MM/YYYY" />
-                
-              </td>
-              <td>
-              <select name="role" class="select-role">
-                <option value="ke-toan" selected>Kế toán</option>
-                <option value="khach">Khách</option>
-                <option value="to-truong">Tổ trưởng</option>
-                <option value="to-pho">Tổ phó</option>
-              </select>
-              </td>
-            <td>
-              <select name="status" class="select-status">
-                <option value="active" selected>Hoạt động</option>
-                <option value="inactive">Không hoạt động</option>
-              </select>
-            </td>
-            <td class="actions-cell">
-              <button class="btn edit"><i class="fa fa-pen"></i></button>
-              <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+              <td>HK001</td>
+              <td>Nguyễn Văn A</td>
+              <td>nguyenvana</td>
+              <td>nguyenvana@example.com</td>
+              <td>0987654321</td>
+              <td>01/05/2022</td>
+              <td>Admin</td>
+              <td>Hoạt động</td>
+              <td class="actions-cell">
+                <button class="btn edit"><i class="fa fa-pen"></i></button>
+                <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
               </td> 
             </tr>
-            <!-- thêm các dòng dữ liệu tương tự -->
+            <!-- Thêm các dòng dữ liệu tương tự -->
           </tbody>
         </table>
 
@@ -173,89 +166,212 @@
         btn.querySelector('.arrow').classList.toggle('rotated');
       });
     });
-  </script>
-  <script>
+
+    // User popover
     const userMenu = document.querySelector('.user-menu');
     const popover = userMenu.querySelector('.user-popover');
     const closeBtn = popover.querySelector('.popover-close');
-  
-    // Toggle popover
+
     userMenu.addEventListener('click', e => {
       e.stopPropagation();
       popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
     });
-  
-    // Close when clicking close icon
+
     closeBtn.addEventListener('click', e => {
       e.stopPropagation();
       popover.style.display = 'none';
     });
-  
-    // Click ra ngoài đóng popover
+
     document.addEventListener('click', () => {
       popover.style.display = 'none';
     });
-  </script>
-  <script>
+
+    // Xóa dòng khi click vào nút delete
     const tbody = document.querySelector('.data-table tbody');
     const addBtn = document.getElementById('add-btn');
 
-    // Xóa dòng khi click vào nút delete
     tbody.addEventListener('click', function(e) {
-      const btn = e.target.closest('.btn.delete');
-      if (!btn) return;
-      if (!confirm('Bạn có chắc muốn xóa tài khoản này?')) return;
-      btn.closest('tr').remove();
+      // Xóa
+      const btnDelete = e.target.closest('.btn.delete');
+      if (btnDelete) {
+        if (!confirm('Bạn có chắc muốn xóa nhân khẩu này?')) return;
+        btnDelete.closest('tr').remove();
+        return;
+      }
+
+      // Chỉnh sửa / Lưu
+      const btnEdit = e.target.closest('.btn.edit');
+      if (!btnEdit) return;
+
+      const tr = btnEdit.closest('tr');
+
+      const isEditing = btnEdit.classList.contains('saving');
+
+      if (!isEditing) {
+        // Chuyển sang trạng thái edit
+        btnEdit.classList.add('saving');
+        btnEdit.innerHTML = '<i class="fa fa-save"></i>';
+
+        const cells = tr.querySelectorAll('td');
+
+        // ID (col 0) không chỉnh sửa
+        // Mã hộ khẩu (col 1) => input
+        cells[1].innerHTML = `<input type="text" value="${cells[1].textContent.trim()}" />`;
+        // Họ và tên (col 2)
+        cells[2].innerHTML = `<input type="text" value="${cells[2].textContent.trim()}" />`;
+        // Tên đăng nhập (col 3)
+        cells[3].innerHTML = `<input type="text" value="${cells[3].textContent.trim()}" />`;
+        // Email (col 4)
+        cells[4].innerHTML = `<input type="email" value="${cells[4].textContent.trim()}" />`;
+        // Số điện thoại (col 5)
+        cells[5].innerHTML = `<input type="tel" value="${cells[5].textContent.trim()}" />`;
+        // Ngày bắt đầu (col 6)
+        cells[6].innerHTML = `<input type="date" value="${formatDateISO(cells[6].textContent.trim())}" />`;
+        // Phân quyền (col 7)
+        cells[7].innerHTML = `<input type="text" value="${cells[7].textContent.trim()}" />`;
+        // Trạng thái (col 8)
+        cells[8].innerHTML = `<input type="text" value="${cells[8].textContent.trim()}" />`;
+      } else {
+        // Lưu
+        btnEdit.classList.remove('saving');
+        btnEdit.innerHTML = '<i class="fa fa-pen"></i>';
+
+        const inputs = tr.querySelectorAll('input');
+        const cells = tr.querySelectorAll('td');
+
+        // Cập nhật dữ liệu từ input ra text
+        // ID (col 0) giữ nguyên
+        cells[1].textContent = inputs[0].value;
+        cells[2].textContent = inputs[1].value;
+        cells[3].textContent = inputs[2].value;
+        cells[4].textContent = inputs[3].value;
+        cells[5].textContent = inputs[4].value;
+        cells[6].textContent = formatDateDisplay(inputs[5].value);
+        cells[7].textContent = inputs[6].value;
+        cells[8].textContent = inputs[7].value;
+      }
     });
 
-    // Thêm dòng mới khi click Tạo mới
-    addBtn.addEventListener('click', function() {
-      const id      = prompt('ID:'); if (!id) return;
-      const hokhau  = prompt('Mã hộ khẩu:'); if (hokhau===null) return;
-      const name    = prompt('Họ và tên:'); if (!name) return;
-      const uname   = prompt('Tên đăng nhập:'); if (!uname) return;
-      const email   = prompt('Email:'); if (!email) return;
-      const phone   = prompt('Số điện thoại:'); if (!phone) return;
-      const start   = prompt('Ngày bắt đầu (DD/MM/YYYY):'); if (!start) return;
-      const role    = prompt('Phân quyền (ke-toan/khach/to-truong/to-pho):','ke-toan'); if (!role) return;
-      const status  = prompt('Trạng thái (active/inactive):','active'); if (!status) return;
-      // Tạo <tr> chứa dữ liệu
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td>${id}</td>
-    <td>${hokhau}</td>
-    <td>${name}</td>
-    <td>${uname}</td>
-    <td>${email}</td>
-    <td>${phone}</td>
-    <td class="date-cell"><input type="text" value="${start}" disabled></td>
-    <td>
-              <select name="role" class="select-role">
-                <option value="ke-toan" selected>Kế toán</option>
-                <option value="khach">Khách</option>
-                <option value="to-truong">Tổ trưởng</option>
-                <option value="to-pho">Tổ phó</option>
-              </select>
-              </td>
-            <td>
-              <select name="status" class="select-status">
-                <option value="active" selected>Hoạt động</option>
-                <option value="inactive">Không hoạt động</option>
-              </select>
-            </td>
-            <td class="actions-cell">
-              <button class="btn edit"><i class="fa fa-pen"></i></button>
-              <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
-              </td> 
-  `;
+    // Hàm chuyển định dạng ngày dd/mm/yyyy sang yyyy-mm-dd cho input date
+    function formatDateISO(dateStr) {
+      // Nếu dateStr đã dạng yyyy-mm-dd thì trả về nguyên
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      // Nếu dạng dd/mm/yyyy
+      const parts = dateStr.split('/');
+      if (parts.length === 3) {
+        const [dd, mm, yyyy] = parts;
+        return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+      }
+      return '';
+    }
 
-  // Append vào tbody
-  document.querySelector('.data-table tbody').appendChild(tr);
+    // Hàm chuyển ngày yyyy-mm-dd sang dd/mm/yyyy để hiển thị
+    function formatDateDisplay(dateStr) {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const [yyyy, mm, dd] = parts;
+        return `${dd}/${mm}/${yyyy}`;
+      }
+      return dateStr;
+    }
+
+    // Thêm dòng mới
+    addBtn.addEventListener('click', () => {
+      const tbody = document.querySelector('.data-table tbody');
+      // Tạo id mới = id lớn nhất + 1
+      let maxId = 0;
+      tbody.querySelectorAll('tr').forEach(tr => {
+        const id = parseInt(tr.cells[0].textContent);
+        if (id > maxId) maxId = id;
+      });
+
+      const newTr = document.createElement('tr');
+      newTr.innerHTML = `
+        <td>${maxId + 1}</td>
+        <td><input type="text" placeholder="Mã hộ khẩu" /></td>
+        <td><input type="text" placeholder="Họ và tên" /></td>
+        <td><input type="text" placeholder="Tên đăng nhập" /></td>
+        <td><input type="email" placeholder="Email" /></td>
+        <td><input type="tel" placeholder="Số điện thoại" /></td>
+        <td><input type="date" /></td>
+        <td><input type="text" placeholder="Phân quyền" /></td>
+        <td><input type="text" placeholder="Trạng thái" /></td>
+        <td class="actions-cell">
+          <button class="btn save"><i class="fa fa-save"></i></button>
+          <button class="btn cancel"><i class="fa fa-times"></i></button>
+        </td>
+      `;
+      tbody.appendChild(newTr);
+
+      // Xử lý nút lưu và hủy
+      newTr.querySelector('.btn.save').addEventListener('click', () => {
+        const inputs = newTr.querySelectorAll('input');
+        // Kiểm tra dữ liệu tối thiểu, ví dụ họ tên không được để trống
+        if (!inputs[1].value.trim()) {
+          alert('Vui lòng nhập họ và tên.');
+          return;
+        }
+        // Cập nhật dữ liệu
+        newTr.cells[1].textContent = inputs[0].value;
+        newTr.cells[2].textContent = inputs[1].value;
+        newTr.cells[3].textContent = inputs[2].value;
+        newTr.cells[4].textContent = inputs[3].value;
+        newTr.cells[5].textContent = inputs[4].value;
+        newTr.cells[6].textContent = formatDateDisplay(inputs[5].value);
+        newTr.cells[7].textContent = inputs[6].value;
+        newTr.cells[8].textContent = inputs[7].value;
+
+        // Đổi cell hành động sang nút sửa và xóa
+        newTr.cells[9].innerHTML = `
+          <button class="btn edit"><i class="fa fa-pen"></i></button>
+          <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+        `;
+      });
+
+      newTr.querySelector('.btn.cancel').addEventListener('click', () => {
+        newTr.remove();
+      });
     });
- 
+
+    // --- Phần TÌM KIẾM ---
+
+    document.getElementById('search-btn').addEventListener('click', () => {
+      const criteriaIndex = parseInt(document.getElementById('search-criteria').value);
+      const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+      if (!keyword) {
+        alert('Vui lòng nhập từ khóa tìm kiếm.');
+        return;
+      }
+
+      const rows = Array.from(document.querySelectorAll('.data-table tbody tr'));
+      let foundRow = null;
+
+      // Xóa highlight cũ
+      rows.forEach(row => row.classList.remove('highlighted'));
+
+      for (const row of rows) {
+        const cellText = row.cells[criteriaIndex].textContent.trim().toLowerCase();
+        if (cellText.includes(keyword)) {
+          foundRow = row;
+          break; // chỉ tìm dòng đầu tiên
+        }
+      }
+
+      if (foundRow) {
+        // Cuộn tới dòng đó
+        foundRow.scrollIntoView({behavior: 'smooth', block: 'center'});
+
+        // Bôi nền xanh sáng nổi bật
+        foundRow.classList.add('highlighted');
+
+        // Sau 3 giây xóa highlight
+        setTimeout(() => {
+          foundRow.classList.remove('highlighted');
+        }, 3000);
+      } else {
+        alert('Không tìm thấy nhân khẩu phù hợp.');
+      }
+    });
   </script>
-
-  
 </body>
-
 </html>
