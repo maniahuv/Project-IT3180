@@ -104,8 +104,8 @@
         <table class="data-table" border="1" cellspacing="0" cellpadding="6">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Mã đợt thu</th>
+              <th>Tên đợt thu</th>
               <th>Thời gian bắt đầu</th>
               <th>Thời gian kết thúc</th>
               <th>Mô tả</th>
@@ -115,8 +115,8 @@
           </thead>
           <tbody>
             <tr>
-              <td>1</td>
-              <td>DT2025-01</td>
+              <td>DT001</td>
+              <td>Đợt thu mùa xuân</td>
               <td>2025-01-01</td>
               <td>2025-01-31</td>
               <td>Đợt thu học phí học kỳ 1 năm 2025</td>
@@ -199,8 +199,8 @@
     tr.classList.add('new-row');
 
     tr.innerHTML = `
-      <td><input type="text" placeholder="ID" class="input-id" /></td>
       <td><input type="text" placeholder="Mã đợt thu" class="input-madotthu" /></td>
+      <td><input type="text" placeholder="Tên đợt thu" class="input-tendotthu" /></td>
       <td><input type="date" class="input-thoigianbatdau" /></td>
       <td><input type="date" class="input-thoigianketthuc" /></td>
       <td><input type="text" placeholder="Mô tả" class="input-mota" /></td>
