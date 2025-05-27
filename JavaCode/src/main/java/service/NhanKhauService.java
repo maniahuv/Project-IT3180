@@ -1,7 +1,6 @@
 package service;
 
 import model.NhanKhau;
-import model.ThongKeNhanKhau;
 import repository.HoKhauDao;
 import repository.NhanKhauDao;
 import utils.Validator;

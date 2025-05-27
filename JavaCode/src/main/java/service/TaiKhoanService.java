@@ -33,6 +33,17 @@ public class TaiKhoanService {
 		return true;
 	}
 
+	public static boolean capNhatThongTin(TaiKhoan t) {
+		if (TaiKhoanDao.instance.update(t.getMaTaiKhoan(),
+				new String[] { "Email", "MatKhau", "TenNguoiDung", "SoDienThoai", "VaiTro", "MaNhanKhau", "TrangThai" },
+				new Object[] { t.getEmail(), t.getMatKhau(), t.getTenNguoiDung(), t.getSoDienThoai(), t.getVaiTro(),
+						t.getMaNhanKhau(), t.isTrangThai() }) > 0) {
+			LichSuService.ghiNhanLichSu(t.getMaTaiKhoan(), "Thay doi vai tro", "", "");
+			return true;
+		}
+		return false;
+	}
+
 	public static boolean capNhatVaiTro(String userId, int vaiTro) {
 		if (TaiKhoanDao.instance.update(userId, new String[] { "VaiTro" }, new Object[] { vaiTro }) > 0) {
 			LichSuService.ghiNhanLichSu(userId, "Thay doi vai tro", "", "");
