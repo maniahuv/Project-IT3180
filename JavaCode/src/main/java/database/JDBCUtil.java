@@ -11,10 +11,10 @@ public class JDBCUtil {
 		Connection c = null;
 		try {
 			// Dang ky driver
-			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName("com.mysql.cj.jdbc.Driver");
 
 			// Cac thong so
-			String DB_URL = "jdbc:mysql://localhost:3306/oop";
+			String DB_URL = "jdbc:mysql://localhost:3306/it3180";
 			String USER_NAME = "root";
 			String PASSWORD = "";
 
