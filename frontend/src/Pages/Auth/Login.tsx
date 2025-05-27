@@ -1,6 +1,5 @@
 import React, { useState, FormEvent } from 'react';
 import axios from 'axios';
-import { Route } from 'react-router-dom';
 
 export default function Login() {
   const [data, setData] = useState({
@@ -127,6 +126,9 @@ export default function Login() {
           <a href="/auth/register" className="underline hover:text-pink-600">
             Register
           </a>
+          {/* <a href="/management/accountmanagement" className="underline hover:text-pink-600">
+            Register
+          </a> */}
         </div>
       </div>
     </div>

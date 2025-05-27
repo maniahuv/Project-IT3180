@@ -4,3 +4,4 @@
 __pycache__/
 *.env
 /.metadata/
+node_modules/

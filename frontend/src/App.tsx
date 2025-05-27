@@ -2,6 +2,16 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Login from './Pages/Auth/Login';
 import Register from './Pages/Auth/Register';
+import QLTaiKhoan from './Pages/Management/QLTaiKhoan';
+import QLDotThu from './Pages/Management/QLDotThu';
+import QLHoKhau from './Pages/Management/QLHoKhau';
+import QLKhoanThu from './Pages/Management/QLKhoanThu';
+import QLNhanKhau from './Pages/Management/QLNhanKhau';
+import Account from './Pages/Account';
+import HomePage from './Pages/HomePage';
+import XemPhieuThu from './Pages/Management/XemPhieuThu';
+import XuatBaoCao from './Pages/Management/XuatBaoCao';
+
 
 function Home() {
   return (
@@ -66,10 +76,17 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/homepage" element={<HomePage />} />
         <Route path="/auth/login" element={<Login />} />
-        {/* Thêm route cho register nếu có */}
         <Route path="/auth/register" element={<Register />} />
+        <Route path="/management/qltaikhoan" element={<QLTaiKhoan />} />
+        <Route path="/management/qldotthu" element={<QLDotThu />} />
+        <Route path='/management/qlhokhau' element={<QLHoKhau />}/>
+        <Route path="/management/qlkhoanthu" element={<QLKhoanThu />} />
+        <Route path="/management/qlnhankhau" element={<QLNhanKhau />} />
+        <Route path="/account" element={<Account />} />
+        <Route path="/management/xemphieuthu" element={<XemPhieuThu />} />
+        <Route path="/management/xuatbaocao" element={<XuatBaoCao />} />
       </Routes>
     </Router>
   );
