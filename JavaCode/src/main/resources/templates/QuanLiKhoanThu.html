@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quản lý khoản thu</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <link rel="stylesheet" href="manHinhQuanLiTaiKhoan.css" />
+  <style>
+    /* Nếu cần chỉnh nhỏ cho cột ngày nộp và trạng thái */
+    table.data-table td, table.data-table th {
+      text-align: center;
+    }
+    .actions-cell button {
+      margin: 0 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar (giữ nguyên như cũ) -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="B.png" alt="Logo" class="logo" />
+        <span class="logo-text">Bluemoon</span>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="trang1.html"><i class="fa fa-home"></i><span>Trang chủ</span></a></li>
+          <li class="has-submenu">
+            <button class="submenu-toggle">
+              <i class="fa fa-cog"></i><span>Dịch Vụ</span>
+              <i class="fa fa-caret-down arrow"></i>
+            </button>
+            <ul class="submenu">
+              <li><a href="QuanLiNhanKhau.html"><i class="fa "></i><span>Quản lý nhân khẩu </span></a></li>
+              <li><a href="QuanLiHoKhau.html"><i class="fa "></i><span>Quản lí hộ khẩu</span></a></li>
+              <li><a href="QuanLiDotThu.html"><i class="fa "></i><span>Quản lí đợt thu</span></a></li>
+              <li><a href="QuanLiKhoanThu.html"><i class="fa "></i><span>Quản lí khoản thu</span></a></li>
+              <li><a href="manHinhQuanLiTaiKhoan.html"><i class="fa "></i><span>Quản lí tài khoản</span></a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main area -->
+    <div class="main">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <a href="#" class="help"><i class="fa fa-question-circle"></i> Trợ giúp</a>
+          <div class="user-menu">
+            <img src="ava.png" alt="User" class="avatar" />
+            <span>Kieu Oanh<i class="fa fa-caret-down"></i></span>
+            <div class="user-popover">
+              <div class="popover-header">
+                <div class="popover-email">nguyenkieuoanh…@gmail.com</div>
+                <button class="popover-close">&times;</button>
+              </div>
+              <div class="popover-account">
+                <img src="ava.png" class="avatar-lg" />
+                <div class="account-info">
+                  <div class="account-name">Nguyễn Kiều Oanh</div>
+                  <div class="account-manage"><a href="#">Quản lý Tài khoản của bạn</a></div>
+                </div>
+              </div>
+              <ul class="popover-list">
+                <li><a href="#"><i class="fa fa-user"></i> Xem hồ sơ</a></li>
+                <li><a href="manHinhDangNhapDangKi.html"><i class="fa fa-user-plus"></i> Thêm tài khoản khác</a></li>
+                <li><a href="trang1.html"><i class="fa fa-sign-out-alt"></i> Đăng xuất khỏi tất cả các tài khoản</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <section class="content">
+        <h2>Quản lý khoản thu</h2>
+
+        <div class="actions">
+          <div class="search-group">
+            <select id="search-criteria" class="search-criteria">
+              <option value="makhoanthu">Mã khoản thu</option>
+              <option value="madotthu">Mã đợt thu</option>
+              <option value="mahokhau">Mã hộ khẩu</option>
+              <option value="maloaikhoanthu">Mã loại khoản thu</option>
+              <option value="trangthaithanhtoan">Trạng thái thanh toán</option>
+            </select>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Nhập từ khóa tìm kiếm"
+              class="search"
+            />
+            <button id="search-btn" class="btn search-btn">
+              <i class="fa fa-search"></i> Tìm kiếm
+            </button>
+          </div>
+
+          <button id="add-btn" class="btn create">
+            <i class="fa fa-plus"></i> Tạo mới
+          </button>
+        </div>
+
+        <table class="data-table" border="1" cellspacing="0" cellpadding="6">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Mã khoản thu</th>
+              <th>Mã đợt thu</th>
+              <th>Mã hộ khẩu</th>
+              <th>Mã loại khoản thu</th>
+              <th>Số tiền phải nộp (VNĐ)</th>
+              <th>Ngày nộp</th>
+              <th>Trạng thái thanh toán</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>KT001</td>
+              <td>DT2024A</td>
+              <td>HK123</td>
+              <td>LT001</td>
+              <td>500000</td>
+              <td>2024-05-01</td>
+              <td>Đã thanh toán</td>
+              <td class="actions-cell">
+                <button class="btn edit"><i class="fa fa-pen"></i></button>
+                <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+              </td>
+            </tr>
+            <!-- Dòng dữ liệu mẫu -->
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <label>
+            Hiển thị
+            <select>
+              <option>10</option><option>25</option><option>50</option>
+            </select>
+            mục
+          </label>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Accordion submenu
+    document.querySelectorAll('.submenu-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.nextElementSibling.classList.toggle('open');
+        btn.querySelector('.arrow').classList.toggle('rotated');
+      });
+    });
+
+    // User popover
+    const userMenu = document.querySelector('.user-menu');
+    const popover = userMenu.querySelector('.user-popover');
+    const closeBtn = popover.querySelector('.popover-close');
+
+    userMenu.addEventListener('click', e => {
+      e.stopPropagation();
+      popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
+    });
+
+    closeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      popover.style.display = 'none';
+    });
+
+    document.addEventListener('click', () => {
+      popover.style.display = 'none';
+    });
+
+    // Xóa dòng khi click nút delete
+    const tbody = document.querySelector('.data-table tbody');
+    const addBtn = document.getElementById('add-btn');
+
+    tbody.addEventListener('click', function (e) {
+      // Xóa
+      const btnDelete = e.target.closest('.btn.delete');
+      if (btnDelete) {
+        if (!confirm('Bạn có chắc muốn xóa khoản thu này?')) return;
+        btnDelete.closest('tr').remove();
+        return;
+      }
+
+      // Chỉnh sửa / Lưu
+      const btnEdit = e.target.closest('.btn.edit');
+      if (!btnEdit) return;
+
+      const tr = btnEdit.closest('tr');
+      const isEditing = btnEdit.classList.contains('saving');
+
+      if (!isEditing) {
+        // Bật chế độ edit
+        btnEdit.classList.add('saving');
+        btnEdit.innerHTML = '<i class="fa fa-save"></i>';
+
+        const cells = tr.querySelectorAll('td');
+
+        // Mã khoản thu
+        const makt = cells[1].innerText;
+        cells[1].innerHTML = `<input type="text" value="${makt}" />`;
+
+        // Mã đợt thu
+        const madt = cells[2].innerText;
+        cells[2].innerHTML = `<input type="text" value="${madt}" />`;
+
+        // Mã hộ khẩu
+        const mahk = cells[3].innerText;
+        cells[3].innerHTML = `<input type="text" value="${mahk}" />`;
+
+        // Mã loại khoản thu
+        const maltk = cells[4].innerText;
+        cells[4].innerHTML = `<input type="text" value="${maltk}" />`;
+
+        // Số tiền phải nộp
+        const sotien = cells[5].innerText;
+        cells[5].innerHTML = `<input type="number" min="0" value="${sotien}" />`;
+
+        // Ngày nộp
+        const ngaynop = cells[6].innerText;
+        cells[6].innerHTML = `<input type="date" value="${ngaynop}" />`;
+
+        // Trạng thái thanh toán
+        const trangthai = cells[7].innerText;
+        cells[7].innerHTML = `
+          <select>
+            <option value="Đã thanh toán" ${trangthai === 'Đã thanh toán' ? 'selected' : ''}>Đã thanh toán</option>
+            <option value="Chưa thanh toán" ${trangthai === 'Chưa thanh toán' ? 'selected' : ''}>Chưa thanh toán</option>
+          </select>
+        `;
+      } else {
+        // Lưu dữ liệu
+        btnEdit.classList.remove('saving');
+        btnEdit.innerHTML = '<i class="fa fa-pen"></i>';
+
+        const inputs = tr.querySelectorAll('input, select');
+
+        cells = tr.querySelectorAll('td');
+        cells[1].innerText = inputs[0].value;
+        cells[2].innerText = inputs[1].value;
+        cells[3].innerText = inputs[2].value;
+        cells[4].innerText = inputs[3].value;
+        cells[5].innerText = inputs[4].value;
+        cells[6].innerText = inputs[5].value;
+        cells[7].innerText = inputs[6].value;
+      }
+    });
+
+    // Tạo mới dòng dữ liệu
+    addBtn.addEventListener('click', () => {
+      const tbody = document.querySelector('.data-table tbody');
+      const newRow = document.createElement('tr');
+
+      // Tạo ID tự động +1, lấy max ID hiện tại
+      const allIds = Array.from(tbody.querySelectorAll('tr')).map(
+        (tr) => parseInt(tr.cells[0].innerText)
+      );
+      const newId = allIds.length ? Math.max(...allIds) + 1 : 1;
+
+      newRow.innerHTML = `
+        <td>${newId}</td>
+        <td><input type="text" placeholder="Mã khoản thu" /></td>
+        <td><input type="text" placeholder="Mã đợt thu" /></td>
+        <td><input type="text" placeholder="Mã hộ khẩu" /></td>
+        <td><input type="text" placeholder="Mã loại khoản thu" /></td>
+        <td><input type="number" min="0" placeholder="Số tiền" /></td>
+        <td><input type="date" /></td>
+        <td>
+          <select>
+            <option value="Đã thanh toán">Đã thanh toán</option>
+            <option value="Chưa thanh toán">Chưa thanh toán</option>
+          </select>
+        </td>
+        <td class="actions-cell">
+          <button class="btn save"><i class="fa fa-save"></i></button>
+          <button class="btn cancel"><i class="fa fa-times"></i></button>
+        </td>
+      `;
+
+      tbody.prepend(newRow);
+
+      // Xử lý nút lưu, hủy
+      const saveBtn = newRow.querySelector('.btn.save');
+      const cancelBtn = newRow.querySelector('.btn.cancel');
+
+      saveBtn.addEventListener('click', () => {
+        const inputs = newRow.querySelectorAll('input, select');
+        // Kiểm tra dữ liệu bắt buộc (có thể mở rộng)
+        for (let input of inputs) {
+          if (!input.value.trim()) {
+            alert('Vui lòng điền đầy đủ thông tin.');
+            return;
+          }
+        }
+        // Chuyển dữ liệu sang text
+        const cells = newRow.querySelectorAll('td');
+        cells[1].innerText = inputs[0].value.trim();
+        cells[2].innerText = inputs[1].value.trim();
+        cells[3].innerText = inputs[2].value.trim();
+        cells[4].innerText = inputs[3].value.trim();
+        cells[5].innerText = inputs[4].value.trim();
+        cells[6].innerText = inputs[5].value.trim();
+        cells[7].innerText = inputs[6].value.trim();
+
+        cells[8].innerHTML = `
+          <button class="btn edit"><i class="fa fa-pen"></i></button>
+          <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+        `;
+      });
+
+      cancelBtn.addEventListener('click', () => {
+        newRow.remove();
+      });
+    });
+
+    // --- Phần tìm kiếm theo cột ---
+    const searchBtn = document.getElementById('search-btn');
+
+    searchBtn.addEventListener('click', () => {
+      const criteria = document.getElementById('search-criteria').value; // giá trị key cột
+      const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+
+      // Map tên criteria thành số cột (index trong bảng)
+      const colMap = {
+        'makhoanthu': 1,
+        'madotthu': 2,
+        'mahokhau': 3,
+        'maloaikhoanthu': 4,
+        'trangthaithanhtoan': 7
+      };
+
+      const colIndex = colMap[criteria];
+      if (colIndex === undefined) return;
+
+      const rows = tbody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const cellText = row.cells[colIndex].innerText.toLowerCase();
+        if (cellText.includes(keyword)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
