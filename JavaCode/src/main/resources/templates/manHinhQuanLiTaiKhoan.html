@@ -275,6 +275,14 @@
       return dateStr;
     }
 
+	function postAction(action, input) {
+		fetch(action, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+		    body: JSON.stringify(input)
+		}).catch(error => console.error('Error:', error));
+	}
+
     // Thêm dòng mới
     addBtn.addEventListener('click', () => {
       const tbody = document.querySelector('.data-table tbody');
@@ -302,6 +310,9 @@
         </td>
       `;
       tbody.appendChild(newTr);
+	  
+	  postAction('/tao-tai-khoan',
+	  		Array.from(newTr.querySelectorAll('td')).slice(0, -1).map(cell => cell.textContent.trim()));
 
       // Xử lý nút lưu và hủy
       newTr.querySelector('.btn.save').addEventListener('click', () => {
@@ -326,6 +337,9 @@
           <button class="btn edit"><i class="fa fa-pen"></i></button>
           <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
         `;
+		
+		postAction('/save-tai-khoan',
+			Array.from(newTr.querySelectorAll('td')).slice(0, -1).map(cell => cell.textContent.trim()));
       });
 
       newTr.querySelector('.btn.cancel').addEventListener('click', () => {
