@@ -82,6 +82,7 @@
   <div class="app">
 
     <!-- Sidebar -->
+    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <img src="B.png" alt="Logo" class="logo" />
@@ -89,10 +90,11 @@
       </div>
       <nav class="sidebar-nav">
         <ul>
-          <li><a href="GiaoDienTC.html"><i class="fa fa-home"></i> Trang chủ</a></li>
-          <li>
+          <li><a href="GiaoDienTC.html"><i class="fa fa-home"></i><span>Trang chủ</span></a></li>
+          <li class="has-submenu">
             <button class="submenu-toggle">
-              <i class="fa fa-cog"></i> Dịch Vụ <i class="fa fa-caret-down arrow"></i>
+              <i class="fa fa-cog"></i><span>Dịch Vụ</span>
+              <i class="fa fa-caret-down arrow"></i>
             </button>
             <ul class="submenu">
               <li><a href="QuanLiNhanKhau.html">Quản lý nhân khẩu</a></li>
@@ -107,7 +109,6 @@
         </ul>
       </nav>
     </aside>
-
     <!-- Main -->
     <div class="main">
       <header class="topbar">
@@ -185,7 +186,7 @@
       </form>
     </div>
   </div>
-
+  
   <script>
     const exportModal = document.getElementById('exportModal');
 const modalTitle = document.getElementById('modalTitle');
@@ -242,13 +243,38 @@ function generateReceiptPDF(id) {
   content.style.padding = '20px';
   content.style.width = '210mm'; // chuẩn A4
   content.innerHTML = `
-    <h2 style="text-align:center;">Phiếu Thu Hộ Khẩu</h2>
-    <p><strong>Mã hộ khẩu:</strong> ${data.householdId}</p>
-    <p><strong>Số căn hộ:</strong> ${data.apartmentNumber}</p>
-    <p><strong>Diện tích:</strong> ${data.area}</p>
-    <p><strong>Số người:</strong> ${data.numberOfPeople}</p>
-    <p><strong>Chủ hộ:</strong> ${data.householdOwner}</p>
-  `;
+  <h2 style="text-align:center; margin-top: 10px;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h2> 
+  <h3 style="text-align:center;"><span style="text-decoration: underline;">Độc lập - Tự do - Hạnh phúc</span></h3>
+
+  <div style="width: 90%; text-align: right; font-style: italic;">
+    <p>..., ngày ... tháng ... năm 20...</p>
+  </div>
+
+  <h3 style="text-align:center; margin-top: 10px;">PHIẾU THU HỘ KHẨU</h3>
+
+  <p style="margin-top:20px;"><strong>Kính gửi:</strong><strong>Chủ hộ:</strong> ${data.householdOwner}</p>
+  <p style="margin-top:15px;">Chúng tôi xin thông báo thông tin chi tiết về khoản thu phí của hộ khẩu có thông tin như sau:</p>
+
+  <p style="margin-top:15px; line-height:1.6;">
+    <strong>Số hộ khẩu:</strong> ${data.householdId}<br>
+    <strong>Số căn hộ:</strong> ${data.apartmentNumber}<br>
+    <strong>Diện tích:</strong> ${data.area}<br>
+    <strong>Số nhân khẩu:</strong> ${data.numberOfPeople}<br>
+    <strong>Khoản phí vệ sinh: ............................................... (Nghìn Đồng)</strong><br>
+    <strong>Khoản phí gửi xe chung cư: ....................................... (Nghìn Đồng)</strong> <br>
+    <strong>Khoản phí bảo trì: ............................................... (Nghìn Đồng)</strong> <br>
+    <strong>Khoản phí cần phải đóng: ......................................... (Nghìn Đồng)</strong> <br>
+    <strong>Khoản tiền đóng góp cho hoạt động hỗ trợ trẻ em vùng cao (Nếu có): .....</strong> <br>
+    <strong>Khoản tiền đóng góp cho hoạt động cặp lá yêu thương (Nếu có): .....</strong><br>
+    <strong>Khoản tiền đóng góp cho hoạt động vì một ngày mai tươi sáng (Nếu có): .....</strong>  <br>
+  </p>
+
+  <div style="margin-top:30px; width:90%; text-align:right; padding-right:40px;">
+    <p><strong>Người làm phiếu</strong></p>
+    <p style="margin-top:60px;">(Ký và ghi rõ họ tên)</p>
+  </div>
+`;
+
 
   html2pdf()
     .set({
@@ -280,17 +306,33 @@ function generateResidentReportPDF(id) {
   content.style.padding = '20px';
   content.style.width = '210mm';
   content.innerHTML = `
-    <h2 style="text-align:center;">Báo Cáo Tạm Trú Tạm Vắng</h2>
-    <p><strong>Mã nhân khẩu:</strong> ${data.residentId}</p>
-    <p><strong>Mã hộ khẩu:</strong> ${data.householdId}</p>
-    <p><strong>Họ và tên:</strong> ${data.fullName}</p>
-    <p><strong>Số CCCD:</strong> ${data.cccd}</p>
-    <p><strong>Ngày sinh:</strong> ${data.dob}</p>
-    <p><strong>Giới tính:</strong> ${data.gender}</p>
-    <p><strong>Nghề nghiệp:</strong> ${data.job}</p>
-    <p><strong>Tình trạng cư trú:</strong> ${data.residenceStatus}</p>
-    <p><strong>Quan hệ với chủ hộ:</strong> ${data.relationToOwner}</p>
-  `;
+  <h2 style="text-align:center; margin-top: 10px;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h2> 
+  <h3 style="text-align:center; "><span style="text-decoration: underline;">Độc lập - Tự do - Hạnh phúc</span>.</h3>
+  <div style="width: 90%; text-align: right; font-style: italic;">
+    <p>..., ngày ... tháng ... năm 20...</p>
+  </div>
+  <h3 style="text-align:center; margin-top: 10px;">PHIẾU KHAI BÁO TẠM TRÚ - TẠM VẮNG</h3>
+
+  <p style="margin-top:20px;"><strong>Kính gửi:</strong> Công an phường/xã/thị trấn ..........</p>
+  <p style="margin-top:15px;">Ban quản lý chung cư BlueMoon xin kính gửi thông tin về tình trạng tạm trú tạm vắng của cá nhân được đề cập tới đây.</p>
+  <p style="margin-top:15px; line-height:1.6;">
+    <strong>Số hộ khẩu:</strong> ${data.householdId}<br>
+    <strong>Họ và tên:</strong> ${data.fullName}<br>
+    <strong>Ngày tháng năm sinh:</strong> ${data.dob}<br>
+    <strong>Số định danh cá nhân/CMND:</strong> ${data.cccd}<br>
+    <strong>Giới tính:</strong> ${data.gender}<br>
+    <strong>Nghề nghiệp:</strong> ${data.job}<br>
+    <strong>Quan hệ với chủ hộ:</strong> ${data.relationToOwner}<br>
+    <strong>Tình trạng cư trú:</strong> ${data.residenceStatus}<br>
+    <strong>Lý do tạm vắng (Nếu có):..........................................</strong>
+  </p>
+
+  <div style="margin-top:30px; width:90%; text-align:right; padding-right:40px;">
+    <p><strong>Người làm báo cáo</strong></p>
+    <p style="margin-top:60px;">(Ký và ghi rõ họ tên)</p>
+  </div>
+`;
+
 
   html2pdf()
     .set({
@@ -313,18 +355,35 @@ function generateStatisticReportPDF() {
   content.style.padding = '20px';
   content.style.width = '210mm';
   content.innerHTML = `
-    <h2 style="text-align:center;">Báo Cáo Thống Kê Hộ Khẩu</h2>
-    <div style="display:flex; justify-content: space-around; margin-top: 30px;">
-      <div style="text-align:center;">
-        <p><strong>Số hộ đã đóng</strong></p>
-        <p style="font-size: 48px; color: green;">${totalPaid}</p>
-      </div>
-      <div style="text-align:center;">
-        <p><strong>Số hộ chưa đóng</strong></p>
-        <p style="font-size: 48px; color: red;">${totalUnpaid}</p>
-      </div>
+  <h2 style="text-align:center; margin-top: 10px;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h2> 
+  <h3 style="text-align:center;"><span style="text-decoration: underline;">Độc lập - Tự do - Hạnh phúc</span></h3>
+
+  <div style="width: 90%; text-align: right; font-style: italic;">
+    <p>..., ngày ... tháng ... năm 20...</p>
+  </div>
+
+  <h3 style="text-align:center; margin-top: 10px;">BÁO CÁO THỐNG KÊ HỘ KHẨU</h3>
+
+  <p style="margin-top:20px;"><strong>Kính gửi:</strong> Ban quản lý chung cư BlueMoon</p>
+  <p style="margin-top:15px;">Trưởng ban thu phí xin báo cáo thống kê tình hình đóng phí của các hộ khẩu như sau:</p>
+
+  <div style="display:flex; justify-content: space-around; margin-top: 30px; line-height:1.6;">
+    <div style="text-align:center;">
+      <p><strong>Số hộ đã đóng</strong></p>
+      <p style="font-size: 48px; color: green;">${totalPaid}</p>
     </div>
-  `;
+    <div style="text-align:center;">
+      <p><strong>Số hộ chưa đóng</strong></p>
+      <p style="font-size: 48px; color: red;">${totalUnpaid}</p>
+    </div>
+  </div>
+
+  <div style="margin-top:40px; width:90%; text-align:right; padding-right:40px;">
+    <p><strong>Người lập báo cáo</strong></p>
+    <p style="margin-top:60px;">(Ký và ghi rõ họ tên)</p>
+  </div>
+`;
+
 
   html2pdf()
     .set({
@@ -367,6 +426,13 @@ exportForm.addEventListener('submit', (e) => {
 document.getElementById('exportReceiptBtn').addEventListener('click', () => openExportModal('receipt'));
 document.getElementById('exportStatisticBtn').addEventListener('click', () => openExportModal('statistic'));
 document.getElementById('exportResidentBtn').addEventListener('click', () => openExportModal('resident'));
+document.querySelectorAll('.submenu-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const submenu = btn.nextElementSibling;
+    submenu.classList.toggle('open');
+    btn.querySelector('.arrow').classList.toggle('rotated');
+  });
+});
 
   </script>
 </body>
