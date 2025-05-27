@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quản lý nhân khẩu</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <link rel="stylesheet" href="manHinhQuanLiTaiKhoan.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="B.png" alt="Logo" class="logo" />
+        <span class="logo-text">Bluemoon</span>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="GiaoDienTC.html"><i class="fa fa-home"></i><span>Trang chủ</span></a></li>
+          <li class="has-submenu">
+            <button class="submenu-toggle">
+              <i class="fa fa-cog"></i><span>Dịch Vụ</span>
+              <i class="fa fa-caret-down arrow"></i>
+            </button>
+            <ul class="submenu">
+              <li><a href="QuanLiNhanKhau.html">Quản lý nhân khẩu</a></li>
+              <li><a href="QuanLiHoKhau.html">Quản lí hộ khẩu</a></li>
+              <li><a href="QuanLiDotThu.html">Quản lí đợt thu</a></li>
+              <li><a href="QuanLiKhoanThu.html">Quản lí khoản thu</a></li>
+              <li><a href="manHinhQuanLiTaiKhoan.html">Quản lí tài khoản</a></li>
+              <li><a href="XemPhieuThu.html">Xem phiếu thu</a></li>
+              <li><a href="XuatBaoCao.html">Xuất báo cáo</a></li>
+            </ul>
+          </li>
+          <!-- thêm các mục khác tương tự -->
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main area -->
+    <div class="main">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left"></div>
+        <div class="topbar-right">
+          <a href="#" class="help"><i class="fa fa-question-circle"></i> Trợ giúp</a>
+          <div class="user-menu">
+            <img src="ava.png" alt="User" class="avatar"/>
+            <span>Kieu Oanh<i class="fa fa-caret-down"></i></span>
+            <!-- Pop-over -->
+            <div class="user-popover">
+              <div class="popover-header">
+                <div class="popover-email">nguyenkieuoanh…@gmail.com</div>
+                <button class="popover-close">&times;</button>
+              </div>
+              <div class="popover-account">
+                <img src="ava.png" class="avatar-lg"/>
+                <div class="account-info">
+                  <div class="account-name">Nguyễn Kiều Oanh</div>
+                  <div class="account-manage"><a href="#">Quản lý Tài khoản của bạn</a></div>
+                </div>
+              </div>
+              <ul class="popover-list">
+                <li><a href="#"><i class="fa fa-user"></i> Xem hồ sơ</a></li>
+                <li><a href="manHinhDangNhapDangKi.html"><i class="fa fa-user-plus"></i> Thêm tài khoản khác</a></li>
+                <li><a href="trang1.html"><i class="fa fa-sign-out-alt"></i> Đăng xuất khỏi tất cả các tài khoản</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <section class="content">
+        <h2>Quản lý nhân khẩu</h2>
+
+        <div class="actions">
+          <div class="search-group">
+            <select id="search-criteria" class="search-criteria">
+              <option value="manhankhau">Mã nhân khẩu</option>
+              <option value="mahokhau">Mã hộ khẩu</option>
+              <option value="hoten">Họ và tên</option>
+              <option value="cccd">Số CCCD</option>
+              <option value="ngaysinh">Ngày sinh</option>
+              <option value="gioitinh">Giới tính</option>
+              <option value="nghenghiep">Nghề nghiệp</option>
+              <option value="tinhtrangcu tru">Tình trạng cư trú</option>
+              <option value="quanhechuhokhau">Quan hệ với chủ hộ</option>
+            </select>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Nhập từ khóa tìm kiếm"
+              class="search"
+            />
+            <button id="search-btn" class="btn search-btn">
+              <i class="fa fa-search"></i> Tìm kiếm
+            </button>
+          </div>
+
+          <button id="add-btn" class="btn create">
+            <i class="fa fa-plus"></i> Tạo mới
+          </button>
+        </div>
+
+        <table class="data-table" border="1" cellspacing="0" cellpadding="6">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Mã nhân khẩu</th>
+              <th>Mã hộ khẩu</th>
+              <th>Họ và tên</th>
+              <th>Số CCCD</th>
+              <th>Ngày sinh</th>
+              <th>Giới tính</th>
+              <th>Nghề nghiệp</th>
+              <th>Tình trạng cư trú</th>
+              <th>Quan hệ với chủ hộ</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>NK001</td>
+              <td>HK001</td>
+              <td>Nguyễn Văn A</td>
+              <td>123456789012</td>
+              <td>01/01/1990</td>
+              <td>Nam</td>
+              <td>Kỹ sư</td>
+              <td>Thường trú</td>
+              <td>Con</td>
+              <td class="actions-cell">
+                <button class="btn edit"><i class="fa fa-pen"></i></button>
+                <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+              </td> 
+            </tr>
+            <!-- Thêm các dòng dữ liệu tương tự -->
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <label>
+            Hiển thị
+            <select>
+              <option>10</option><option>25</option><option>50</option>
+            </select>
+            mục
+          </label>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Accordion submenu
+    document.querySelectorAll('.submenu-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.nextElementSibling.classList.toggle('open');
+        btn.querySelector('.arrow').classList.toggle('rotated');
+      });
+    });
+
+    // User popover
+    const userMenu = document.querySelector('.user-menu');
+    const popover = userMenu.querySelector('.user-popover');
+    const closeBtn = popover.querySelector('.popover-close');
+
+    userMenu.addEventListener('click', e => {
+      e.stopPropagation();
+      popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
+    });
+
+    closeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      popover.style.display = 'none';
+    });
+
+    document.addEventListener('click', () => {
+      popover.style.display = 'none';
+    });
+
+    // Xóa dòng khi click vào nút delete
+    const tbody = document.querySelector('.data-table tbody');
+    const addBtn = document.getElementById('add-btn');
+
+    tbody.addEventListener('click', function(e) {
+      // Xóa
+      const btnDelete = e.target.closest('.btn.delete');
+      if (btnDelete) {
+        if (!confirm('Bạn có chắc muốn xóa nhân khẩu này?')) return;
+        btnDelete.closest('tr').remove();
+        return;
+      }
+
+      // Chỉnh sửa / Lưu
+      const btnEdit = e.target.closest('.btn.edit');
+      if (!btnEdit) return;
+
+      const tr = btnEdit.closest('tr');
+
+      // Kiểm tra trạng thái: nếu đang ở chế độ edit (btn có icon save), thì lưu lại
+      const isEditing = btnEdit.classList.contains('saving');
+
+      if (!isEditing) {
+        // Chuyển sang trạng thái edit
+        btnEdit.classList.add('saving');
+        btnEdit.innerHTML = '<i class="fa fa-save"></i>';
+
+        // Chuyển các cột thành input/select editable
+        const cells = tr.querySelectorAll('td');
+        // Bỏ qua cột ID (index 0) và cột Hành động (cuối)
+        // Chỉ edit cột 1-9 tương ứng các thông tin
+        // Xác định các trường có thể là select (Giới tính, Tình trạng cư trú, Quan hệ với chủ hộ), các trường còn lại input text
+
+        // Mã nhân khẩu (col 1)
+        let mnk = cells[1].innerText;
+        cells[1].innerHTML = `<input type="text" value="${mnk}" />`;
+
+        // Mã hộ khẩu (col 2)
+        let mhk = cells[2].innerText;
+        cells[2].innerHTML = `<input type="text" value="${mhk}" />`;
+
+        // Họ và tên (col 3)
+        let hoten = cells[3].innerText;
+        cells[3].innerHTML = `<input type="text" value="${hoten}" />`;
+
+        // Số CCCD (col 4)
+        let cccd = cells[4].innerText;
+        cells[4].innerHTML = `<input type="text" value="${cccd}" />`;
+
+        // Ngày sinh (col 5)
+        let ngaysinh = cells[5].innerText;
+        cells[5].innerHTML = `<input type="date" value="${formatDateForInput(ngaysinh)}" />`;
+
+        // Giới tính (col 6)
+        let gioitinh = cells[6].innerText;
+        cells[6].innerHTML = `
+          <select>
+            <option value="Nam" ${gioitinh === 'Nam' ? 'selected' : ''}>Nam</option>
+            <option value="Nữ" ${gioitinh === 'Nữ' ? 'selected' : ''}>Nữ</option>
+            <option value="Khác" ${gioitinh !== 'Nam' && gioitinh !== 'Nữ' ? 'selected' : ''}>Khác</option>
+          </select>`;
+
+        // Nghề nghiệp (col 7)
+        let nghenghiep = cells[7].innerText;
+        cells[7].innerHTML = `<input type="text" value="${nghenghiep}" />`;
+
+        // Tình trạng cư trú (col 8)
+        let tinhtrang = cells[8].innerText;
+        cells[8].innerHTML = `
+          <select>
+            <option value="Thường trú" ${tinhtrang === 'Thường trú' ? 'selected' : ''}>Thường trú</option>
+            <option value="Tạm trú" ${tinhtrang === 'Tạm trú' ? 'selected' : ''}>Tạm trú</option>
+            <option value="Khác" ${tinhtrang !== 'Thường trú' && tinhtrang !== 'Tạm trú' ? 'selected' : ''}>Khác</option>
+          </select>`;
+
+        // Quan hệ với chủ hộ (col 9)
+        let quanhe = cells[9].innerText;
+        cells[9].innerHTML = `
+          <select>
+            <option value="Chủ hộ" ${quanhe === 'Chủ hộ' ? 'selected' : ''}>Chủ hộ</option>
+            <option value="Vợ/Chồng" ${quanhe === 'Vợ/Chồng' ? 'selected' : ''}>Vợ/Chồng</option>
+            <option value="Con" ${quanhe === 'Con' ? 'selected' : ''}>Con</option>
+            <option value="Khác" ${['Chủ hộ','Vợ/Chồng','Con'].includes(quanhe) ? '' : 'selected'}>Khác</option>
+          </select>`;
+
+      } else {
+        // Lưu lại và chuyển về trạng thái bình thường
+        btnEdit.classList.remove('saving');
+        btnEdit.innerHTML = '<i class="fa fa-pen"></i>';
+
+        const cells = tr.querySelectorAll('td');
+
+        // Lấy giá trị input/select rồi cập nhật vào innerText
+        // Mã nhân khẩu
+        let mnk = cells[1].querySelector('input').value.trim();
+        cells[1].innerText = mnk;
+
+        // Mã hộ khẩu
+        let mhk = cells[2].querySelector('input').value.trim();
+        cells[2].innerText = mhk;
+
+        // Họ và tên
+        let hoten = cells[3].querySelector('input').value.trim();
+        cells[3].innerText = hoten;
+
+        // Số CCCD
+        let cccd = cells[4].querySelector('input').value.trim();
+        cells[4].innerText = cccd;
+
+        // Ngày sinh
+        let ngaysinh = cells[5].querySelector('input').value;
+        cells[5].innerText = formatDateDisplay(ngaysinh);
+
+        // Giới tính
+        let gioitinh = cells[6].querySelector('select').value;
+        cells[6].innerText = gioitinh;
+
+        // Nghề nghiệp
+        let nghenghiep = cells[7].querySelector('input').value.trim();
+        cells[7].innerText = nghenghiep;
+
+        // Tình trạng cư trú
+        let tinhtrang = cells[8].querySelector('select').value;
+        cells[8].innerText = tinhtrang;
+
+        // Quan hệ với chủ hộ
+        let quanhe = cells[9].querySelector('select').value;
+        cells[9].innerText = quanhe;
+      }
+    });
+
+    // Hàm định dạng ngày (dd/mm/yyyy) -> yyyy-mm-dd (cho input date)
+    function formatDateForInput(str) {
+      // str dạng dd/mm/yyyy
+      const parts = str.split('/');
+      if (parts.length !== 3) return '';
+      return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+    }
+
+    // Hàm định dạng ngày (yyyy-mm-dd) -> dd/mm/yyyy
+    function formatDateDisplay(str) {
+      if (!str) return '';
+      const parts = str.split('-');
+      if (parts.length !== 3) return str;
+      return `${parts[2].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[0]}`;
+    }
+
+    // Nút tạo mới
+    addBtn.addEventListener('click', () => {
+      const tbody = document.querySelector('.data-table tbody');
+      // Tạo một dòng mới với các ô input, id tự động tăng dựa vào dòng cuối cùng
+      const lastRow = tbody.querySelector('tr:last-child');
+      let newId = 1;
+      if (lastRow) {
+        newId = parseInt(lastRow.cells[0].innerText) + 1;
+      }
+
+      // Tạo dòng mới với ô input, ID cố định, các trường còn lại là input/select
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td>${newId}</td>
+        <td><input type="text" placeholder="Mã nhân khẩu" /></td>
+        <td><input type="text" placeholder="Mã hộ khẩu" /></td>
+        <td><input type="text" placeholder="Họ và tên" /></td>
+        <td><input type="text" placeholder="Số CCCD" /></td>
+        <td><input type="date" /></td>
+        <td>
+          <select>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </td>
+        <td><input type="text" placeholder="Nghề nghiệp" /></td>
+        <td>
+          <select>
+            <option value="Thường trú">Thường trú</option>
+            <option value="Tạm trú">Tạm trú</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </td>
+        <td>
+          <select>
+            <option value="Chủ hộ">Chủ hộ</option>
+            <option value="Vợ/Chồng">Vợ/Chồng</option>
+            <option value="Con">Con</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </td>
+        <td class="actions-cell">
+          <button class="btn edit saving"><i class="fa fa-save"></i></button>
+          <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+        </td>
+      `;
+      tbody.appendChild(newRow);
+    });
+
+  </script>
+</body>
+</html>
