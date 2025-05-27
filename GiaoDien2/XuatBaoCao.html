@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Quản lý Tài Khoản - Xuất báo cáo</title>
@@ -9,6 +10,73 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
   <link rel="stylesheet" href="XuatBaoCao.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* --- CSS modal --- */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background-color: #fff;
+      padding: 20px 25px;
+      border-radius: 8px;
+      width: 350px;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.25);
+      position: relative;
+    }
+    .modal-content h3 {
+      margin-bottom: 15px;
+    }
+    .modal-content label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 6px 8px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .modal-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn-cancel, .btn-submit {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-cancel {
+      background-color: #ccc;
+      color: #333;
+    }
+    .btn-cancel:hover {
+      background-color: #999;
+    }
+    .btn-submit {
+      background-color: #3d5a80;
+      color: #fff;
+    }
+    .btn-submit:hover {
+      background-color: #2c4259;
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -79,7 +147,7 @@
           <!-- Box xuất phiếu thu -->
           <div class="export-box">
             <h3>Xuất phiếu thu của hộ khẩu</h3>
-            <label for="householdId">Nhập ID hộ khẩu</label>
+            <label for="householdId">Nhập mã hộ khẩu</label>
             <input type="text" id="householdId" placeholder="Nhập mã hộ khẩu..." />
             <button id="exportReceiptBtn">Xuất file PDF</button>
           </div>
@@ -87,14 +155,14 @@
           <!-- Box xuất thống kê -->
           <div class="export-box">
             <h3>Báo cáo thống kê </h3>
-            <p>Báo cáo tổng hộ  đã đóng và tổng số hộ chưa đóng.</p>
+            <p>Báo cáo tổng hộ đã đóng và tổng số hộ chưa đóng.</p>
             <button id="exportStatisticBtn">Xuất thống kê</button>
           </div>
 
           <!-- Box xuất tạm trú tạm vắng -->
           <div class="export-box">
             <h3>Xuất báo cáo tạm trú tạm vắng</h3>
-            <label for="residentId">Nhập ID nhân khẩu</label>
+            <label for="residentId">Nhập mã nhân khẩu</label>
             <input type="text" id="residentId" placeholder="Nhập mã nhân khẩu..." />
             <button id="exportResidentBtn">Xuất file PDF</button>
           </div>
@@ -104,61 +172,202 @@
     </div>
   </div>
 
+  <!-- Modal xuất báo cáo -->
+  <div class="modal" id="exportModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Xuất báo cáo</h3>
+      <form id="exportForm">
+        <div id="modalInputs"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" id="modalCancel">Hủy</button>
+          <button type="submit" class="btn-submit" id="modalSubmit">Xuất file PDF</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
-    // Accordion submenu
-    document.querySelectorAll('.submenu-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const submenu = btn.nextElementSibling;
-        submenu.classList.toggle('open');
-        btn.querySelector('.arrow').classList.toggle('rotated');
-      });
-    });
-    /* User popover*/
-    const userMenu = document.querySelector('.user-menu');
-    const popover = userMenu.querySelector('.user-popover');
-    const closeBtn = popover.querySelector('.popover-close');
+    const exportModal = document.getElementById('exportModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalInputs = document.getElementById('modalInputs');
+const modalCancel = document.getElementById('modalCancel');
+const exportForm = document.getElementById('exportForm');
 
-    userMenu.addEventListener('click', e => {
-      e.stopPropagation();
-      popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
-    });
+function openExportModal(type) {
+  modalInputs.innerHTML = ''; // Xóa nội dung cũ
+  switch(type) {
+    case 'receipt':
+      modalTitle.textContent = 'Xuất phiếu thu của hộ khẩu';
+      modalInputs.innerHTML = `
+        <label for="modalHouseholdId">Nhập mã hộ khẩu</label>
+        <input type="text" id="modalHouseholdId" name="householdId" required value="${document.getElementById('householdId').value.trim()}" />
+      `;
+      break;
+    case 'statistic':
+      modalTitle.textContent = 'Xuất báo cáo thống kê';
+      modalInputs.innerHTML = `<p>Báo cáo tổng số hộ đã đóng và tổng số hộ chưa đóng sẽ được xuất.</p>`;
+      break;
+    case 'resident':
+      modalTitle.textContent = 'Xuất báo cáo tạm trú tạm vắng';
+      modalInputs.innerHTML = `
+        <label for="modalResidentId">Nhập mã nhân khẩu</label>
+        <input type="text" id="modalResidentId" name="residentId" required value="${document.getElementById('residentId').value.trim()}" />
+      `;
+      break;
+  }
+  exportModal.classList.add('active');
+}
 
-    closeBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      popover.style.display = 'none';
-    });
+function closeExportModal() {
+  exportModal.classList.remove('active');
+  exportForm.reset();
+}
 
-    document.addEventListener('click', () => {
-      popover.style.display = 'none';
-    });
+modalCancel.addEventListener('click', (e) => {
+  e.preventDefault();
+  closeExportModal();
+});
 
-    // Xử lý nút Xuất phiếu thu
-    document.getElementById('exportReceiptBtn').addEventListener('click', () => {
-      const id = document.getElementById('householdId').value.trim();
-      if (!id) {
-        alert('Vui lòng nhập mã hộ khẩu.');
-        return;
-      }
-      alert(`Đã gửi yêu cầu xuất phiếu thu của hộ khẩu ID: ${id}`);
-      // TODO: gọi backend xử lý
-    });
+function generateReceiptPDF(id) {
+  const data = {
+    householdId: id,
+    apartmentNumber: 'A12-05',
+    area: '85 m²',
+    numberOfPeople: 4,
+    householdOwner: 'Nguyễn Văn A'
+  };
 
-    // Xử lý nút Xuất thống kê
-    document.getElementById('exportStatisticBtn').addEventListener('click', () => {
-      alert('Đã gửi yêu cầu xuất báo cáo thống kê hộ khẩu.');
-      // TODO: gọi backend xử lý
-    });
+  const content = document.createElement('div');
+  content.style.fontFamily = "'Arial', sans-serif";
+  content.style.padding = '20px';
+  content.style.width = '210mm'; // chuẩn A4
+  content.innerHTML = `
+    <h2 style="text-align:center;">Phiếu Thu Hộ Khẩu</h2>
+    <p><strong>Mã hộ khẩu:</strong> ${data.householdId}</p>
+    <p><strong>Số căn hộ:</strong> ${data.apartmentNumber}</p>
+    <p><strong>Diện tích:</strong> ${data.area}</p>
+    <p><strong>Số người:</strong> ${data.numberOfPeople}</p>
+    <p><strong>Chủ hộ:</strong> ${data.householdOwner}</p>
+  `;
 
-    // Xử lý nút Xuất tạm trú tạm vắng
-    document.getElementById('exportResidentBtn').addEventListener('click', () => {
-      const id = document.getElementById('residentId').value.trim();
-      if (!id) {
-        alert('Vui lòng nhập mã nhân khẩu.');
-        return;
-      }
-      alert(`Đã gửi yêu cầu xuất báo cáo tạm trú tạm vắng của nhân khẩu ID: ${id}`);
-      // TODO: gọi backend xử lý
-    });
+  html2pdf()
+    .set({
+      margin: 10,
+      filename: `PhieuThu_HoKhau_${data.householdId}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, letterRendering: true, dpi: 192 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    })
+    .from(content)
+    .save();
+}
+
+function generateResidentReportPDF(id) {
+  const data = {
+    residentId: id,
+    householdId: 'HK001',
+    fullName: 'Nguyễn Văn B',
+    cccd: '123456789012',
+    dob: '01/01/1990',
+    gender: 'Nam',
+    job: 'Kỹ sư',
+    residenceStatus: 'Tạm trú',
+    relationToOwner: 'Con'
+  };
+
+  const content = document.createElement('div');
+  content.style.fontFamily = "'Arial', sans-serif";
+  content.style.padding = '20px';
+  content.style.width = '210mm';
+  content.innerHTML = `
+    <h2 style="text-align:center;">Báo Cáo Tạm Trú Tạm Vắng</h2>
+    <p><strong>Mã nhân khẩu:</strong> ${data.residentId}</p>
+    <p><strong>Mã hộ khẩu:</strong> ${data.householdId}</p>
+    <p><strong>Họ và tên:</strong> ${data.fullName}</p>
+    <p><strong>Số CCCD:</strong> ${data.cccd}</p>
+    <p><strong>Ngày sinh:</strong> ${data.dob}</p>
+    <p><strong>Giới tính:</strong> ${data.gender}</p>
+    <p><strong>Nghề nghiệp:</strong> ${data.job}</p>
+    <p><strong>Tình trạng cư trú:</strong> ${data.residenceStatus}</p>
+    <p><strong>Quan hệ với chủ hộ:</strong> ${data.relationToOwner}</p>
+  `;
+
+  html2pdf()
+    .set({
+      margin: 10,
+      filename: `BaoCao_TamTruTamVang_${data.residentId}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, letterRendering: true, dpi: 192 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    })
+    .from(content)
+    .save();
+}
+
+function generateStatisticReportPDF() {
+  const totalPaid = 320;
+  const totalUnpaid = 80;
+
+  const content = document.createElement('div');
+  content.style.fontFamily = "'Arial', sans-serif";
+  content.style.padding = '20px';
+  content.style.width = '210mm';
+  content.innerHTML = `
+    <h2 style="text-align:center;">Báo Cáo Thống Kê Hộ Khẩu</h2>
+    <div style="display:flex; justify-content: space-around; margin-top: 30px;">
+      <div style="text-align:center;">
+        <p><strong>Số hộ đã đóng</strong></p>
+        <p style="font-size: 48px; color: green;">${totalPaid}</p>
+      </div>
+      <div style="text-align:center;">
+        <p><strong>Số hộ chưa đóng</strong></p>
+        <p style="font-size: 48px; color: red;">${totalUnpaid}</p>
+      </div>
+    </div>
+  `;
+
+  html2pdf()
+    .set({
+      margin: 10,
+      filename: 'BaoCao_ThongKe_HoKhau.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, letterRendering: true, dpi: 192 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    })
+    .from(content)
+    .save();
+}
+
+exportForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const title = modalTitle.textContent.toLowerCase();
+
+  if(title.includes('phiếu thu')) {
+    const id = exportForm.householdId.value.trim();
+    if(!id) {
+      alert('Vui lòng nhập mã hộ khẩu.');
+      return;
+    }
+    generateReceiptPDF(id);
+  }
+  else if(title.includes('thống kê')) {
+    generateStatisticReportPDF();
+  }
+  else if(title.includes('tạm trú')) {
+    const id = exportForm.residentId.value.trim();
+    if(!id) {
+      alert('Vui lòng nhập mã nhân khẩu.');
+      return;
+    }
+    generateResidentReportPDF(id);
+  }
+  closeExportModal();
+});
+
+document.getElementById('exportReceiptBtn').addEventListener('click', () => openExportModal('receipt'));
+document.getElementById('exportStatisticBtn').addEventListener('click', () => openExportModal('statistic'));
+document.getElementById('exportResidentBtn').addEventListener('click', () => openExportModal('resident'));
+
   </script>
 </body>
 </html>
