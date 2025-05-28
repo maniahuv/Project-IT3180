@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Thông tin cơ bản có kéo thả avatar & chỉnh sửa</title>
+<style>
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;  /* sửa từ 20px thành 0 */
+    background: #f9f9f9;
+    color: #202124;
+    display: flex;
+    justify-content: center; /* canh giữa theo ngang */
+    padding: 40px 0; /* padding trên dưới */
+    box-sizing: border-box;
+    min-height: 100vh;
+  }
+  .container {
+  width: 600px; /* hoặc bạn muốn rộng hơn thì thay đổi */
+  padding: 0 16px; /* padding nhỏ 2 bên để responsive */
+}
+  h2 {
+    font-weight: 500;
+    font-size: 24px;
+    margin-bottom: 0.2em;
+  }
+  p.subtitle {
+    font-size: 14px;
+    color: #5f6368;
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px 32px;
+    box-shadow: 0 1px 3px rgb(60 64 67 / 0.3), 0 4px 8px rgb(60 64 67 / 0.15);
+    max-width: 600px;
+    margin-bottom: 20px;
+  }
+
+  /* Sửa lại cấu trúc row: label, value/input, nút riêng biệt */
+  .row {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e8eaed;
+    gap: 16px;
+  }
+  .row:last-child {
+    border-bottom: none;
+  }
+  .row label {
+    font-size: 14px;
+    color: #3c4043;
+    flex-basis: 120px; /* độ rộng cố định cho nhãn */
+  }
+  /* Container chứa text-value và input */
+  .value {
+    flex-grow: 1;
+    position: relative;
+  }
+  .text-value {
+    font-size: 16px;
+    color: #202124;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="date"],
+  select.input-value {
+    font-size: 16px;
+    padding: 4px 8px;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+    display: none;
+  }
+  /* Container chứa các nút */
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .btn {
+    cursor: pointer;
+    background-color: #1a73e8;
+    border: none;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .btn.cancel {
+    background-color: #bbb;
+  }
+
+  /* Ảnh hồ sơ */
+  .profile-photo-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  #avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #e8eaed;
+    cursor: pointer;
+    object-fit: cover;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+  #avatar.dragover {
+    border-color: #1a73e8;
+  }
+  .profile-photo-text {
+    font-size: 14px;
+    color: #3c4043;
+  }
+  .profile-photo-text a {
+    color: #1a73e8;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .profile-photo-text a:hover {
+    text-decoration: underline;
+  }
+
+  /* Nút quản lý email */
+  .btn-email-manage {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #dadce0;
+    border-radius: 24px;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #3c4043;
+    cursor: pointer;
+    background: #fff;
+    box-shadow: none;
+    margin-top: 12px;
+    transition: background-color 0.2s ease;
+  }
+  .btn-email-manage:hover {
+    background-color: #f1f3f4;
+  }
+  .btn-email-manage svg {
+    margin-right: 8px;
+    fill: #3c4043;
+  }
+
+  /* Ẩn input file */
+  #fileInput {
+    display: none;
+  }
+  .btn-back {
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  background-color: #e8f0fe;
+  color: #1a73e8;
+  font-size: 18px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.2);
+}
+.btn-back:hover {
+  background-color: #d2e3fc;
+}
+</style>
+</head>
+<body>
+    <a href="javascript:history.back()" class="btn-back">← Quay về</a>
+
+<div class="container">
+<div class="card">
+  <h2>Thông tin cơ bản</h2>
+  <p class="subtitle">Những người khác sử dụng các dịch vụ của Google có thể nhìn thấy một số thông tin. <a href="#" target="_blank">Tìm hiểu thêm</a></p>
+  
+  <div class="row" data-field="avatar">
+    <label>Ảnh hồ sơ</label>
+    <div class="profile-photo-container">
+      <img id="avatar" src="https://ssl.gstatic.com/accounts/ui/avatar_2x.png" alt="Ảnh hồ sơ" title="Nhấn hoặc kéo thả ảnh vào đây để đổi ảnh" />
+      <div class="profile-photo-text">
+        Thêm ảnh hồ sơ để cá nhân hóa tài khoản của bạn
+      </div>
+    </div>
+  </div>
+
+  <!-- Tên -->
+  <div class="row" data-field="name">
+    <label for="input-name">Tên</label>
+    <div class="value">
+      <span class="text-value">29. Nguyễn Kiều Oanh 416</span>
+      <input type="text" class="input-value" id="input-name" value="29. Nguyễn Kiều Oanh 416" />
+    </div>
+    <div class="btn-group">
+      <button class="btn edit-btn">Chỉnh sửa</button>
+      <button class="btn cancel-btn" style="display:none">Hủy</button>
+      <button class="btn save-btn" style="display:none">Lưu</button>
+    </div>
+  </div>
+
+  <!-- Ngày sinh -->
+  <div class="row" data-field="birthday">
+    <label for="input-birthday">Ngày sinh</label>
+    <div class="value">
+      <span class="text-value">17 tháng 7, 2004</span>
+      <input type="date" class="input-value" id="input-birthday" value="2004-07-17" />
+    </div>
+    <div class="btn-group">
+      <button class="btn edit-btn">Chỉnh sửa</button>
+      <button class="btn cancel-btn" style="display:none">Hủy</button>
+      <button class="btn save-btn" style="display:none">Lưu</button>
+    </div>
+  </div>
+
+  <!-- Giới tính -->
+  <div class="row" data-field="gender">
+    <label for="input-gender">Giới tính</label>
+    <div class="value">
+      <span class="text-value">Nữ</span>
+      <select class="input-value" id="input-gender" style="display:none">
+        <option value="Nam">Nam</option>
+        <option value="Nữ" selected>Nữ</option>
+        <option value="Khác">Khác</option>
+      </select>
+    </div>
+    <div class="btn-group">
+      <button class="btn edit-btn">Chỉnh sửa</button>
+      <button class="btn cancel-btn" style="display:none">Hủy</button>
+      <button class="btn save-btn" style="display:none">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Thông tin liên hệ</h2>
+
+  <!-- Email -->
+  <div class="row" data-field="email">
+    <label for="input-email">Email</label>
+    <div class="value" style="max-width:none;">
+      <span class="text-value">nguyenkieuoanh17720041772004@gmail.com</span>
+      <input type="email" class="input-value" id="input-email" value="nguyenkieuoanh17720041772004@gmail.com" />
+    </div>
+    <div class="btn-group">
+      <button class="btn edit-btn">Chỉnh sửa</button>
+      <button class="btn cancel-btn" style="display:none">Hủy</button>
+      <button class="btn save-btn" style="display:none">Lưu</button>
+    </div>
+  </div>
+
+  <!-- Điện thoại -->
+  <div class="row" data-field="phone">
+    <label for="input-phone">Điện thoại</label>
+    <div class="value">
+      <span class="text-value">0984 065 666</span>
+      <input type="text" class="input-value" id="input-phone" value="0984 065 666" />
+    </div>
+    <div class="btn-group">
+      <button class="btn edit-btn">Chỉnh sửa</button>
+      <button class="btn cancel-btn" style="display:none">Hủy</button>
+      <button class="btn save-btn" style="display:none">Lưu</button>
+    </div>
+  </div>
+
+  <div style="padding-top: 12px;">
+    <div class="btn-email-manage" onclick="alert('Chức năng quản lý email từ Google')">
+      <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      Quản lý các email từ Google
+    </div>
+  </div>
+</div>
+</div>
+<input type="file" id="fileInput" accept="image/*" />
+
+<script>
+  const avatar = document.getElementById('avatar');
+  const fileInput = document.getElementById('fileInput');
+
+  // Avatar kéo thả và chọn file
+  avatar.addEventListener('click', () => fileInput.click());
+  avatar.addEventListener('dragover', e => {
+    e.preventDefault();
+    avatar.classList.add('dragover');
+  });
+  avatar.addEventListener('dragleave', e => {
+    e.preventDefault();
+    avatar.classList.remove('dragover');
+  });
+  avatar.addEventListener('drop', e => {
+    e.preventDefault();
+    avatar.classList.remove('dragover');
+    if (e.dataTransfer.files.length > 0) updateAvatar(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', e => {
+    if (fileInput.files.length > 0) updateAvatar(fileInput.files[0]);
+  });
+  function updateAvatar(file) {
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn file ảnh hợp lệ.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => avatar.src = e.target.result;
+    reader.readAsDataURL(file);
+  }
+
+  // Chỉnh sửa thông tin từng trường
+  document.querySelectorAll('.row').forEach(row => {
+    const editBtn = row.querySelector('.edit-btn');
+    const cancelBtn = row.querySelector('.cancel-btn');
+    const saveBtn = row.querySelector('.save-btn');
+    const textValue = row.querySelector('.text-value');
+    const inputValue = row.querySelector('.input-value');
+
+    if (!editBtn) return; // Bỏ qua trường không có nút chỉnh sửa
+
+    editBtn.addEventListener('click', () => {
+      inputValue.style.display = 'inline-block';
+      textValue.style.display = 'none';
+      editBtn.style.display = 'none';
+      cancelBtn.style.display = 'inline-block';
+      saveBtn.style.display = 'inline-block';
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      inputValue.style.display = 'none';
+      textValue.style.display = 'inline-block';
+      editBtn.style.display = 'inline-block';
+      cancelBtn.style.display = 'none';
+      saveBtn.style.display = 'none';
+      inputValue.value = textValue.textContent.trim();
+    });
+
+    saveBtn.addEventListener('click', () => {
+      let newValue = inputValue.value.trim();
+      if (newValue.length === 0) {
+        alert('Giá trị không được để trống!');
+        return;
+      }
+      // Nếu là ngày sinh (date), định dạng lại hiển thị đẹp hơn
+      if (inputValue.type === 'date') {
+        const d = new Date(newValue);
+        if (!isNaN(d)) {
+          const options = { year: 'numeric', month: 'long', day: 'numeric' };
+          newValue = d.toLocaleDateString('vi-VN', options);
+        }
+      }
+      textValue.textContent = newValue;
+
+      inputValue.style.display = 'none';
+      textValue.style.display = 'inline-block';
+      editBtn.style.display = 'inline-block';
+      cancelBtn.style.display = 'none';
+      saveBtn.style.display = 'none';
+    });
+  });
+</script>
+
+</body>
+</html>
