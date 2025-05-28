@@ -184,4 +184,32 @@ public abstract class DataAccessObject<T> {
 		return null;
 	}
 
+	public T queryFirst(String[] names, Object[] matches) {
+		return query(names, matches).get(0);
+	}
+
+	public List<T> query(String[] names, Object[] matches) {
+		List<T> list = new ArrayList<>();
+		StringBuilder sql = new StringBuilder("SELECT * FROM KhoanThu WHERE 1=1");
+
+		for (String name : names) {
+			sql.append(String.format(" AND %s = ?", name));
+		}
+
+		try (Connection conn = JDBCUtil.getConnection();
+				PreparedStatement pst = conn.prepareStatement(sql.toString())) {
+			for (int i = 0; i < matches.length; i++) {
+				setData(pst, i, matches[i]);
+			}
+			try (ResultSet rs = pst.executeQuery()) {
+				while (rs.next()) {
+					list.add(newFromResultSet(rs));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+
 }

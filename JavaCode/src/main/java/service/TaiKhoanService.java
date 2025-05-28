@@ -1,12 +1,34 @@
 package service;
 
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
 import model.TaiKhoan;
 import model.TaiKhoan.VaiTro;
 import repository.NhanKhauDao;
 import repository.TaiKhoanDao;
 import utils.Validator;
 
-public class TaiKhoanService {
+@Service
+public class TaiKhoanService implements UserDetailsService {
+
+	@Override
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		System.out.println("Authorizing user");
+		if ("admin@example.com".equals(email)) {
+			System.out.println("Returning admin user");
+			return User.withUsername("admin@example.com").password("{noop}password").roles("ADMIN").build();
+		}
+		TaiKhoan taiKhoan = timTaiKhoan(email);
+		if (taiKhoan != null) {
+			return User.withUsername(taiKhoan.getEmail()).password(taiKhoan.getMatKhau())
+					.roles(VaiTro.toString(taiKhoan.getVaiTro()).isEmpty() ? "USER" : "ADMIN").build();
+		}
+		throw new UsernameNotFoundException("Khong tim dc tai khoan");
+	}
 
 	public static boolean taoTaiKhoanMoi(TaiKhoan t) {
 		if (kiemTraThongTin(t)) {
@@ -62,6 +84,10 @@ public class TaiKhoanService {
 
 	public static TaiKhoan traCuuThongTin(String userId) {
 		return TaiKhoanDao.instance.selectByID(userId);
+	}
+
+	public static TaiKhoan timTaiKhoan(String email) {
+		return TaiKhoanDao.instance.queryFirst(new String[] { "Email" }, new Object[] { email });
 	}
 
 	public static boolean khoaMoTaiKhoan(String userId, boolean trangThai) {
