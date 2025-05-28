@@ -1,4 +1,4 @@
-package main.controller;
+package controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,17 +11,17 @@ public class MainController {
 		return "trang1";
 	}
 
-	@RequestMapping("/Login")
+	@RequestMapping("/login")
 	public String login() {
 		return "manHinhDangNhapDangKi";
 	}
 
-	@RequestMapping("/Register")
+	@RequestMapping("/register")
 	public String register() {
 		return "trangThemTaiKhoan";
 	}
 
-	@RequestMapping("/Profiles")
+	@RequestMapping("/profiles")
 	public String mapProfiles() {
 		return "manHinhQuanLiTaiKhoan";
 	}

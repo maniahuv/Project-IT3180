@@ -1,4 +1,4 @@
-package main.controller;
+package controller;
 
 import java.util.List;
 
@@ -11,9 +11,9 @@ import model.TaiKhoan.VaiTro;
 import service.TaiKhoanService;
 
 @RestController
-public class QuanLiTaiKhoanController {
+public class DangNhapController {
 
-	@PostMapping("/tao-tai-khoan")
+	@PostMapping("/dang-nhap")
 	public String taoTaiKhoan(@RequestBody List<String> newTr) {
 		for (String x : newTr) {
 			System.out.printf("%s - ", x);
@@ -24,21 +24,6 @@ public class QuanLiTaiKhoanController {
 			System.out.println("Tao tai khoan thanh cong");
 		} else {
 			System.out.println("Tao tai khoan that bai");
-		}
-		return "manHinhQuanLiTaiKhoan";
-	}
-
-	@PostMapping("/save-tai-khoan")
-	public String luuTaiKhoan(@RequestBody List<String> newTr) {
-		for (String x : newTr) {
-			System.out.printf("%s - ", x);
-		}
-		System.out.println("SAVE");
-		if (TaiKhoanService.capNhatThongTin(new TaiKhoan(newTr.get(0), newTr.get(4), "111111", newTr.get(1),
-				newTr.get(3), VaiTro.TO_TRUONG, "", true))) {
-			System.out.println("Luu tai khoan thanh cong");
-		} else {
-			System.out.println("Luu tai khoan that bai");
 		}
 		return "manHinhQuanLiTaiKhoan";
 	}
