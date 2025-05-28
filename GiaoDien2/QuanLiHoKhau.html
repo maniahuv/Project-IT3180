@@ -9,6 +9,21 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
   <link rel="stylesheet" href="manHinhQuanLiTaiKhoan.css" />
+  <style>
+    /* Hiệu ứng highlight khi tìm kiếm */
+    .highlighted {
+      background-color: #90ee90 !important; /* màu xanh nhạt */
+      transition: background-color 0.5s ease;
+    }
+    /* Style cơ bản cho bảng và input */
+    table.data-table input, table.data-table select {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .actions-cell button {
+      margin-right: 5px;
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -79,9 +94,11 @@
         <div class="actions">
           <div class="search-group">
             <select id="search-criteria" class="search-criteria">
-              <option value="mahokhau">Mã hộ khẩu</option>
-              <option value="socanho">Số căn hộ</option>
-              <option value="chuho">Chủ hộ</option>
+              <option value="0">Mã hộ khẩu</option>
+              <option value="1">Số căn hộ</option>
+              <option value="2">Diện tích</option>
+              <option value="3">Số người</option>
+              <option value="4">Chủ hộ</option>
             </select>
             <input
               type="text"
@@ -102,7 +119,6 @@
         <table class="data-table" border="1" cellspacing="0" cellpadding="6">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Mã hộ khẩu</th>
               <th>Số căn hộ</th>
               <th>Diện tích (m²)</th>
@@ -113,18 +129,17 @@
           </thead>
           <tbody>
             <tr>
-              <td>1</td>
               <td>HK001</td>
               <td>101</td>
               <td>75.5</td>
               <td>4</td>
               <td>Nguyễn Văn A</td>
               <td class="actions-cell">
-                <button class="btn edit" title="Sửa"><i class="fa fa-pen"></i></button>
-                <button class="btn delete" title="Xóa"><i class="fa fa-trash-alt"></i></button>
-              </td> 
+                <button class="btn edit"><i class="fa fa-pen"></i></button>
+                <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+              </td>
             </tr>
-            <!-- thêm các dòng dữ liệu tương tự -->
+            <!-- Thêm các dòng dữ liệu tương tự -->
           </tbody>
         </table>
 
@@ -142,179 +157,202 @@
   </div>
 
   <script>
-  // Accordion submenu
-  document.querySelectorAll('.submenu-toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-      btn.nextElementSibling.classList.toggle('open');
-      btn.querySelector('.arrow').classList.toggle('rotated');
-    });
-  });
-
-  // User menu popover
-  const userMenu = document.querySelector('.user-menu');
-  const popover = userMenu.querySelector('.user-popover');
-  const closeBtn = popover.querySelector('.popover-close');
-
-  userMenu.addEventListener('click', e => {
-    e.stopPropagation();
-    popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
-  });
-
-  closeBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    popover.style.display = 'none';
-  });
-
-  document.addEventListener('click', () => {
-    popover.style.display = 'none';
-  });
-
-  const tbody = document.querySelector('.data-table tbody');
-  const addBtn = document.getElementById('add-btn');
-
-  // Xóa dòng khi click vào nút delete
-  tbody.addEventListener('click', function(e) {
-    const btn = e.target.closest('.btn.delete');
-    if (!btn) return;
-    if (!confirm('Bạn có chắc muốn xóa hộ khẩu này?')) return;
-    btn.closest('tr').remove();
-    // Mở lại nút thêm nếu đang khóa
-    addBtn.disabled = false;
-  });
-
-  // Biến cờ để kiểm soát trạng thái thêm mới
-  let isAddingNew = false;
-
-  // Thêm dòng mới khi click Tạo mới
-  addBtn.addEventListener('click', function() {
-    if (isAddingNew) return; // Không thêm dòng mới nếu đang có dòng thêm mới đang nhập
-
-    isAddingNew = true;
-    addBtn.disabled = true; // khóa nút thêm để tránh thêm nhiều dòng
-
-    // Tạo dòng tr mới có các ô input
-    const tr = document.createElement('tr');
-
-    tr.innerHTML = `
-      <td><input type="text" placeholder="ID" style="width:60px" /></td>
-      <td><input type="text" placeholder="Mã hộ khẩu" /></td>
-      <td><input type="text" placeholder="Số căn hộ" /></td>
-      <td><input type="number" placeholder="Diện tích (m²)" min="0" step="0.1" style="width:80px" /></td>
-      <td><input type="number" placeholder="Số người" min="1" style="width:60px" /></td>
-      <td><input type="text" placeholder="Chủ hộ" /></td>
-      <td class="actions-cell">
-        <button class="btn save" title="Lưu" style="color:green"><i class="fa fa-floppy-disk"></i></button>
-        <button class="btn cancel" title="Hủy" style="color:red"><i class="fa fa-times"></i></button>
-      </td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-
-  // Xử lý lưu/hủy dòng thêm mới
-  tbody.addEventListener('click', function(e) {
-    const saveBtn = e.target.closest('.btn.save');
-    const cancelBtn = e.target.closest('.btn.cancel');
-    if (saveBtn) {
-      const tr = saveBtn.closest('tr');
-      const inputs = tr.querySelectorAll('input');
-      const values = [];
-      let valid = true;
-
-      inputs.forEach(input => {
-        if (!input.value.trim()) {
-          alert('Vui lòng nhập đầy đủ thông tin.');
-          input.focus();
-          valid = false;
-          return false; // thoát forEach
-        }
-        values.push(input.value.trim());
+    // Accordion submenu
+    document.querySelectorAll('.submenu-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.nextElementSibling.classList.toggle('open');
+        btn.querySelector('.arrow').classList.toggle('rotated');
       });
+    });
 
-      if (!valid) return;
+    // User popover
+    const userMenu = document.querySelector('.user-menu');
+    const popover = userMenu.querySelector('.user-popover');
+    const closeBtn = popover.querySelector('.popover-close');
 
-      // Kiểm tra giá trị số hợp lệ cho diện tích và số người
-      const dientich = parseFloat(values[3]);
-      const songuoi = parseInt(values[4], 10);
-      if (isNaN(dientich) || dientich <= 0) {
-        alert('Diện tích phải là số lớn hơn 0.');
-        inputs[3].focus();
+    userMenu.addEventListener('click', e => {
+      e.stopPropagation();
+      popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
+    });
+
+    closeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      popover.style.display = 'none';
+    });
+
+    document.addEventListener('click', () => {
+      popover.style.display = 'none';
+    });
+
+    // Xóa dòng khi click vào nút delete
+    const tbody = document.querySelector('.data-table tbody');
+    const addBtn = document.getElementById('add-btn');
+
+    tbody.addEventListener('click', function(e) {
+      // Xóa
+      const btnDelete = e.target.closest('.btn.delete');
+      if (btnDelete) {
+        if (!confirm('Bạn có chắc muốn xóa hộ khẩu này?')) return;
+        btnDelete.closest('tr').remove();
         return;
       }
-      if (isNaN(songuoi) || songuoi <= 0) {
-        alert('Số người phải là số nguyên lớn hơn 0.');
-        inputs[4].focus();
-        return;
-      }
 
-      // Chuyển dòng thành dòng dữ liệu bình thường
-      tr.innerHTML = `
-        <td>${values[0]}</td>
-        <td>${values[1]}</td>
-        <td>${values[2]}</td>
-        <td>${dientich.toFixed(1)}</td>
-        <td>${songuoi}</td>
-        <td>${values[5]}</td>
-        <td class="actions-cell">
-          <button class="btn edit" title="Sửa"><i class="fa fa-pen"></i></button>
-          <button class="btn delete" title="Xóa"><i class="fa fa-trash-alt"></i></button>
-        </td>
-      `;
-      isAddingNew = false;
-      addBtn.disabled = false;
-    } else if (cancelBtn) {
-      // Hủy thêm mới xóa dòng tr
-      const tr = cancelBtn.closest('tr');
-      tr.remove();
-      isAddingNew = false;
-      addBtn.disabled = false;
-    }
-  });
+      // Chỉnh sửa / Lưu
+      const btnEdit = e.target.closest('.btn.edit');
+      if (!btnEdit) return;
 
-  // Xử lý chức năng Sửa/Lưu dòng đã có sẵn
-  tbody.addEventListener('click', function(e) {
-    const btn = e.target.closest('.btn.edit');
-    if (!btn) return;
+      const tr = btnEdit.closest('tr');
+      const isEditing = btnEdit.classList.contains('saving');
 
-    const tr = btn.closest('tr');
+      if (!isEditing) {
+        // Chuyển sang trạng thái edit
+        btnEdit.classList.add('saving');
+        btnEdit.innerHTML = '<i class="fa fa-save"></i>';
 
-    if (btn.classList.contains('editing')) {
-      // Lưu lại dữ liệu sau khi chỉnh sửa
-      for (let i = 0; i <= 5; i++) {
-        const td = tr.cells[i];
-        const input = td.querySelector('input');
-        if (input) {
-          if (!input.value.trim()) {
-            alert('Vui lòng không để trống.');
-            input.focus();
+        const cells = tr.querySelectorAll('td');
+
+        // Mã hộ khẩu (col 0)
+        const mahk = cells[0].textContent.trim();
+        cells[0].innerHTML = `<input type="text" value="${mahk}" />`;
+
+        // Số căn hộ (col 1)
+        const socanho = cells[1].textContent.trim();
+        cells[1].innerHTML = `<input type="text" value="${socanho}" />`;
+
+        // Diện tích (col 2)
+        const dientich = cells[2].textContent.trim();
+        cells[2].innerHTML = `<input type="number" min="0" step="0.1" value="${dientich}" />`;
+
+        // Số người (col 3)
+        const songuoi = cells[3].textContent.trim();
+        cells[3].innerHTML = `<input type="number" min="0" value="${songuoi}" />`;
+
+        // Chủ hộ (col 4)
+        const chuho = cells[4].textContent.trim();
+        cells[4].innerHTML = `<input type="text" value="${chuho}" />`;
+
+      } else {
+        // Lưu
+        const inputs = tr.querySelectorAll('input');
+        const cells = tr.querySelectorAll('td');
+
+        // Kiểm tra dữ liệu bắt buộc
+        for(let i=0; i<inputs.length; i++){
+          if(inputs[i].value.trim() === ''){
+            alert('Vui lòng điền đầy đủ thông tin.');
             return;
           }
-          td.textContent = input.value.trim();
         }
-      }
-      btn.classList.remove('editing');
-      btn.title = 'Sửa';
-      btn.innerHTML = '<i class="fa fa-pen"></i>';
-    } else {
-      // Chuyển sang trạng thái chỉnh sửa
-      for (let i = 0; i <= 5; i++) {
-        const td = tr.cells[i];
-        const text = td.textContent.trim();
-        if (!td.querySelector('input')) {
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.value = text;
-          input.style.width = '100%';
-          td.textContent = '';
-          td.appendChild(input);
-        }
-      }
-      btn.classList.add('editing');
-      btn.title = 'Lưu';
-      btn.innerHTML = '<i class="fa fa-floppy-disk"></i>';
-    }
-  });
-</script>
 
+        btnEdit.classList.remove('saving');
+        btnEdit.innerHTML = '<i class="fa fa-pen"></i>';
+
+        cells[0].textContent = inputs[0].value.trim();
+        cells[1].textContent = inputs[1].value.trim();
+        cells[2].textContent = inputs[2].value.trim();
+        cells[3].textContent = inputs[3].value.trim();
+        cells[4].textContent = inputs[4].value.trim();
+      }
+    });
+
+    // Thêm dòng mới
+    addBtn.addEventListener('click', () => {
+      const newTr = document.createElement('tr');
+      const tbody = document.querySelector('.data-table tbody');
+
+      // Tạo mã hộ khẩu mới tự động dạng HKxxx
+      let maxNumber = 0;
+      tbody.querySelectorAll('tr').forEach(tr => {
+        const code = tr.cells[0].textContent.trim();
+        const numMatch = code.match(/\d+/);
+        if (numMatch) {
+          const num = parseInt(numMatch[0]);
+          if (num > maxNumber) maxNumber = num;
+        }
+      });
+      const newCode = `HK${String(maxNumber + 1).padStart(3, '0')}`;
+
+      newTr.innerHTML = `
+        <td><input type="text" value="${newCode}" readonly /></td>
+        <td><input type="text" placeholder="Số căn hộ" /></td>
+        <td><input type="number" min="0" step="0.1" placeholder="Diện tích (m²)" /></td>
+        <td><input type="number" min="0" placeholder="Số người" /></td>
+        <td><input type="text" placeholder="Chủ hộ" /></td>
+        <td class="actions-cell">
+          <button class="btn save"><i class="fa fa-save"></i></button>
+          <button class="btn cancel"><i class="fa fa-times"></i></button>
+        </td>
+      `;
+
+      tbody.prepend(newTr);
+
+      // Xử lý nút lưu và hủy
+      newTr.querySelector('.btn.save').addEventListener('click', () => {
+        const inputs = newTr.querySelectorAll('input');
+        // Kiểm tra dữ liệu bắt buộc
+        for(let i=0; i<inputs.length; i++){
+          if(inputs[i].value.trim() === ''){
+            alert('Vui lòng điền đầy đủ thông tin.');
+            return;
+          }
+        }
+
+        newTr.cells[0].textContent = inputs[0].value.trim();
+        newTr.cells[1].textContent = inputs[1].value.trim();
+        newTr.cells[2].textContent = inputs[2].value.trim();
+        newTr.cells[3].textContent = inputs[3].value.trim();
+        newTr.cells[4].textContent = inputs[4].value.trim();
+
+        newTr.cells[5].innerHTML = `
+          <button class="btn edit"><i class="fa fa-pen"></i></button>
+          <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+        `;
+      });
+
+      newTr.querySelector('.btn.cancel').addEventListener('click', () => {
+        newTr.remove();
+      });
+    });
+
+    // --- Phần TÌM KIẾM ---
+
+    document.getElementById('search-btn').addEventListener('click', () => {
+      const criteriaIndex = parseInt(document.getElementById('search-criteria').value);
+      const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+      if (!keyword) {
+        alert('Vui lòng nhập từ khóa tìm kiếm.');
+        return;
+      }
+
+      const rows = Array.from(document.querySelectorAll('.data-table tbody tr'));
+      let foundRow = null;
+
+      // Xóa highlight cũ
+      rows.forEach(row => row.classList.remove('highlighted'));
+
+      for (const row of rows) {
+        const cellText = row.cells[criteriaIndex].textContent.trim().toLowerCase();
+        if (cellText.includes(keyword)) {
+          foundRow = row;
+          break; // chỉ tìm dòng đầu tiên
+        }
+      }
+
+      if (foundRow) {
+        // Cuộn tới dòng đó
+        foundRow.scrollIntoView({behavior: 'smooth', block: 'center'});
+
+        // Bôi nền xanh sáng nổi bật
+        foundRow.classList.add('highlighted');
+
+        // Sau 3 giây xóa highlight
+        setTimeout(() => {
+          foundRow.classList.remove('highlighted');
+        }, 3000);
+      } else {
+        alert('Không tìm thấy hộ khẩu phù hợp.');
+      }
+    });
+  </script>
 </body>
 </html>

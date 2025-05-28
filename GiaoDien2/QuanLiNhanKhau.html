@@ -9,6 +9,21 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
   <link rel="stylesheet" href="manHinhQuanLiTaiKhoan.css" />
+  <style>
+    /* Hiệu ứng highlight khi tìm kiếm */
+    .highlighted {
+      background-color: #90ee90 !important; /* màu xanh nhạt */
+      transition: background-color 0.5s ease;
+    }
+    /* Style cơ bản cho bảng và input/select */
+    table.data-table input, table.data-table select {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .actions-cell button {
+      margin-right: 5px;
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -36,7 +51,6 @@
               <li><a href="XuatBaoCao.html">Xuất báo cáo</a></li>
             </ul>
           </li>
-          <!-- thêm các mục khác tương tự -->
         </ul>
       </nav>
     </aside>
@@ -51,7 +65,6 @@
           <div class="user-menu">
             <img src="ava.png" alt="User" class="avatar"/>
             <span>Kieu Oanh<i class="fa fa-caret-down"></i></span>
-            <!-- Pop-over -->
             <div class="user-popover">
               <div class="popover-header">
                 <div class="popover-email">nguyenkieuoanh…@gmail.com</div>
@@ -81,15 +94,15 @@
         <div class="actions">
           <div class="search-group">
             <select id="search-criteria" class="search-criteria">
-              <option value="manhankhau">Mã nhân khẩu</option>
-              <option value="mahokhau">Mã hộ khẩu</option>
-              <option value="hoten">Họ và tên</option>
-              <option value="cccd">Số CCCD</option>
-              <option value="ngaysinh">Ngày sinh</option>
-              <option value="gioitinh">Giới tính</option>
-              <option value="nghenghiep">Nghề nghiệp</option>
-              <option value="tinhtrangcu tru">Tình trạng cư trú</option>
-              <option value="quanhechuhokhau">Quan hệ với chủ hộ</option>
+              <option value="0">Mã nhân khẩu</option>
+              <option value="1">Mã hộ khẩu</option>
+              <option value="2">Họ và tên</option>
+              <option value="3">Số CCCD</option>
+              <option value="4">Ngày sinh</option>
+              <option value="5">Giới tính</option>
+              <option value="6">Nghề nghiệp</option>
+              <option value="7">Quan hệ với chủ hộ</option>
+              <option value="8">Tình trạng cư trú</option>
             </select>
             <input
               type="text"
@@ -107,10 +120,9 @@
           </button>
         </div>
 
-        <table class="data-table" border="1" cellspacing="0" cellpadding="6">
+        <table class="data-table" border="1" cellspacing="0" cellpadding="6" style="min-width:1000px;">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Mã nhân khẩu</th>
               <th>Mã hộ khẩu</th>
               <th>Họ và tên</th>
@@ -118,27 +130,26 @@
               <th>Ngày sinh</th>
               <th>Giới tính</th>
               <th>Nghề nghiệp</th>
-              <th>Tình trạng cư trú</th>
               <th>Quan hệ với chủ hộ</th>
+              <th>Tình trạng cư trú</th>
               <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>1</td>
               <td>NK001</td>
               <td>HK001</td>
               <td>Nguyễn Văn A</td>
               <td>123456789012</td>
-              <td>01/01/1990</td>
+              <td>1990-01-01</td>
               <td>Nam</td>
               <td>Kỹ sư</td>
-              <td>Thường trú</td>
-              <td>Con</td>
+              <td>Chủ hộ</td>
+              <td>Đang ở</td>
               <td class="actions-cell">
                 <button class="btn edit"><i class="fa fa-pen"></i></button>
                 <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
-              </td> 
+              </td>
             </tr>
             <!-- Thêm các dòng dữ liệu tương tự -->
           </tbody>
@@ -203,185 +214,207 @@
       if (!btnEdit) return;
 
       const tr = btnEdit.closest('tr');
-
-      // Kiểm tra trạng thái: nếu đang ở chế độ edit (btn có icon save), thì lưu lại
       const isEditing = btnEdit.classList.contains('saving');
 
       if (!isEditing) {
-        // Chuyển sang trạng thái edit
+        // Chuyển sang chế độ edit
         btnEdit.classList.add('saving');
         btnEdit.innerHTML = '<i class="fa fa-save"></i>';
 
-        // Chuyển các cột thành input/select editable
         const cells = tr.querySelectorAll('td');
-        // Bỏ qua cột ID (index 0) và cột Hành động (cuối)
-        // Chỉ edit cột 1-9 tương ứng các thông tin
-        // Xác định các trường có thể là select (Giới tính, Tình trạng cư trú, Quan hệ với chủ hộ), các trường còn lại input text
 
-        // Mã nhân khẩu (col 1)
-        let mnk = cells[1].innerText;
-        cells[1].innerHTML = `<input type="text" value="${mnk}" />`;
+        // Mã nhân khẩu (col 0)
+        const mank = cells[0].textContent.trim();
+        cells[0].innerHTML = `<input type="text" value="${mank}" />`;
 
-        // Mã hộ khẩu (col 2)
-        let mhk = cells[2].innerText;
-        cells[2].innerHTML = `<input type="text" value="${mhk}" />`;
+        // Mã hộ khẩu (col 1)
+        const mahk = cells[1].textContent.trim();
+        cells[1].innerHTML = `<input type="text" value="${mahk}" />`;
 
-        // Họ và tên (col 3)
-        let hoten = cells[3].innerText;
-        cells[3].innerHTML = `<input type="text" value="${hoten}" />`;
+        // Họ và tên (col 2)
+        const hoten = cells[2].textContent.trim();
+        cells[2].innerHTML = `<input type="text" value="${hoten}" />`;
 
-        // Số CCCD (col 4)
-        let cccd = cells[4].innerText;
-        cells[4].innerHTML = `<input type="text" value="${cccd}" />`;
+        // Số CCCD (col 3)
+        const cccd = cells[3].textContent.trim();
+        cells[3].innerHTML = `<input type="text" value="${cccd}" maxlength="12" />`;
 
-        // Ngày sinh (col 5)
-        let ngaysinh = cells[5].innerText;
-        cells[5].innerHTML = `<input type="date" value="${formatDateForInput(ngaysinh)}" />`;
+        // Ngày sinh (col 4)
+        const ngaysinh = cells[4].textContent.trim();
+        cells[4].innerHTML = `<input type="date" value="${ngaysinh}" />`;
 
-        // Giới tính (col 6)
-        let gioitinh = cells[6].innerText;
-        cells[6].innerHTML = `
+        // Giới tính (col 5)
+        const gioitinh = cells[5].textContent.trim();
+        cells[5].innerHTML = `
           <select>
             <option value="Nam" ${gioitinh === 'Nam' ? 'selected' : ''}>Nam</option>
             <option value="Nữ" ${gioitinh === 'Nữ' ? 'selected' : ''}>Nữ</option>
-            <option value="Khác" ${gioitinh !== 'Nam' && gioitinh !== 'Nữ' ? 'selected' : ''}>Khác</option>
-          </select>`;
+            <option value="Khác" ${gioitinh === 'Khác' ? 'selected' : ''}>Khác</option>
+          </select>
+        `;
 
-        // Nghề nghiệp (col 7)
-        let nghenghiep = cells[7].innerText;
-        cells[7].innerHTML = `<input type="text" value="${nghenghiep}" />`;
+        // Nghề nghiệp (col 6)
+        const nghenghiep = cells[6].textContent.trim();
+        cells[6].innerHTML = `<input type="text" value="${nghenghiep}" />`;
+
+        // Quan hệ với chủ hộ (col 7)
+        const qhchuho = cells[7].textContent.trim();
+        cells[7].innerHTML = `<input type="text" value="${qhchuho}" />`;
 
         // Tình trạng cư trú (col 8)
-        let tinhtrang = cells[8].innerText;
+        const tinhtrang = cells[8].textContent.trim();
         cells[8].innerHTML = `
           <select>
-            <option value="Thường trú" ${tinhtrang === 'Thường trú' ? 'selected' : ''}>Thường trú</option>
-            <option value="Tạm trú" ${tinhtrang === 'Tạm trú' ? 'selected' : ''}>Tạm trú</option>
-            <option value="Khác" ${tinhtrang !== 'Thường trú' && tinhtrang !== 'Tạm trú' ? 'selected' : ''}>Khác</option>
-          </select>`;
-
-        // Quan hệ với chủ hộ (col 9)
-        let quanhe = cells[9].innerText;
-        cells[9].innerHTML = `
-          <select>
-            <option value="Chủ hộ" ${quanhe === 'Chủ hộ' ? 'selected' : ''}>Chủ hộ</option>
-            <option value="Vợ/Chồng" ${quanhe === 'Vợ/Chồng' ? 'selected' : ''}>Vợ/Chồng</option>
-            <option value="Con" ${quanhe === 'Con' ? 'selected' : ''}>Con</option>
-            <option value="Khác" ${['Chủ hộ','Vợ/Chồng','Con'].includes(quanhe) ? '' : 'selected'}>Khác</option>
-          </select>`;
+            <option value="Đang ở" ${tinhtrang === 'Đang ở' ? 'selected' : ''}>Đang ở</option>
+            <option value="Tạm vắng" ${tinhtrang === 'Tạm vắng' ? 'selected' : ''}>Tạm vắng</option>
+          </select>
+        `;
 
       } else {
-        // Lưu lại và chuyển về trạng thái bình thường
+        // Lưu
+        const inputs = tr.querySelectorAll('input, select');
+        const cells = tr.querySelectorAll('td');
+
+        // Kiểm tra dữ liệu bắt buộc
+        for(let i=0; i<inputs.length; i++){
+          if(inputs[i].value.trim() === ''){
+            alert('Vui lòng điền đầy đủ thông tin.');
+            return;
+          }
+        }
+
         btnEdit.classList.remove('saving');
         btnEdit.innerHTML = '<i class="fa fa-pen"></i>';
 
-        const cells = tr.querySelectorAll('td');
-
-        // Lấy giá trị input/select rồi cập nhật vào innerText
-        // Mã nhân khẩu
-        let mnk = cells[1].querySelector('input').value.trim();
-        cells[1].innerText = mnk;
-
-        // Mã hộ khẩu
-        let mhk = cells[2].querySelector('input').value.trim();
-        cells[2].innerText = mhk;
-
-        // Họ và tên
-        let hoten = cells[3].querySelector('input').value.trim();
-        cells[3].innerText = hoten;
-
-        // Số CCCD
-        let cccd = cells[4].querySelector('input').value.trim();
-        cells[4].innerText = cccd;
-
-        // Ngày sinh
-        let ngaysinh = cells[5].querySelector('input').value;
-        cells[5].innerText = formatDateDisplay(ngaysinh);
-
-        // Giới tính
-        let gioitinh = cells[6].querySelector('select').value;
-        cells[6].innerText = gioitinh;
-
-        // Nghề nghiệp
-        let nghenghiep = cells[7].querySelector('input').value.trim();
-        cells[7].innerText = nghenghiep;
-
-        // Tình trạng cư trú
-        let tinhtrang = cells[8].querySelector('select').value;
-        cells[8].innerText = tinhtrang;
-
-        // Quan hệ với chủ hộ
-        let quanhe = cells[9].querySelector('select').value;
-        cells[9].innerText = quanhe;
+        cells[0].textContent = inputs[0].value.trim();
+        cells[1].textContent = inputs[1].value.trim();
+        cells[2].textContent = inputs[2].value.trim();
+        cells[3].textContent = inputs[3].value.trim();
+        cells[4].textContent = inputs[4].value.trim();
+        cells[5].textContent = inputs[5].value.trim();
+        cells[6].textContent = inputs[6].value.trim();
+        cells[7].textContent = inputs[7].value.trim();
+        cells[8].textContent = inputs[8].value.trim();
       }
     });
 
-    // Hàm định dạng ngày (dd/mm/yyyy) -> yyyy-mm-dd (cho input date)
-    function formatDateForInput(str) {
-      // str dạng dd/mm/yyyy
-      const parts = str.split('/');
-      if (parts.length !== 3) return '';
-      return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-    }
-
-    // Hàm định dạng ngày (yyyy-mm-dd) -> dd/mm/yyyy
-    function formatDateDisplay(str) {
-      if (!str) return '';
-      const parts = str.split('-');
-      if (parts.length !== 3) return str;
-      return `${parts[2].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[0]}`;
-    }
-
-    // Nút tạo mới
+    // Thêm dòng mới
     addBtn.addEventListener('click', () => {
+      const newTr = document.createElement('tr');
       const tbody = document.querySelector('.data-table tbody');
-      // Tạo một dòng mới với các ô input, id tự động tăng dựa vào dòng cuối cùng
-      const lastRow = tbody.querySelector('tr:last-child');
-      let newId = 1;
-      if (lastRow) {
-        newId = parseInt(lastRow.cells[0].innerText) + 1;
-      }
 
-      // Tạo dòng mới với ô input, ID cố định, các trường còn lại là input/select
-      const newRow = document.createElement('tr');
-      newRow.innerHTML = `
-        <td>${newId}</td>
-        <td><input type="text" placeholder="Mã nhân khẩu" /></td>
+      // Tạo mã nhân khẩu mới tự động dạng NKxxx
+      let maxNumber = 0;
+      tbody.querySelectorAll('tr').forEach(tr => {
+        const code = tr.cells[0].textContent.trim();
+        const numMatch = code.match(/\d+/);
+        if (numMatch) {
+          const num = parseInt(numMatch[0]);
+          if (num > maxNumber) maxNumber = num;
+        }
+      });
+      const newCode = `NK${String(maxNumber + 1).padStart(3, '0')}`;
+
+      newTr.innerHTML = `
+        <td><input type="text" value="${newCode}" readonly /></td>
         <td><input type="text" placeholder="Mã hộ khẩu" /></td>
         <td><input type="text" placeholder="Họ và tên" /></td>
-        <td><input type="text" placeholder="Số CCCD" /></td>
+        <td><input type="text" maxlength="12" placeholder="Số CCCD" /></td>
         <td><input type="date" /></td>
         <td>
           <select>
-            <option value="Nam">Nam</option>
+            <option value="Nam" selected>Nam</option>
             <option value="Nữ">Nữ</option>
             <option value="Khác">Khác</option>
           </select>
         </td>
         <td><input type="text" placeholder="Nghề nghiệp" /></td>
+        <td><input type="text" placeholder="Quan hệ với chủ hộ" /></td>
         <td>
           <select>
-            <option value="Thường trú">Thường trú</option>
-            <option value="Tạm trú">Tạm trú</option>
-            <option value="Khác">Khác</option>
-          </select>
-        </td>
-        <td>
-          <select>
-            <option value="Chủ hộ">Chủ hộ</option>
-            <option value="Vợ/Chồng">Vợ/Chồng</option>
-            <option value="Con">Con</option>
-            <option value="Khác">Khác</option>
+            <option value="Đang ở" selected>Đang ở</option>
+            <option value="Tạm vắng">Tạm vắng</option>
           </select>
         </td>
         <td class="actions-cell">
-          <button class="btn edit saving"><i class="fa fa-save"></i></button>
-          <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+          <button class="btn save"><i class="fa fa-save"></i></button>
+          <button class="btn cancel"><i class="fa fa-times"></i></button>
         </td>
       `;
-      tbody.appendChild(newRow);
+
+      tbody.prepend(newTr);
+
+      // Xử lý nút lưu và hủy
+      newTr.querySelector('.btn.save').addEventListener('click', () => {
+        const inputs = newTr.querySelectorAll('input, select');
+        // Kiểm tra dữ liệu bắt buộc
+        for(let i=0; i<inputs.length; i++){
+          if(inputs[i].value.trim() === ''){
+            alert('Vui lòng điền đầy đủ thông tin.');
+            return;
+          }
+        }
+
+        newTr.cells[0].textContent = inputs[0].value.trim();
+        newTr.cells[1].textContent = inputs[1].value.trim();
+        newTr.cells[2].textContent = inputs[2].value.trim();
+        newTr.cells[3].textContent = inputs[3].value.trim();
+        newTr.cells[4].textContent = inputs[4].value.trim();
+        newTr.cells[5].textContent = inputs[5].value.trim();
+        newTr.cells[6].textContent = inputs[6].value.trim();
+        newTr.cells[7].textContent = inputs[7].value.trim();
+        newTr.cells[8].textContent = inputs[8].value.trim();
+
+        newTr.cells[9].innerHTML = `
+          <button class="btn edit"><i class="fa fa-pen"></i></button>
+          <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+        `;
+      });
+
+      newTr.querySelector('.btn.cancel').addEventListener('click', () => {
+        newTr.remove();
+      });
     });
 
+    // --- Phần TÌM KIẾM ---
+
+    document.getElementById('search-btn').addEventListener('click', () => {
+      const criteriaIndex = parseInt(document.getElementById('search-criteria').value);
+      const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+      if (!keyword) {
+        alert('Vui lòng nhập từ khóa tìm kiếm.');
+        return;
+      }
+
+      const rows = Array.from(document.querySelectorAll('.data-table tbody tr'));
+      let foundRow = null;
+
+      // Xóa highlight cũ
+      rows.forEach(row => row.classList.remove('highlighted'));
+
+      for (const row of rows) {
+        const cellText = row.cells[criteriaIndex].textContent.trim().toLowerCase();
+        if (cellText.includes(keyword)) {
+          foundRow = row;
+          break; // chỉ tìm dòng đầu tiên
+        }
+      }
+
+      if (foundRow) {
+        // Cuộn tới dòng đó
+        foundRow.scrollIntoView({behavior: 'smooth', block: 'center'});
+
+        // Bôi nền xanh sáng nổi bật
+        foundRow.classList.add('highlighted');
+
+        // Sau 3 giây xóa highlight
+        setTimeout(() => {
+          foundRow.classList.remove('highlighted');
+        }, 3000);
+      } else {
+        alert('Không tìm thấy nhân khẩu phù hợp.');
+      }
+    });
   </script>
 </body>
 </html>
