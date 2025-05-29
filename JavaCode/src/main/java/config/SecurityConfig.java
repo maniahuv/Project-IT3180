@@ -21,14 +21,15 @@ import service.TaiKhoanService;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	@SuppressWarnings("unused")
 	@Autowired
 	private TaiKhoanService userDetailsService;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests(auth -> auth.requestMatchers("/", "/login", "/register", "*.css", "*.js", "*.png")
-				.permitAll().anyRequest().authenticated())
+		http.csrf(csrf -> csrf.disable())
+				.authorizeHttpRequests(
+						auth -> auth.requestMatchers("/", "/login", "/register", "*.css", "*.js", "*.png", "/dang-ki")
+								.permitAll().anyRequest().authenticated())
 				.formLogin(form -> form.loginPage("/login").usernameParameter("email").passwordParameter("password")
 						.defaultSuccessUrl("/", true).permitAll())
 				.logout(logout -> logout.logoutSuccessUrl("/").permitAll());

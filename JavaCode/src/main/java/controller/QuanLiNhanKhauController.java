@@ -1,5 +1,6 @@
 package controller;
 
+import java.sql.Date;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,59 +8,60 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import model.TaiKhoan;
-import model.TaiKhoan.VaiTro;
-import repository.TaiKhoanDao;
-import service.TaiKhoanService;
+import model.NhanKhau;
+import repository.NhanKhauDao;
+import service.NhanKhauService;
 
 @RestController
-public class QuanLiTaiKhoanController {
+public class QuanLiNhanKhauController {
 
-	@PostMapping("/tao-tai-khoan")
+	@PostMapping("/tao-nhan-khau")
 	public String taoTaiKhoan(@RequestBody List<String> newTr) {
 		for (String x : newTr) {
 			System.out.printf("%s - ", x);
 		}
 		System.out.println("CREATE");
-		if (TaiKhoanService.taoTaiKhoanMoi(new TaiKhoan(TaiKhoanDao.instance.generateID(), newTr.get(4), newTr.get(2),
-				newTr.get(1), newTr.get(3), VaiTro.TO_TRUONG, newTr.get(6), true))) {
+		if (NhanKhauService.taoNhanKhauMoi("Admin",
+				new NhanKhau(NhanKhauDao.instance.generateID(), newTr.get(1), newTr.get(2), Date.valueOf(newTr.get(3)),
+						Integer.parseInt(newTr.get(4)), newTr.get(5), 0, Integer.parseInt(newTr.get(7))))) {
 			System.out.println("Tao tai khoan thanh cong");
 		} else {
 			System.out.println("Tao tai khoan that bai");
 		}
-		return "manHinhQuanLiTaiKhoan";
+		return "QuanLiNhanKhau";
 	}
 
-	@PostMapping("/save-tai-khoan")
+	@PostMapping("/save-nhan-khau")
 	public String luuTaiKhoan(@RequestBody List<String> newTr) {
 		for (String x : newTr) {
 			System.out.printf("%s - ", x);
 		}
 		System.out.println("SAVE");
-		if (TaiKhoanService.capNhatThongTin(new TaiKhoan(newTr.get(0), newTr.get(4), "111111", newTr.get(1),
-				newTr.get(3), VaiTro.TO_TRUONG, newTr.get(6), true))) {
+		if (NhanKhauService.capNhatThongTin("Admin",
+				new NhanKhau(newTr.get(0), newTr.get(1), newTr.get(2), Date.valueOf(newTr.get(3)),
+						Integer.parseInt(newTr.get(4)), newTr.get(5), 0, Integer.parseInt(newTr.get(7))))) {
 			System.out.println("Luu tai khoan thanh cong");
 		} else {
 			System.out.println("Luu tai khoan that bai");
 		}
-		return "manHinhQuanLiTaiKhoan";
+		return "QuanLiNhanKhau";
 	}
 
-	@PostMapping("/xoa-tai-khoan")
-	public String xoaTaiKhoan(@RequestBody String id) {
+	@PostMapping("/xoa-nhan-khau")
+	public String xoaNhanKhau(@RequestBody String id) {
 		System.out.println(String.format("Delete %s", id));
-		if (TaiKhoanService.xoaTaiKhoan(id)) {
+		if (NhanKhauService.xoaNhanKhau("Admin", id)) {
 			System.out.println("Xoa tai khoan thanh cong");
 		} else {
 			System.out.println("Xoa tai khoan that bai");
 		}
-		return "manHinhQuanLiTaiKhoan";
+		return "QuanLiNhanKhau";
 	}
 
-	@GetMapping("/get-tai-khoan")
-	public List<TaiKhoan> getAllTaiKhoan() {
+	@GetMapping("/get-nhan-khau")
+	public List<NhanKhau> getAllNhanKhau() {
 		System.out.println("LOAD");
-		return TaiKhoanDao.instance.selectAll();
+		return NhanKhauDao.instance.selectAll();
 	}
 
 }

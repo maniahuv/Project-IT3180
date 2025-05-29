@@ -49,27 +49,25 @@ public abstract class DataAccessObject<T> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.err.println(String.format("Failed to update %s", name));
+			return 0;
 		}
 		return ketQua;
 	}
 
 	private void setData(PreparedStatement pst, int index, Object data) throws SQLException {
-		if (data instanceof String) {
-			pst.setString(index, (String) data);
-		}
-		if (data instanceof Integer) {
-			pst.setInt(index, (Integer) data);
-		}
-		if (data instanceof Double) {
-			pst.setDouble(index, (Double) data);
-		}
+		int i = index + 1;
 		if (data instanceof Date) {
-			pst.setDate(index, (Date) data);
-		}
-		if (data instanceof Boolean) {
-			pst.setBoolean(index, (Boolean) data);
+			pst.setDate(i, (Date) data);
+		} else if (data instanceof Boolean) {
+			pst.setBoolean(i, (Boolean) data);
+		} else if (data instanceof String) {
+			pst.setString(i, (String) data);
+		} else if (data instanceof Integer) {
+			pst.setInt(i, (Integer) data);
+		} else if (data instanceof Double) {
+			pst.setDouble(i, (Double) data);
 		}
 	}
 
@@ -93,8 +91,8 @@ public abstract class DataAccessObject<T> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(String.format("Failed to delete %s", name));
+			return 0;
 		}
 		return ketQua;
 	}
@@ -120,14 +118,13 @@ public abstract class DataAccessObject<T> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(String.format("Failed to select %s", name));
 			return null;
 		}
 		return ketQua;
 	}
 
-	public List<T> selectALL() {
+	public List<T> selectAll() {
 		List<T> ketQua = new ArrayList<T>();
 		try {
 			// Tao ket noi
@@ -149,7 +146,7 @@ public abstract class DataAccessObject<T> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.err.println(String.format("Failed to select %s", name));
 			return null;
 		}
 		return ketQua;
@@ -172,13 +169,13 @@ public abstract class DataAccessObject<T> {
 
 			// Xu ly
 			while (rs.next()) {
-				return String.format("%s%d", prefix, rs.getInt(1));
+				return String.format("%s%03d", prefix, rs.getInt(1) + 1);
 			}
 
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.err.println(String.format("Failed to generate id %s", name));
 			return null;
 		}
 		return null;
@@ -207,7 +204,8 @@ public abstract class DataAccessObject<T> {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.err.println(String.format("Failed to query %s", name));
+			return list;
 		}
 		return list;
 	}

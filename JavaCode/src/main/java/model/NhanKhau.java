@@ -13,11 +13,10 @@ public class NhanKhau {
 	private String ngheNghiep;
 	private int quanHeVoiChuHo;
 	private int tinhTrangCuTru;
-	private String maHoKhau;
 
 	// Constructor
 	public NhanKhau(String maNhanKhau, String hoTen, String soCCCD, Date ngaySinh, int gioiTinh, String ngheNghiep,
-			int quanHeVoiChuHo, int tinhTrangCuTru, String maHoKhau) {
+			int quanHeVoiChuHo, int tinhTrangCuTru) {
 		this.maNhanKhau = maNhanKhau;
 		this.hoTen = hoTen;
 		this.soCCCD = soCCCD;
@@ -26,7 +25,6 @@ public class NhanKhau {
 		this.ngheNghiep = ngheNghiep;
 		this.quanHeVoiChuHo = quanHeVoiChuHo;
 		this.tinhTrangCuTru = tinhTrangCuTru;
-		this.maHoKhau = maHoKhau;
 	}
 
 	// Getters và Setters
@@ -94,25 +92,16 @@ public class NhanKhau {
 		this.tinhTrangCuTru = tinhTrangCuTru;
 	}
 
-	public String getMaHoKhau() {
-		return maHoKhau;
-	}
-
-	public void setMaHoKhau(String maHoKhau) {
-		this.maHoKhau = maHoKhau;
-	}
-
 	@Override
 	public String toString() {
 		return "NhanKhau [maNhanKhau=" + maNhanKhau + ", hoTen=" + hoTen + ", soCCCD=" + soCCCD + ", ngaySinh="
 				+ ngaySinh + ", gioiTinh=" + gioiTinh + ", ngheNghiep=" + ngheNghiep + ", quanHeVoiChuHo="
-				+ quanHeVoiChuHo + ", tinhTrangCuTru=" + tinhTrangCuTru + ", maHoKhau=" + maHoKhau + "]";
+				+ quanHeVoiChuHo + ", tinhTrangCuTru=" + tinhTrangCuTru;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(maNhanKhau, hoTen, soCCCD, ngaySinh, gioiTinh, ngheNghiep, quanHeVoiChuHo, tinhTrangCuTru,
-				maHoKhau);
+		return Objects.hash(maNhanKhau, hoTen, soCCCD, ngaySinh, gioiTinh, ngheNghiep, quanHeVoiChuHo, tinhTrangCuTru);
 	}
 
 	@Override
@@ -125,8 +114,7 @@ public class NhanKhau {
 		return Objects.equals(maNhanKhau, other.maNhanKhau) && Objects.equals(hoTen, other.hoTen)
 				&& Objects.equals(soCCCD, other.soCCCD) && Objects.equals(ngaySinh, other.ngaySinh)
 				&& gioiTinh == other.gioiTinh && Objects.equals(ngheNghiep, other.ngheNghiep)
-				&& quanHeVoiChuHo == other.quanHeVoiChuHo && tinhTrangCuTru == other.tinhTrangCuTru
-				&& Objects.equals(maHoKhau, other.maHoKhau);
+				&& quanHeVoiChuHo == other.quanHeVoiChuHo && tinhTrangCuTru == other.tinhTrangCuTru;
 	}
 
 	// Enums
@@ -195,4 +183,5 @@ public class NhanKhau {
 		}
 
 	}
+
 }

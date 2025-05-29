@@ -14,6 +14,8 @@ public class TaiKhoan {
 	private boolean trangThai;
 
 	public TaiKhoan() {
+		vaiTro = VaiTro.KE_TOAN;
+		trangThai = false;
 	}
 
 	public TaiKhoan(String maTaiKhoan, String email, String matKhau, String tenNguoiDung, String soDienThoai,
@@ -123,16 +125,16 @@ public class TaiKhoan {
 
 		public static final int KE_TOAN = 0;
 		public static final int TO_TRUONG = 1;
-		public static final int TO_PHO = 2;
+		public static final int NGUOI_DUNG = 2;
 
 		public static String toString(int vaiTro) {
 			switch (vaiTro) {
 			case KE_TOAN:
 				return "Kế toán";
 			case TO_TRUONG:
-				return "Tổ trưởng";
-			case TO_PHO:
-				return "Tổ phó";
+				return "Tổ trưởng/Tổ phó";
+			case NGUOI_DUNG:
+				return "Nguoi dung";
 			default:
 				return "";
 			}

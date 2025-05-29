@@ -7,37 +7,17 @@ public class KhoanThu {
 
 	private String maKhoanThu;
 	private String maDotThu;
-	private String maHoKhau;
-	private String maLoaiKHoanThu;
 	private Double soTienPhaiNop;
-	private int trangThaiThanhToan;
 	private Date ngayNop;
+	private String tenKhoanThu;
 
-	public static class TrangThaiThanhToan {
-		public static final int DA_NOP = 0;
-		public static final int CHUA_NOP = 1;
-
-		public static String toString(int id) {
-			switch (id) {
-			case DA_NOP:
-				return "đã thu";
-			case CHUA_NOP:
-				return "chưa thu";
-			default:
-				return "";
-			}
-		}
-	}
-
-	public KhoanThu(String maKhoanThu, String maDotThu, String maHoKhau, String maLoaiKHoanThu, Double soTienPhaiNop,
-			int trangThaiThanhToan, Date ngayNop) {
+	public KhoanThu(String maKhoanThu, String maDotThu, Double soTienPhaiNop, Date ngayNop, String tenKhoanThu) {
+		super();
 		this.maKhoanThu = maKhoanThu;
 		this.maDotThu = maDotThu;
-		this.maHoKhau = maHoKhau;
-		this.maLoaiKHoanThu = maLoaiKHoanThu;
 		this.soTienPhaiNop = soTienPhaiNop;
-		this.trangThaiThanhToan = trangThaiThanhToan;
 		this.ngayNop = ngayNop;
+		this.tenKhoanThu = tenKhoanThu;
 	}
 
 	public String getMaKhoanThu() {
@@ -56,36 +36,12 @@ public class KhoanThu {
 		this.maDotThu = maDotThu;
 	}
 
-	public String getMaHoKhau() {
-		return maHoKhau;
-	}
-
-	public void setMaHoKhau(String maHoKhau) {
-		this.maHoKhau = maHoKhau;
-	}
-
-	public String getMaLoaiKHoanThu() {
-		return maLoaiKHoanThu;
-	}
-
-	public void setMaLoaiKHoanThu(String maLoaiKHoanThu) {
-		this.maLoaiKHoanThu = maLoaiKHoanThu;
-	}
-
 	public Double getSoTienPhaiNop() {
 		return soTienPhaiNop;
 	}
 
 	public void setSoTienPhaiNop(Double soTienPhaiNop) {
 		this.soTienPhaiNop = soTienPhaiNop;
-	}
-
-	public int getTrangThaiThanhToan() {
-		return trangThaiThanhToan;
-	}
-
-	public void setTrangThaiThanhToan(int trangThaiThanhToan) {
-		this.trangThaiThanhToan = trangThaiThanhToan;
 	}
 
 	public Date getNgayNop() {
@@ -96,16 +52,17 @@ public class KhoanThu {
 		this.ngayNop = ngayNop;
 	}
 
-	@Override
-	public String toString() {
-		return "KhoanThu [maKhoanThu=" + maKhoanThu + ", maDotThu=" + maDotThu + ", maHoKhau=" + maHoKhau
-				+ ", maLoaiKHoanThu=" + maLoaiKHoanThu + ", soTienPhaiNop=" + soTienPhaiNop + ", trangThaiThanhToan="
-				+ trangThaiThanhToan + ", ngayNop=" + ngayNop + "]";
+	public String getTenKhoanThu() {
+		return tenKhoanThu;
+	}
+
+	public void setTenKhoanThu(String tenKhoanThu) {
+		this.tenKhoanThu = tenKhoanThu;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(maDotThu, maHoKhau, maKhoanThu, maLoaiKHoanThu, ngayNop, soTienPhaiNop, trangThaiThanhToan);
+		return Objects.hash(maDotThu, maKhoanThu, ngayNop, soTienPhaiNop, tenKhoanThu);
 	}
 
 	@Override
@@ -117,10 +74,31 @@ public class KhoanThu {
 		if (getClass() != obj.getClass())
 			return false;
 		KhoanThu other = (KhoanThu) obj;
-		return Objects.equals(maDotThu, other.maDotThu) && Objects.equals(maHoKhau, other.maHoKhau)
-				&& Objects.equals(maKhoanThu, other.maKhoanThu) && Objects.equals(maLoaiKHoanThu, other.maLoaiKHoanThu)
+		return Objects.equals(maDotThu, other.maDotThu) && Objects.equals(maKhoanThu, other.maKhoanThu)
 				&& Objects.equals(ngayNop, other.ngayNop) && Objects.equals(soTienPhaiNop, other.soTienPhaiNop)
-				&& Objects.equals(trangThaiThanhToan, other.trangThaiThanhToan);
+				&& Objects.equals(tenKhoanThu, other.tenKhoanThu);
+	}
+
+	@Override
+	public String toString() {
+		return "KhoanThu [maKhoanThu=" + maKhoanThu + ", maDotThu=" + maDotThu + ", soTienPhaiNop=" + soTienPhaiNop
+				+ ", ngayNop=" + ngayNop + ", tenKhoanThu=" + tenKhoanThu + "]";
+	}
+
+	public static class TrangThaiThanhToan {
+		public static final int DA_NOP = 0;
+		public static final int CHUA_NOP = 1;
+
+		public static String toString(int id) {
+			switch (id) {
+			case DA_NOP:
+				return "đã thu";
+			case CHUA_NOP:
+				return "chưa thu";
+			default:
+				return "";
+			}
+		}
 	}
 
 }

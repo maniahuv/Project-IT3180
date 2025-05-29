@@ -170,6 +170,43 @@
     const popover = userMenu.querySelector('.user-popover');
     const closeBtn = popover.querySelector('.popover-close');
 
+	// Post action to backend action mapping
+	async function postAction(action, input) {
+		fetch(action, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json' },
+		    body: JSON.stringify(input)
+		}).then(() => loadNhanKhau()).catch(error => console.error('Error:', error));
+	}
+
+	async function loadNhanKhau() {
+	    const response = await fetch('/get-dot-thu');
+	    const accounts = await response.json();
+
+	    const tbody = document.querySelector('.data-table tbody');
+	    tbody.innerHTML = ''; // Clear current rows
+
+	    accounts.forEach(acc => {
+	      const row = document.createElement('tr');
+	      row.innerHTML = `
+	        <td>${acc.maDotThu}</td>
+		  	<td>${acc.tenDotThu}</td>
+	        <td>${acc.thoiGianBatDau}</td>
+	        <td>${acc.thoiGianKetThuc}</td>
+			<td>${acc.moTa}</td>
+			<td>${acc.trangThai}</td>
+	        <td class="actions-cell">
+	          <button class="btn edit"><i class="fa fa-pen"></i></button>
+	          <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+	        </td>
+	      `;
+	      tbody.appendChild(row);
+	    });
+	  }
+
+	  // Load data when page is ready
+	  window.addEventListener('DOMContentLoaded', loadNhanKhau);
+	  
     userMenu.addEventListener('click', e => {
       e.stopPropagation();
       popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
@@ -194,6 +231,8 @@
       if (btnDelete) {
         if (!confirm('Bạn có chắc muốn xóa khoản thu này?')) return;
         btnDelete.closest('tr').remove();
+		postAction('/xoa-khoan-thu',
+		  		btnDelete.closest('tr').querySelector('td').textContent.trim());
         return;
       }
 
@@ -252,6 +291,9 @@
         cells[2].textContent = inputs[2].value.trim();
         cells[3].textContent = inputs[3].value.trim();
         cells[4].textContent = inputs[4].value.trim();
+		
+		postAction('/save-khoan-thu',
+		  		Array.from(cells).slice(0, -1).map(cell => cell.textContent.trim()));
       }
     });
 
@@ -307,6 +349,9 @@
           <button class="btn edit"><i class="fa fa-pen"></i></button>
           <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
         `;
+
+		  postAction('/tao-khoan-thu',
+		  		Array.from(newTr.cells).slice(0, -1).map(cell => cell.textContent.trim()));
       });
 
       newTr.querySelector('.btn.cancel').addEventListener('click', () => {

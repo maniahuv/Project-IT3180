@@ -22,11 +22,9 @@ public class JDBCUtil {
 			c = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD);
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Failed to connect to mySQL.");
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Failed to get JDBC Driver.");
 		}
 
 		return c;
