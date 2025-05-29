@@ -95,14 +95,13 @@
           <div class="search-group">
             <select id="search-criteria" class="search-criteria">
               <option value="0">Mã nhân khẩu</option>
-              <option value="1">Mã hộ khẩu</option>
-              <option value="2">Họ và tên</option>
-              <option value="3">Số CCCD</option>
-              <option value="4">Ngày sinh</option>
-              <option value="5">Giới tính</option>
-              <option value="6">Nghề nghiệp</option>
-              <option value="7">Quan hệ với chủ hộ</option>
-              <option value="8">Tình trạng cư trú</option>
+              <option value="1">Họ và tên</option>
+              <option value="2">Số CCCD</option>
+              <option value="3">Ngày sinh</option>
+              <option value="4">Giới tính</option>
+              <option value="5">Nghề nghiệp</option>
+              <option value="6">Quan hệ với chủ hộ</option>
+              <option value="7">Tình trạng cư trú</option>
             </select>
             <input
               type="text"
@@ -124,7 +123,6 @@
           <thead>
             <tr>
               <th>Mã nhân khẩu</th>
-              <th>Mã hộ khẩu</th>
               <th>Họ và tên</th>
               <th>Số CCCD</th>
               <th>Ngày sinh</th>
@@ -138,7 +136,6 @@
           <tbody>
             <tr>
               <td>NK001</td>
-              <td>HK001</td>
               <td>Nguyễn Văn A</td>
               <td>123456789012</td>
               <td>1990-01-01</td>
@@ -188,8 +185,7 @@
 			method: 'POST',
 			headers: {'Content-Type': 'application/json' },
 		    body: JSON.stringify(input)
-		}).catch(error => console.error('Error:', error));
-		loadNhanKhau();
+		}).then(() => loadNhanKhau()).catch(error => console.error('Error:', error));
 	}
 
 	async function loadNhanKhau() {
@@ -203,7 +199,6 @@
 	      const row = document.createElement('tr');
 	      row.innerHTML = `
 	        <td>${acc.maNhanKhau}</td>
-		  	<td>${acc.maHoKhau}</td>
 	        <td>${acc.hoTen}</td>
 	        <td>${acc.soCCCD}</td>
 	        <td>${acc.ngaySinh}</td>
@@ -270,25 +265,21 @@
         const mank = cells[0].textContent.trim();
         cells[0].innerHTML = `<input type="text" value="${mank}" />`;
 
-        // Mã hộ khẩu (col 1)
-        const mahk = cells[1].textContent.trim();
-        cells[1].innerHTML = `<input type="text" value="${mahk}" />`;
+        // Họ và tên (col 1)
+        const hoten = cells[1].textContent.trim();
+        cells[1].innerHTML = `<input type="text" value="${hoten}" />`;
 
-        // Họ và tên (col 2)
-        const hoten = cells[2].textContent.trim();
-        cells[2].innerHTML = `<input type="text" value="${hoten}" />`;
+        // Số CCCD (col 2)
+        const cccd = cells[2].textContent.trim();
+        cells[2].innerHTML = `<input type="text" value="${cccd}" maxlength="12" />`;
 
-        // Số CCCD (col 3)
-        const cccd = cells[3].textContent.trim();
-        cells[3].innerHTML = `<input type="text" value="${cccd}" maxlength="12" />`;
+        // Ngày sinh (col 3)
+        const ngaysinh = cells[3].textContent.trim();
+        cells[3].innerHTML = `<input type="date" value="${ngaysinh}" />`;
 
-        // Ngày sinh (col 4)
-        const ngaysinh = cells[4].textContent.trim();
-        cells[4].innerHTML = `<input type="date" value="${ngaysinh}" />`;
-
-        // Giới tính (col 5)
-        const gioitinh = cells[5].textContent.trim();
-        cells[5].innerHTML = `
+        // Giới tính (col 4)
+        const gioitinh = cells[4].textContent.trim();
+        cells[4].innerHTML = `
           <select>
             <option value=0 ${gioitinh === 0 ? 'selected' : ''}>Nam</option>
             <option value=1 ${gioitinh === 1 ? 'selected' : ''}>Nữ</option>
@@ -296,26 +287,26 @@
           </select>
         `;
 
-        // Nghề nghiệp (col 6)
-        const nghenghiep = cells[6].textContent.trim();
-        cells[6].innerHTML = `<input type="text" value="${nghenghiep}" />`;
+        // Nghề nghiệp (col 5)
+        const nghenghiep = cells[5].textContent.trim();
+        cells[5].innerHTML = `<input type="text" value="${nghenghiep}" />`;
 
-        // Quan hệ với chủ hộ (col 7)
-        const qhchuho = cells[7].textContent.trim();
-        cells[7].innerHTML = `
+        // Quan hệ với chủ hộ (col 6)
+        const qhchuho = cells[6].textContent.trim();
+        cells[6].innerHTML = `
 	         <select>
 	           <option value=0 ${qhchuho === 0 ? 'selected' : ''}>Chủ hộ</option>
 	           <option value=1 ${qhchuho === 1 ? 'selected' : ''}>Vợ/Chồng</option>
 	           <option value=2 ${qhchuho === 2 ? 'selected' : ''}>Con</option>
-			   <option value=0 ${qhchuho === 3 ? 'selected' : ''}>Cha/Mẹ</option>
-   	           <option value=1 ${qhchuho === 4 ? 'selected' : ''}>Anh/Chị/Em</option>
-   	           <option value=2 ${qhchuho === 5 ? 'selected' : ''}>Khác</option>
+			   <option value=3 ${qhchuho === 3 ? 'selected' : ''}>Cha/Mẹ</option>
+   	           <option value=4 ${qhchuho === 4 ? 'selected' : ''}>Anh/Chị/Em</option>
+   	           <option value=5 ${qhchuho === 5 ? 'selected' : ''}>Khác</option>
 	         </select>
 	       `;
 
-        // Tình trạng cư trú (col 8)
-        const tinhtrang = cells[8].textContent.trim();
-        cells[8].innerHTML = `
+        // Tình trạng cư trú (col 7)
+        const tinhtrang = cells[7].textContent.trim();
+        cells[7].innerHTML = `
           <select>
             <option value=0 ${tinhtrang === 0 ? 'selected' : ''}>Đang ở</option>
             <option value=1 ${tinhtrang === 1 ? 'selected' : ''}>Tạm vắng</option>
@@ -346,7 +337,6 @@
         cells[5].textContent = inputs[5].value.trim();
         cells[6].textContent = inputs[6].value.trim();
         cells[7].textContent = inputs[7].value.trim();
-        cells[8].textContent = inputs[8].value.trim();
 
 		postAction('/save-nhan-khau',
 		  		Array.from(cells).slice(0, -1).map(cell => cell.textContent.trim()));
@@ -372,7 +362,6 @@
 
       newTr.innerHTML = `
         <td><input type="text" value="${newCode}" readonly /></td>
-        <td><input type="text" placeholder="Mã hộ khẩu" /></td>
         <td><input type="text" placeholder="Họ và tên" /></td>
         <td><input type="text" maxlength="12" placeholder="Số CCCD" /></td>
         <td><input type="date" /></td>
@@ -426,9 +415,8 @@
         newTr.cells[5].textContent = inputs[5].value.trim();
         newTr.cells[6].textContent = inputs[6].value.trim();
         newTr.cells[7].textContent = inputs[7].value.trim();
-        newTr.cells[8].textContent = inputs[8].value.trim();
 
-        newTr.cells[9].innerHTML = `
+        newTr.cells[8].innerHTML = `
           <button class="btn edit"><i class="fa fa-pen"></i></button>
           <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
         `;

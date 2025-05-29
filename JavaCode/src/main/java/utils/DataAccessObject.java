@@ -49,6 +49,7 @@ public abstract class DataAccessObject<T> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
+			e.printStackTrace();
 			System.err.println(String.format("Failed to update %s", name));
 			return 0;
 		}
@@ -56,20 +57,17 @@ public abstract class DataAccessObject<T> {
 	}
 
 	private void setData(PreparedStatement pst, int index, Object data) throws SQLException {
-		if (data instanceof String) {
-			pst.setString(index, (String) data);
-		}
-		if (data instanceof Integer) {
-			pst.setInt(index, (Integer) data);
-		}
-		if (data instanceof Double) {
-			pst.setDouble(index, (Double) data);
-		}
+		int i = index + 1;
 		if (data instanceof Date) {
-			pst.setDate(index, (Date) data);
-		}
-		if (data instanceof Boolean) {
-			pst.setBoolean(index, (Boolean) data);
+			pst.setDate(i, (Date) data);
+		} else if (data instanceof Boolean) {
+			pst.setBoolean(i, (Boolean) data);
+		} else if (data instanceof String) {
+			pst.setString(i, (String) data);
+		} else if (data instanceof Integer) {
+			pst.setInt(i, (Integer) data);
+		} else if (data instanceof Double) {
+			pst.setDouble(i, (Double) data);
 		}
 	}
 

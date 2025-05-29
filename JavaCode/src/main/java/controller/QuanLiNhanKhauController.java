@@ -22,9 +22,8 @@ public class QuanLiNhanKhauController {
 		}
 		System.out.println("CREATE");
 		if (NhanKhauService.taoNhanKhauMoi("Admin",
-				new NhanKhau(NhanKhauDao.instance.generateID(), newTr.get(2), newTr.get(3), Date.valueOf(newTr.get(4)),
-						Integer.parseInt(newTr.get(5)), newTr.get(6), 0, Integer.parseInt(newTr.get(8)),
-						newTr.get(1)))) {
+				new NhanKhau(NhanKhauDao.instance.generateID(), newTr.get(1), newTr.get(2), Date.valueOf(newTr.get(3)),
+						Integer.parseInt(newTr.get(4)), newTr.get(5), 0, Integer.parseInt(newTr.get(7))))) {
 			System.out.println("Tao tai khoan thanh cong");
 		} else {
 			System.out.println("Tao tai khoan that bai");
@@ -39,9 +38,8 @@ public class QuanLiNhanKhauController {
 		}
 		System.out.println("SAVE");
 		if (NhanKhauService.capNhatThongTin("Admin",
-				new NhanKhau(NhanKhauDao.instance.generateID(), newTr.get(2), newTr.get(3), Date.valueOf(newTr.get(4)),
-						Integer.parseInt(newTr.get(5)), newTr.get(6), 0, Integer.parseInt(newTr.get(8)),
-						newTr.get(1)))) {
+				new NhanKhau(newTr.get(0), newTr.get(1), newTr.get(2), Date.valueOf(newTr.get(3)),
+						Integer.parseInt(newTr.get(4)), newTr.get(5), 0, Integer.parseInt(newTr.get(7))))) {
 			System.out.println("Luu tai khoan thanh cong");
 		} else {
 			System.out.println("Luu tai khoan that bai");

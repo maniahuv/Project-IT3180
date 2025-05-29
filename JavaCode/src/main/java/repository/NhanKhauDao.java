@@ -25,7 +25,7 @@ public class NhanKhauDao extends DataAccessObject<NhanKhau> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thuc thi lenh sql
-			String sql = "INSERT INTO NhanKhau (ID,HoTen,SoCCCD,NgaySinh,GioiTinh,NgheNghiep,QuanHeVoiChuHo,TinhTrangCuTru,MaHoKhau) VALUES (?,?,?,?,?,?,?,?,?)";
+			String sql = "INSERT INTO NhanKhau (ID,HoTen,SoCCCD,NgaySinh,GioiTinh,NgheNghiep,QuanHeVoiChuHo,TinhTrangCuTru) VALUES (?,?,?,?,?,?,?,?)";
 
 			// Tao statement
 			PreparedStatement pst = conn.prepareStatement(sql);
@@ -37,7 +37,6 @@ public class NhanKhauDao extends DataAccessObject<NhanKhau> {
 			pst.setString(6, t.getNgheNghiep());
 			pst.setInt(7, t.getQuanHeVoiChuHo());
 			pst.setInt(8, t.getTinhTrangCuTru());
-			pst.setString(9, t.getMaHoKhau());
 
 			ketQua = pst.executeUpdate();
 			System.out.println("Có " + ketQua + " dòng thay đổi");
@@ -55,7 +54,7 @@ public class NhanKhauDao extends DataAccessObject<NhanKhau> {
 	public NhanKhau newFromResultSet(ResultSet rs) throws SQLException {
 		return new NhanKhau(rs.getString("ID"), rs.getString("HoTen"), rs.getString("SoCCCD"), rs.getDate("NgaySinh"),
 				rs.getInt("GioiTinh"), rs.getString("NgheNghiep"), rs.getInt("QuanHeVoiChuHo"),
-				rs.getInt("TinhTrangCuTru"), rs.getString("MaHoKhau"));
+				rs.getInt("TinhTrangCuTru"));
 	}
 
 }

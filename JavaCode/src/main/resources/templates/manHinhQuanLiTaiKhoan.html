@@ -157,15 +157,14 @@
         btn.querySelector('.arrow').classList.toggle('rotated');
       });
     });
-	
+
 	// Post action to backend action mapping
 	async function postAction(action, input) {
 		fetch(action, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json' },
 		    body: JSON.stringify(input)
-		}).catch(error => console.error('Error:', error));
-		loadAccounts();
+		}).then(() => loadAccounts()).catch(error => console.error('Error:', error));
 	}
 
 	async function loadAccounts() {

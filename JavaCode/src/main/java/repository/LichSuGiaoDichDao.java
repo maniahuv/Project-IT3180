@@ -42,7 +42,7 @@ public class LichSuGiaoDichDao extends DataAccessObject<LichSuGiaoDich> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			System.err.println(String.format("Failed to update %s", name));
+			System.err.println("Failed to record history.");
 			return 0;
 		}
 		return ketQua;

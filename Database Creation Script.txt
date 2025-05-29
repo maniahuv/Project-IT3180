@@ -12,8 +12,7 @@ CREATE TABLE NhanKhau (
     GioiTinh INT,
     NgheNghiep VARCHAR(100),
     QuanHeVoiChuHo VARCHAR(50),
-    TinhTrangCuTru VARCHAR(20),
-    MaHoKhau VARCHAR(20)
+    TinhTrangCuTru VARCHAR(20)
 );
 
 CREATE TABLE HoKhau (
@@ -24,8 +23,6 @@ CREATE TABLE HoKhau (
     ChuHo VARCHAR(20),
     FOREIGN KEY (ChuHo) REFERENCES NhanKhau(ID)
 );
-
-ALTER TABLE NhanKhau ADD FOREIGN KEY (MaHoKhau) REFERENCES HoKhau(ID);
 
 CREATE TABLE TaiKhoan (
     ID VARCHAR(20) PRIMARY KEY,
@@ -57,14 +54,10 @@ CREATE TABLE LoaiKhoanThu (
 CREATE TABLE KhoanThu (
     ID VARCHAR(20) PRIMARY KEY,
     MaDotThu VARCHAR(20),
-    MaHoKhau VARCHAR(20),
-    MaLoaiKhoanThu VARCHAR(20),
     SoTienPhaiNop DECIMAL(12,2),
-    NgayNop     DATE,
-    TrangThaiThanhToan INT,
-    FOREIGN KEY (MaDotThu) REFERENCES DotThu(ID),
-    FOREIGN KEY (MaHoKhau) REFERENCES HoKhau(ID),
-    FOREIGN KEY (MaLoaiKhoanThu) REFERENCES LoaiKhoanThu(ID)
+    NgayNop DATE,
+    TenKhoanThu VARCHAR(100),
+    FOREIGN KEY (MaDotThu) REFERENCES DotThu(ID)
 );
 
 CREATE TABLE PhieuThu (

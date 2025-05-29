@@ -8,14 +8,7 @@ import utils.Validator;
 
 public class HoKhauService {
 
-	private String taiKhoan;
-
-	public HoKhauService(String taiKhoan) {
-		super();
-		this.taiKhoan = taiKhoan;
-	}
-
-	public boolean taoHoKhauMoi(HoKhau t) {
+	public static boolean taoHoKhauMoi(String taiKhoan, HoKhau t) {
 		if (kiemTraThongTin(t)) {
 			if (HoKhauDao.instance.insert(t) > 0) {
 				LichSuService.ghiNhanLichSu(taiKhoan, "Them ho khau", "", "");
@@ -25,7 +18,7 @@ public class HoKhauService {
 		return false;
 	}
 
-	public boolean xoaHoKhau(String id) {
+	public static boolean xoaHoKhau(String taiKhoan, String id) {
 		if (HoKhauDao.instance.delete(id) > 0) {
 			LichSuService.ghiNhanLichSu(taiKhoan, "Xoa ho khau", "", "");
 			return true;
@@ -33,10 +26,11 @@ public class HoKhauService {
 		return false;
 	}
 
-	public boolean luuBienDong(HoKhau t) {
+	public static boolean luuBienDong(String taiKhoan, HoKhau t) {
 		if (kiemTraThongTin(t)) {
 			if (HoKhauDao.instance.update(t.getMaHoKhau(), new String[] { "SoCanHo", "DienTich", "SoNguoi", "ChuHo" },
-					new Object[] { t.getSoCanHo(), t.getDienTich(), t.getSoNguoi(), t.getChuHo() }) > 0) {
+					new Object[] { t.getSoCanHo(), (Double) t.getDienTich(), (Integer) t.getSoNguoi(),
+							t.getChuHo() }) > 0) {
 				LichSuService.ghiNhanLichSu(taiKhoan, "Cap nhat thong tin ho khau", "", "");
 				return true;
 			}
@@ -44,27 +38,27 @@ public class HoKhauService {
 		return false;
 	}
 
-	public boolean kiemTraTonTai(String id) {
+	public static boolean kiemTraTonTai(String id) {
 		if (HoKhauDao.instance.selectByID(id) != null) {
 			return true;
 		}
 		return false;
 	}
 
-	public HoKhau layThongTinHoKhau(String id) {
+	public static HoKhau layThongTinHoKhau(String id) {
 		return HoKhauDao.instance.selectByID(id);
 	}
 
-	public boolean kiemTraThongTin(HoKhau t) {
+	public static boolean kiemTraThongTin(HoKhau t) {
 		return Validator.validLength(t.getSoCanHo(), 20, false)
 				&& NhanKhauDao.instance.selectByID(t.getChuHo()) != null;
 	}
 
-	public HoKhau traCuuThongTin(String userId) {
+	public static HoKhau traCuuThongTin(String userId) {
 		return HoKhauDao.instance.selectByID(userId);
 	}
 
-	public ThongKeHoKhau thongKeHoKhau() {
+	public static ThongKeHoKhau thongKeHoKhau() {
 		return HoKhauDao.instance.thongKe();
 	}
 

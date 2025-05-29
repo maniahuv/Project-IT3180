@@ -29,17 +29,15 @@ public class KhoanThuDao extends DataAccessObject<KhoanThu> {
 			Connection conn = JDBCUtil.getConnection();
 
 			// Thuc thi lenh sql
-			String sql = "INSERT INTO KhoanThu (ID,MaDotThu,MaHoKhau,MaLoaiKHoanThu,SoTienPhaiNop,TrangThaiThanhToan,NgayNop) VALUES (?,?,?,?,?,?,?)";
+			String sql = "INSERT INTO KhoanThu (ID,MaDotThu,SoTienPhaiNop,NgayNop,TenKhoanThu) VALUES (?,?,?,?,?)";
 
 			// Tao statement
 			PreparedStatement pst = conn.prepareStatement(sql);
 			pst.setString(1, t.getMaKhoanThu());
 			pst.setString(2, t.getMaDotThu());
-			pst.setString(3, t.getMaHoKhau());
-			pst.setString(4, t.getMaLoaiKHoanThu());
-			pst.setDouble(5, t.getSoTienPhaiNop());
-			pst.setInt(6, t.getTrangThaiThanhToan());
-			pst.setDate(7, t.getNgayNop());
+			pst.setDouble(3, t.getSoTienPhaiNop());
+			pst.setDate(4, t.getNgayNop());
+			pst.setString(5, t.getTenKhoanThu());
 
 			ketQua = pst.executeUpdate();
 			System.out.println("Có " + ketQua + " dòng thay đổi");
@@ -55,32 +53,23 @@ public class KhoanThuDao extends DataAccessObject<KhoanThu> {
 
 	@Override
 	public KhoanThu newFromResultSet(ResultSet rs) throws SQLException {
-		return new KhoanThu(rs.getString("ID"), rs.getString("MaDotThu"), rs.getString("MaHoKhau"),
-				rs.getString("MaLoaiKHoanThu"), rs.getDouble("SoTienPhaiNop"), rs.getInt("TrangThaiThanhToan"),
-				rs.getDate("NgayNop"));
+		return new KhoanThu(rs.getString("ID"), rs.getString("MaDotThu"), rs.getDouble("SoTienPhaiNop"),
+				rs.getDate("NgayNop"), rs.getString("TenKhoanThu"));
 	}
 
 	/**
 	 * Tìm KhoanThu theo các tiêu chí: maHoKhau, maDotThu, trangThai (0/1), khoảng
 	 * ngày nộp.
 	 */
-	public List<KhoanThu> timTheoTieuChi(String maHoKhau, String maDotThu, Integer trangThai, Date tuNgay, Date denNgay,
-			String orderBy, boolean asc, int limit, int offset) {
+	public List<KhoanThu> timTheoTieuChi(String maDotThu, Date tuNgay, Date denNgay, String orderBy, boolean asc,
+			int limit, int offset) {
 		List<KhoanThu> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM KhoanThu WHERE 1=1");
 		List<Object> params = new ArrayList<>();
 
-		if (maHoKhau != null) {
-			sql.append(" AND MaHoKhau = ?");
-			params.add(maHoKhau);
-		}
 		if (maDotThu != null) {
 			sql.append(" AND MaDotThu = ?");
 			params.add(maDotThu);
-		}
-		if (trangThai != null) {
-			sql.append(" AND TrangThaiThanhToan = ?");
-			params.add(trangThai);
 		}
 		if (tuNgay != null) {
 			sql.append(" AND NgayNop >= ?");
@@ -109,9 +98,7 @@ public class KhoanThuDao extends DataAccessObject<KhoanThu> {
 			}
 			try (ResultSet rs = pst.executeQuery()) {
 				while (rs.next()) {
-					list.add(new KhoanThu(rs.getString("ID"), rs.getString("MaDotThu"), rs.getString("MaHoKhau"),
-							rs.getString("MaLoaiKhoanThu"), rs.getDouble("SoTienPhaiNop"),
-							rs.getInt("TrangThaiThanhToan"), rs.getDate("NgayNop")));
+					list.add(newFromResultSet(rs));
 				}
 			}
 		} catch (SQLException e) {
@@ -124,6 +111,7 @@ public class KhoanThuDao extends DataAccessObject<KhoanThu> {
 	 * Thống kê: tổng số khoan thu; số đã đóng (trang_thai=1); số chưa đóng
 	 * (trang_thai=0); số quá hạn chưa đóng.
 	 */
+	@Deprecated
 	public ThongKeKhoanThu thongKe() {
 		String sql = "SELECT " + name + " COUNT(*) AS total, "
 				+ " SUM(CASE WHEN TrangThaiThanhToan=1 THEN 1 ELSE 0 END) AS da_thanh_toan, "
