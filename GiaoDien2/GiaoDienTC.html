@@ -478,7 +478,7 @@
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // Chart residents by floor (Pie chart)
+    // Chart residents by floor (Pie chart) - giữ nguyên
     const ctxResidents = document.getElementById('residentsChart').getContext('2d');
     const residentsChart = new Chart(ctxResidents, {
       type: 'pie',
@@ -506,17 +506,43 @@
         }
       }
     });
-
+  
     // Chart issues by type (Bar chart)
     const ctxIssues = document.getElementById('issuesChart').getContext('2d');
+  
+    // Khởi tạo dữ liệu cơ bản ban đầu (giữ nguyên)
+    let initialIssueLabels = ['Điện', 'Nước', 'Thang máy', 'An ninh', 'Khác'];
+    let initialNotificationLabels = ['Thông báo chung', 'Bảo trì', 'Hoạt động cộng đồng', 'Khác'];
+  
+    // Giữ trạng thái dữ liệu hiện tại cho issuesChart
+    let issueDataMap = new Map([
+      ['Sự cố điện', 5],
+      ['Sự cố nước', 3],
+      ['Sự cố thang máy', 2],
+      ['An ninh', 1],
+      ['Khác', 2]
+    ]);
+    let notificationDataMap = new Map([
+      ['Thông báo chung', 1],
+      ['Bảo trì', 1],
+      ['Hoạt động cộng đồng', 0],
+      ['Khác', 0]
+    ]);
+  
     const issuesChart = new Chart(ctxIssues, {
       type: 'bar',
       data: {
-        labels: ['Điện', 'Nước', 'Thang máy', 'An ninh', 'Khác'],
+        labels: [...initialIssueLabels, ...initialNotificationLabels],
         datasets: [{
-          label: 'Số sự cố',
-          data: [5, 3, 2, 1, 2],
-          backgroundColor: '#ee6c4d'
+          label: 'Số sự cố / thông báo',
+          data: [
+            ...initialIssueLabels.map(label => issueDataMap.get(`Sự cố ${label.toLowerCase()}`) ?? (label === 'An ninh' ? issueDataMap.get('An ninh') : 0)),
+            ...initialNotificationLabels.map(label => notificationDataMap.get(label) ?? 0)
+          ],
+          backgroundColor: [
+            '#ee6c4d', '#ee6c4d', '#ee6c4d', '#ee6c4d', '#ee6c4d',
+            '#3d5a80', '#3d5a80', '#3d5a80', '#3d5a80'
+          ]
         }]
       },
       options: {
@@ -533,8 +559,8 @@
         }
       }
     });
-
-    // Xử lý modal và thêm/sửa/xóa thông báo & sự cố
+  
+    // --- Các phần xử lý modal, bảng như cũ ---
     const modal = document.getElementById('modalForm');
     const modalTitle = document.getElementById('modalTitle');
     const formEntry = document.getElementById('formEntry');
@@ -543,11 +569,11 @@
     const contentInput = document.getElementById('contentInput');
     const statusSelect = document.getElementById('statusSelect');
     const btnCancel = modal.querySelector('.btn-cancel');
-
+  
     let isEditing = false;
     let editingRow = null;
     let currentMode = ''; // 'issue' hoặc 'notification'
-
+  
     // Nút mở modal
     document.getElementById('btnReportIssue').addEventListener('click', () => {
       openModal('issue');
@@ -555,12 +581,12 @@
     document.getElementById('btnCreateNotification').addEventListener('click', () => {
       openModal('notification');
     });
-
+  
     btnCancel.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => {
-      if(e.target === modal) closeModal();
+      if (e.target === modal) closeModal();
     });
-
+  
     function openModal(mode) {
       currentMode = mode;
       isEditing = false;
@@ -569,8 +595,7 @@
       dateInput.valueAsDate = new Date();
       contentInput.value = '';
       statusSelect.value = 'Chờ xử lý';
-      // Loại
-      if(mode === 'issue') {
+      if (mode === 'issue') {
         typeSelect.innerHTML = `
           <option value="Sự cố điện">Sự cố điện</option>
           <option value="Sự cố nước">Sự cố nước</option>
@@ -588,40 +613,42 @@
       }
       modal.classList.add('active');
     }
-
+  
     function closeModal() {
       modal.classList.remove('active');
       isEditing = false;
       editingRow = null;
     }
-
+  
     formEntry.addEventListener('submit', (e) => {
       e.preventDefault();
       const dateVal = dateInput.value;
       const typeVal = typeSelect.value;
       const contentVal = contentInput.value.trim();
       const statusVal = statusSelect.value;
-
-      if(!dateVal || !typeVal || !contentVal || !statusVal) {
+  
+      if (!dateVal || !typeVal || !contentVal || !statusVal) {
         alert('Vui lòng điền đầy đủ thông tin.');
         return;
       }
-
-      if(isEditing && editingRow) {
-        // Cập nhật dòng đang chỉnh sửa
+  
+      if (isEditing && editingRow) {
         updateTableRow(editingRow, dateVal, typeVal, contentVal, statusVal);
       } else {
-        // Thêm mới dòng
         addTableRow(dateVal, typeVal, contentVal, statusVal);
       }
+  
+      // Cập nhật biểu đồ mỗi lần có thay đổi dữ liệu
+      updateIssueDataMap();
+      updateChart();
+  
       closeModal();
     });
-
+  
     const tableBody = document.querySelector('#notificationsTable tbody');
-
+  
     function addTableRow(date, type, content, status) {
       const tr = document.createElement('tr');
-
       tr.innerHTML = `
         <td>${formatDateDisplay(date)}</td>
         <td>${type}</td>
@@ -635,7 +662,7 @@
       tableBody.prepend(tr);
       attachRowEvents(tr);
     }
-
+  
     function updateTableRow(tr, date, type, content, status) {
       tr.cells[0].textContent = formatDateDisplay(date);
       tr.cells[1].textContent = type;
@@ -644,13 +671,13 @@
       tr.cells[3].className = status === 'Chờ xử lý' ? 'status-pending' : 'status-sent';
       detachEditing(tr);
     }
-
+  
     function attachRowEvents(tr) {
       const editBtn = tr.querySelector('.edit-btn');
       const deleteBtn = tr.querySelector('.delete-btn');
-
+  
       editBtn.addEventListener('click', () => {
-        if(isEditing) {
+        if (isEditing) {
           alert('Vui lòng hoàn thành chỉnh sửa hiện tại trước.');
           return;
         }
@@ -658,35 +685,35 @@
         editingRow = tr;
         openEditRow(tr);
       });
-
+  
       deleteBtn.addEventListener('click', () => {
-        if(isEditing && editingRow === tr) {
+        if (isEditing && editingRow === tr) {
           alert('Bạn đang chỉnh sửa dòng này, không thể xóa.');
           return;
         }
-        if(confirm('Bạn có chắc muốn xóa thông báo/sự cố này?')) {
+        if (confirm('Bạn có chắc muốn xóa thông báo/sự cố này?')) {
           tr.remove();
+          // Cập nhật lại biểu đồ sau khi xóa
+          updateIssueDataMap();
+          updateChart();
         }
       });
     }
-
+  
     function openEditRow(tr) {
-      // Lấy dữ liệu hiện tại
       const currentDate = parseDateDisplay(tr.cells[0].textContent);
       const currentType = tr.cells[1].textContent;
       const currentContent = tr.cells[2].textContent;
       const currentStatus = tr.cells[3].textContent;
-
-      // Hiện modal chỉnh sửa với dữ liệu hiện tại
+  
       modalTitle.textContent = 'Chỉnh sửa thông báo/sự cố';
       modal.classList.add('active');
       dateInput.value = currentDate;
       contentInput.value = currentContent;
       statusSelect.value = currentStatus;
-
-      // Lấy danh sách loại theo dữ liệu hiện tại
-      // Nếu là sự cố hay thông báo dựa theo một số từ khóa (cách đơn giản)
-      if(['Sự cố điện','Sự cố nước','Sự cố thang máy','An ninh','Khác'].includes(currentType)) {
+  
+      // Xác định currentMode dựa trên loại
+      if (['Sự cố điện', 'Sự cố nước', 'Sự cố thang máy', 'An ninh', 'Khác'].includes(currentType)) {
         currentMode = 'issue';
         typeSelect.innerHTML = `
           <option value="Sự cố điện">Sự cố điện</option>
@@ -705,34 +732,84 @@
         `;
       }
       typeSelect.value = currentType;
-
-      // Focus nội dung để người dùng tiện chỉnh
+  
       contentInput.focus();
     }
-
+  
     function detachEditing(tr) {
       isEditing = false;
       editingRow = null;
       modal.classList.remove('active');
     }
-
+  
     // Định dạng ngày yyyy-mm-dd -> dd/mm/yyyy
     function formatDateDisplay(dateStr) {
-      if(!dateStr) return '';
+      if (!dateStr) return '';
       const parts = dateStr.split('-');
-      if(parts.length !==3) return dateStr;
+      if (parts.length !== 3) return dateStr;
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
-    // Định dạng ngày dd/mm/yyyy -> yyyy-mm-dd (dùng khi edit)
+    // Định dạng ngày dd/mm/yyyy -> yyyy-mm-dd
     function parseDateDisplay(dateStr) {
-      if(!dateStr) return '';
+      if (!dateStr) return '';
       const parts = dateStr.split('/');
-      if(parts.length !== 3) return '';
-      return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+      if (parts.length !== 3) return '';
+      return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
     }
-
+  
     // Gắn sự kiện cho các dòng có sẵn
     document.querySelectorAll('#notificationsTable tbody tr').forEach(attachRowEvents);
+  
+    // Hàm cập nhật dữ liệu số lượng các loại sự cố và thông báo từ bảng
+    function updateIssueDataMap() {
+      // Reset map
+      issueDataMap = new Map();
+      notificationDataMap = new Map();
+  
+      // Duyệt từng dòng trong bảng
+      const rows = tableBody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const type = row.cells[1].textContent.trim();
+  
+        // Phân loại sự cố hoặc thông báo dựa trên type
+        if (['Sự cố điện', 'Sự cố nước', 'Sự cố thang máy', 'An ninh', 'Khác'].includes(type)) {
+          // tăng số lượng sự cố
+          issueDataMap.set(type, (issueDataMap.get(type) || 0) + 1);
+        } else if (['Thông báo chung', 'Bảo trì', 'Hoạt động cộng đồng', 'Khác'].includes(type)) {
+          notificationDataMap.set(type, (notificationDataMap.get(type) || 0) + 1);
+        } else {
+          // Loại không xác định có thể tính chung vào Khác của sự cố hoặc thông báo? Ở đây bỏ qua
+        }
+      });
+  
+      // Đảm bảo các loại có trong label đều có số liệu (để không bị lỗi thiếu)
+      for (const key of ['Sự cố điện', 'Sự cố nước', 'Sự cố thang máy', 'An ninh', 'Khác']) {
+        if (!issueDataMap.has(key)) issueDataMap.set(key, 0);
+      }
+      for (const key of ['Thông báo chung', 'Bảo trì', 'Hoạt động cộng đồng', 'Khác']) {
+        if (!notificationDataMap.has(key)) notificationDataMap.set(key, 0);
+      }
+    }
+  
+    // Hàm cập nhật lại dữ liệu và vẽ lại biểu đồ
+    function updateChart() {
+      // Cập nhật labels và data cho biểu đồ issuesChart
+      issuesChart.data.labels = [...initialIssueLabels, ...initialNotificationLabels];
+      issuesChart.data.datasets[0].data = [
+        ...initialIssueLabels.map(label => {
+          if (label === 'An ninh') return issueDataMap.get('An ninh') || 0;
+          // chuyển 'Điện' thành 'Sự cố điện', 'Nước' thành 'Sự cố nước' v.v
+          return issueDataMap.get(`Sự cố ${label.toLowerCase()}`) || 0;
+        }),
+        ...initialNotificationLabels.map(label => notificationDataMap.get(label) || 0)
+      ];
+      issuesChart.update();
+    }
+  
+    // Khởi tạo dữ liệu ban đầu khi load trang
+    updateIssueDataMap();
+    updateChart();
   </script>
+  
 </body>
 </html>
