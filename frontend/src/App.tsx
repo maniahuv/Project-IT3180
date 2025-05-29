@@ -6,11 +6,12 @@ import QLTaiKhoan from './Pages/Management/QLTaiKhoan';
 import QLDotThu from './Pages/Management/QLDotThu';
 import QLHoKhau from './Pages/Management/QLHoKhau';
 import QLKhoanThu from './Pages/Management/QLKhoanThu';
-import QLNhanKhau from './Pages/Management/QLNhanKhau';
 import Account from './Pages/Account';
 import HomePage from './Pages/HomePage';
 import XemPhieuThu from './Pages/Management/XemPhieuThu';
-import XuatBaoCao from './Pages/Management/XuatBaoCao';
+import QLNhanKhau from './Pages/Management/QLNhanKhau';
+
+// import XuatBaoCao from './Pages/Management/XuatBaoCao';
 
 
 function Home() {
@@ -86,7 +87,7 @@ export default function App() {
         <Route path="/management/qlnhankhau" element={<QLNhanKhau />} />
         <Route path="/account" element={<Account />} />
         <Route path="/management/xemphieuthu" element={<XemPhieuThu />} />
-        <Route path="/management/xuatbaocao" element={<XuatBaoCao />} />
+        {/* <Route path="/management/xuatbaocao" element={<XuatBaoCao />} /> */}
       </Routes>
     </Router>
   );

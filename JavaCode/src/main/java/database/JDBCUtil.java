@@ -16,7 +16,7 @@ public class JDBCUtil {
 			// Cac thong so
 			String DB_URL = "jdbc:mysql://localhost:3306/it3180";
 			String USER_NAME = "root";
-			String PASSWORD = "";
+			String PASSWORD = "nganha123@";
 
 			// Tao ket noi
 			c = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD);
