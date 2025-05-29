@@ -182,6 +182,47 @@
     const popover = userMenu.querySelector('.user-popover');
     const closeBtn = popover.querySelector('.popover-close');
 
+	// Post action to backend action mapping
+	async function postAction(action, input) {
+		fetch(action, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json' },
+		    body: JSON.stringify(input)
+		}).catch(error => console.error('Error:', error));
+		loadNhanKhau();
+	}
+
+	async function loadNhanKhau() {
+	    const response = await fetch('/get-nhan-khau');
+	    const accounts = await response.json();
+
+	    const tbody = document.querySelector('.data-table tbody');
+	    tbody.innerHTML = ''; // Clear current rows
+
+	    accounts.forEach(acc => {
+	      const row = document.createElement('tr');
+	      row.innerHTML = `
+	        <td>${acc.maNhanKhau}</td>
+		  	<td>${acc.maHoKhau}</td>
+	        <td>${acc.hoTen}</td>
+	        <td>${acc.soCCCD}</td>
+	        <td>${acc.ngaySinh}</td>
+	        <td>${acc.gioiTinh}</td>
+			<td>${acc.ngheNghiep}</td>
+			<td>${acc.quanHeVoiChuHo}</td>
+			<td>${acc.tinhTrangCuTru}</td>
+	        <td class="actions-cell">
+	          <button class="btn edit"><i class="fa fa-pen"></i></button>
+	          <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+	        </td>
+	      `;
+	      tbody.appendChild(row);
+	    });
+	  }
+
+	  // Load data when page is ready
+	  window.addEventListener('DOMContentLoaded', loadNhanKhau);
+	  
     userMenu.addEventListener('click', e => {
       e.stopPropagation();
       popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
@@ -206,6 +247,8 @@
       if (btnDelete) {
         if (!confirm('Bạn có chắc muốn xóa nhân khẩu này?')) return;
         btnDelete.closest('tr').remove();
+		postAction('/xoa-nhan-khau',
+		  		btnDelete.closest('tr').querySelector('td').textContent.trim());
         return;
       }
 
@@ -247,9 +290,9 @@
         const gioitinh = cells[5].textContent.trim();
         cells[5].innerHTML = `
           <select>
-            <option value="Nam" ${gioitinh === 'Nam' ? 'selected' : ''}>Nam</option>
-            <option value="Nữ" ${gioitinh === 'Nữ' ? 'selected' : ''}>Nữ</option>
-            <option value="Khác" ${gioitinh === 'Khác' ? 'selected' : ''}>Khác</option>
+            <option value=0 ${gioitinh === 0 ? 'selected' : ''}>Nam</option>
+            <option value=1 ${gioitinh === 1 ? 'selected' : ''}>Nữ</option>
+            <option value=2 ${gioitinh === 2 ? 'selected' : ''}>Khác</option>
           </select>
         `;
 
@@ -259,14 +302,23 @@
 
         // Quan hệ với chủ hộ (col 7)
         const qhchuho = cells[7].textContent.trim();
-        cells[7].innerHTML = `<input type="text" value="${qhchuho}" />`;
+        cells[7].innerHTML = `
+	         <select>
+	           <option value=0 ${qhchuho === 0 ? 'selected' : ''}>Chủ hộ</option>
+	           <option value=1 ${qhchuho === 1 ? 'selected' : ''}>Vợ/Chồng</option>
+	           <option value=2 ${qhchuho === 2 ? 'selected' : ''}>Con</option>
+			   <option value=0 ${qhchuho === 3 ? 'selected' : ''}>Cha/Mẹ</option>
+   	           <option value=1 ${qhchuho === 4 ? 'selected' : ''}>Anh/Chị/Em</option>
+   	           <option value=2 ${qhchuho === 5 ? 'selected' : ''}>Khác</option>
+	         </select>
+	       `;
 
         // Tình trạng cư trú (col 8)
         const tinhtrang = cells[8].textContent.trim();
         cells[8].innerHTML = `
           <select>
-            <option value="Đang ở" ${tinhtrang === 'Đang ở' ? 'selected' : ''}>Đang ở</option>
-            <option value="Tạm vắng" ${tinhtrang === 'Tạm vắng' ? 'selected' : ''}>Tạm vắng</option>
+            <option value=0 ${tinhtrang === 0 ? 'selected' : ''}>Đang ở</option>
+            <option value=1 ${tinhtrang === 1 ? 'selected' : ''}>Tạm vắng</option>
           </select>
         `;
 
@@ -295,6 +347,9 @@
         cells[6].textContent = inputs[6].value.trim();
         cells[7].textContent = inputs[7].value.trim();
         cells[8].textContent = inputs[8].value.trim();
+
+		postAction('/save-nhan-khau',
+		  		Array.from(cells).slice(0, -1).map(cell => cell.textContent.trim()));
       }
     });
 
@@ -323,17 +378,25 @@
         <td><input type="date" /></td>
         <td>
           <select>
-            <option value="Nam" selected>Nam</option>
-            <option value="Nữ">Nữ</option>
-            <option value="Khác">Khác</option>
+            <option value=0 selected>Nam</option>
+            <option value=1>Nữ</option>
+            <option value=2>Khác</option>
           </select>
         </td>
         <td><input type="text" placeholder="Nghề nghiệp" /></td>
-        <td><input type="text" placeholder="Quan hệ với chủ hộ" /></td>
+        <td>
+			<select>
+			  	<option value=0 selected>Chủ hộ</option>
+				<option value=1>Vợ/Chồng</option>
+			  	<option value=2>Con</option>
+				<option value=3>Cha/Mẹ</option>
+			  	<option value=4>Anh/Chị/Em</option>
+				<option value=5>Khác</option>
+			</select>
         <td>
           <select>
-            <option value="Đang ở" selected>Đang ở</option>
-            <option value="Tạm vắng">Tạm vắng</option>
+            <option value=0 selected>Đang ở</option>
+            <option value=1>Tạm vắng</option>
           </select>
         </td>
         <td class="actions-cell">
@@ -369,6 +432,9 @@
           <button class="btn edit"><i class="fa fa-pen"></i></button>
           <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
         `;
+
+		postAction('/tao-nhan-khau',
+				Array.from(newTr.cells).slice(0, -1).map(cell => cell.textContent.trim()));
       });
 
       newTr.querySelector('.btn.cancel').addEventListener('click', () => {

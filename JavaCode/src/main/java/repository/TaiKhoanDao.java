@@ -45,6 +45,8 @@ public class TaiKhoanDao extends DataAccessObject<TaiKhoan> {
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
 			e.printStackTrace();
+			System.err.println(String.format("Failed to insert %s", name));
+			return 0;
 		}
 		return ketQua;
 	}

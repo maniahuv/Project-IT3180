@@ -49,8 +49,8 @@ public abstract class DataAccessObject<T> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(String.format("Failed to update %s", name));
+			return 0;
 		}
 		return ketQua;
 	}
@@ -93,8 +93,8 @@ public abstract class DataAccessObject<T> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(String.format("Failed to delete %s", name));
+			return 0;
 		}
 		return ketQua;
 	}
@@ -120,14 +120,13 @@ public abstract class DataAccessObject<T> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(String.format("Failed to select %s", name));
 			return null;
 		}
 		return ketQua;
 	}
 
-	public List<T> selectALL() {
+	public List<T> selectAll() {
 		List<T> ketQua = new ArrayList<T>();
 		try {
 			// Tao ket noi
@@ -149,7 +148,7 @@ public abstract class DataAccessObject<T> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.err.println(String.format("Failed to select %s", name));
 			return null;
 		}
 		return ketQua;
@@ -172,13 +171,13 @@ public abstract class DataAccessObject<T> {
 
 			// Xu ly
 			while (rs.next()) {
-				return String.format("%s%d", prefix, rs.getInt(1));
+				return String.format("%s%03d", prefix, rs.getInt(1) + 1);
 			}
 
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.err.println(String.format("Failed to generate id %s", name));
 			return null;
 		}
 		return null;
@@ -207,7 +206,8 @@ public abstract class DataAccessObject<T> {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.err.println(String.format("Failed to query %s", name));
+			return list;
 		}
 		return list;
 	}

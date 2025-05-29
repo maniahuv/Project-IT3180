@@ -2,12 +2,14 @@ package controller;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import model.TaiKhoan;
 import model.TaiKhoan.VaiTro;
+import repository.TaiKhoanDao;
 import service.TaiKhoanService;
 
 @RestController
@@ -19,8 +21,8 @@ public class QuanLiTaiKhoanController {
 			System.out.printf("%s - ", x);
 		}
 		System.out.println("CREATE");
-		if (TaiKhoanService.taoTaiKhoanMoi(new TaiKhoan(newTr.get(0), "test@gmail.com", "111111", "No Name",
-				"0000000000", VaiTro.TO_TRUONG, "0", true))) {
+		if (TaiKhoanService.taoTaiKhoanMoi(new TaiKhoan(TaiKhoanDao.instance.generateID(), newTr.get(4), newTr.get(2),
+				newTr.get(1), newTr.get(3), VaiTro.TO_TRUONG, newTr.get(6), true))) {
 			System.out.println("Tao tai khoan thanh cong");
 		} else {
 			System.out.println("Tao tai khoan that bai");
@@ -35,12 +37,29 @@ public class QuanLiTaiKhoanController {
 		}
 		System.out.println("SAVE");
 		if (TaiKhoanService.capNhatThongTin(new TaiKhoan(newTr.get(0), newTr.get(4), "111111", newTr.get(1),
-				newTr.get(3), VaiTro.TO_TRUONG, "", true))) {
+				newTr.get(3), VaiTro.TO_TRUONG, newTr.get(6), true))) {
 			System.out.println("Luu tai khoan thanh cong");
 		} else {
 			System.out.println("Luu tai khoan that bai");
 		}
 		return "manHinhQuanLiTaiKhoan";
+	}
+
+	@PostMapping("/xoa-tai-khoan")
+	public String xoaTaiKhoan(@RequestBody String id) {
+		System.out.println(String.format("Delete %s", id));
+		if (TaiKhoanService.xoaTaiKhoan(id)) {
+			System.out.println("Xoa tai khoan thanh cong");
+		} else {
+			System.out.println("Xoa tai khoan that bai");
+		}
+		return "manHinhQuanLiTaiKhoan";
+	}
+
+	@GetMapping("/get-tai-khoan")
+	public List<TaiKhoan> getAllTaiKhoan() {
+		System.out.println("LOAD");
+		return TaiKhoanDao.instance.selectAll();
 	}
 
 }

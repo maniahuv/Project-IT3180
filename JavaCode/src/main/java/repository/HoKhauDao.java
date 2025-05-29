@@ -42,7 +42,8 @@ public class HoKhauDao extends DataAccessObject<HoKhau> {
 			// Ngat ket noi
 			JDBCUtil.closeConnetion(conn);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.err.println(String.format("Failed to update %s", name));
+			return 0;
 		}
 		return ketQua;
 	}

@@ -36,6 +36,8 @@ public class TaiKhoanService implements UserDetailsService {
 				LichSuService.ghiNhanLichSu(t.getMaTaiKhoan(), "Tao tai khoan", "", "");
 				return true;
 			}
+		} else {
+			System.out.println("Thong tin ko hop le");
 		}
 		return false;
 	}
@@ -57,9 +59,9 @@ public class TaiKhoanService implements UserDetailsService {
 
 	public static boolean capNhatThongTin(TaiKhoan t) {
 		if (TaiKhoanDao.instance.update(t.getMaTaiKhoan(),
-				new String[] { "Email", "MatKhau", "TenNguoiDung", "SoDienThoai", "VaiTro", "MaNhanKhau", "TrangThai" },
-				new Object[] { t.getEmail(), t.getMatKhau(), t.getTenNguoiDung(), t.getSoDienThoai(), t.getVaiTro(),
-						t.getMaNhanKhau(), t.isTrangThai() }) > 0) {
+				new String[] { "Email", "TenNguoiDung", "SoDienThoai", "VaiTro", "MaNhanKhau", "TrangThai" },
+				new Object[] { t.getEmail(), t.getTenNguoiDung(), t.getSoDienThoai(), t.getVaiTro(), t.getMaNhanKhau(),
+						t.isTrangThai() }) > 0) {
 			LichSuService.ghiNhanLichSu(t.getMaTaiKhoan(), "Thay doi vai tro", "", "");
 			return true;
 		}

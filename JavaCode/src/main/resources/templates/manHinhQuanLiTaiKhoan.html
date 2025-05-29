@@ -132,19 +132,6 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>TK001</td>
-              <td>nguyenvana@example.com</td>
-              <td>*********</td>
-              <td>Nguyễn Văn A</td>
-              <td>0987654321</td>
-              <td>Admin</td>
-              <td>NK001</td>
-              <td class="actions-cell">
-                <button class="btn edit"><i class="fa fa-pen"></i></button>
-                <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
-              </td> 
-            </tr>
             <!-- Thêm các dòng dữ liệu tương tự -->
           </tbody>
         </table>
@@ -170,21 +157,51 @@
         btn.querySelector('.arrow').classList.toggle('rotated');
       });
     });
-
+	
 	// Post action to backend action mapping
-	function postAction(action, input) {
+	async function postAction(action, input) {
 		fetch(action, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
+			headers: {'Content-Type': 'application/json' },
 		    body: JSON.stringify(input)
 		}).catch(error => console.error('Error:', error));
+		loadAccounts();
 	}
-	
+
+	async function loadAccounts() {
+	    const response = await fetch('/get-tai-khoan');
+	    const accounts = await response.json();
+
+	    const tbody = document.querySelector('.data-table tbody');
+	    tbody.innerHTML = ''; // Clear current rows
+
+	    accounts.forEach(acc => {
+	      const row = document.createElement('tr');
+	      row.innerHTML = `
+	        <td>${acc.maTaiKhoan}</td>
+	        <td>${acc.email}</td>
+	        <td>*********</td>
+	        <td>${acc.tenNguoiDung}</td>
+	        <td>${acc.soDienThoai}</td>
+	        <td>${acc.vaiTro}</td>
+	        <td>${acc.maNhanKhau}</td>
+	        <td class="actions-cell">
+	          <button class="btn edit"><i class="fa fa-pen"></i></button>
+	          <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
+	        </td>
+	      `;
+	      tbody.appendChild(row);
+	    });
+	  }
+
+	  // Load data when page is ready
+	  window.addEventListener('DOMContentLoaded', loadAccounts);
+	  
     // User popover
     const userMenu = document.querySelector('.user-menu');
     const popover = userMenu.querySelector('.user-popover');
     const closeBtn = popover.querySelector('.popover-close');
-
+	
     userMenu.addEventListener('click', e => {
       e.stopPropagation();
       popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
@@ -209,6 +226,10 @@
       if (btnDelete) {
         if (!confirm('Bạn có chắc muốn xóa tài khoản này?')) return;
         btnDelete.closest('tr').remove();
+
+		// Xoa tai khoan backend
+		postAction('/xoa-tai-khoan',
+		  		btnDelete.closest('tr').querySelector('td').textContent.trim());
         return;
       }
 
@@ -286,7 +307,7 @@
 
 		// Luu tai khoan backend
 		postAction('/save-tai-khoan',
-		  		Array.from(newTr.querySelectorAll('td')).slice(0, -1).map(cell => cell.textContent.trim()));
+		  		Array.from(cells).slice(0, -1).map(cell => cell.textContent.trim()));
       }
     });
 
@@ -328,10 +349,6 @@
       `;
       tbody.appendChild(newTr);
 	  
-	  // Tao tai khoan backend
-	  postAction('/tao-tai-khoan',
-	    		Array.from(newTr.querySelectorAll('td')).slice(0, -1).map(cell => cell.textContent.trim()));
-
       // Xử lý nút lưu và hủy
       newTr.querySelector('.btn.save').addEventListener('click', () => {
         const inputs = newTr.querySelectorAll('input, select');
@@ -371,9 +388,9 @@
           <button class="btn delete"><i class="fa fa-trash-alt"></i></button>
         `;
 
-		// Luu tai khoan backend
-		postAction('/save-tai-khoan',
-					Array.from(newTr.querySelectorAll('td')).slice(0, -1).map(cell => cell.textContent.trim()));
+		// Tao tai khoan backend
+		postAction('/tao-tai-khoan',
+					Array.from(newTr.cells).slice(0, -1).map(cell => cell.textContent.trim()));
       });
 
       newTr.querySelector('.btn.cancel').addEventListener('click', () => {

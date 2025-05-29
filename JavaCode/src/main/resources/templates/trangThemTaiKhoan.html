@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -12,35 +12,31 @@
   <div class="form-card">
     <h2>Thêm tài khoản mới</h2>
     <!-- 1) Bọc form và đặt đúng id -->
-    <form id="add-account-form">
+    <form id="add-account-form" th:action="@{/dang-ki}" th:object="${taiKhoan}" method="post">
       <table class="form-table">
         <tbody>
           <tr>
             <th>Tài khoản</th><th class="required">(*)</th>
             <!-- 2) Thêm name -->
-            <td><input name="username" type="text" placeholder="Nhập tài khoản" required /></td>
+            <td><input name="username" type="text" placeholder="Nhập tài khoản" th:field="*{tenNguoiDung}" required /></td>
           </tr>
           <tr>
             <th>Mã Nhân Khẩu</th><th class="required">(*)</th>
-            <td><input name="householdId" type="text" placeholder="Nhập mã nhân khẩu" required /></td>
-          </tr>
-          <tr>
-            <th>Ngày Đăng Kí</th><th class="required">(*)</th>
-            <td class="date-cell"><input name="startDate" type="text" placeholder="DD/MM/YYYY" required /></td>
+            <td><input name="householdId" type="text" placeholder="Nhập mã nhân khẩu" th:field="*{maNhanKhau}" required /></td>
           </tr>
           <tr>
             <th>Email</th><th class="required">(*)</th>
-            <td><input name="email" type="email" placeholder="email@example.com" required /></td>
+            <td><input name="email" type="email" placeholder="email@example.com" th:field="*{email}" required /></td>
           </tr>
           <tr>
             <th>Số điện thoại</th><th class="required">(*)</th>
-            <td><input name="phone" type="text" placeholder="Nhập số điện thoại" required /></td>
+            <td><input name="phone" type="text" placeholder="Nhập số điện thoại" th:field="*{soDienThoai}" required /></td>
           </tr>
           <tr>
             <th>Mật khẩu</th><th class="required">(*)</th>
             <td>
               <div class="input-group">
-                <input name="password" type="password" placeholder="••••••••" required />
+                <input name="password" type="password" placeholder="••••••••" th:field="*{matKhau}" required />
                 <button type="button" class="btn-secondary">Tạo mật khẩu ngẫu nhiên</button>
               </div>
             </td>
@@ -93,14 +89,12 @@
     const form = document.getElementById('add-account-form');
 
     form.addEventListener('submit', async function(e) {
-      e.preventDefault();
       const data = {
-        username: this.username.value.trim(),
-        householdId: this.householdId.value.trim(),
-        startDate: this.startDate.value.trim(),
+        username: this.tenNguoiDung.value.trim(),
+        householdId: this.maNhanKhau.value.trim(),
         email: this.email.value.trim(),
-        phone: this.phone.value.trim(),
-        password: this.password.value,
+        phone: this.soDienThoai.value.trim(),
+        password: this.matKhau.value,
         confirmPassword: this.confirmPassword.value,
         firstName: this.firstName.value.trim(),
         lastName: this.lastName.value.trim(),
@@ -109,30 +103,15 @@
       };
 
       if (data.password !== data.confirmPassword) {
+	  	e.preventDefault();
         return alert('Mật khẩu và lặp lại mật khẩu không khớp.');
       }
 
-      try {
-        const res = await fetch('/api/accounts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        if (!res.ok) {
-          const err = await res.json();
-          return alert('Lỗi: ' + (err.message || res.statusText));
-        }
-        alert('Thêm tài khoản thành công!');
-        form.reset();
-      } catch (err) {
-        console.error(err);
-        alert('Không thể kết nối tới server.');
-      }
     });
 
     // Hiển thị mật khẩu
     document.getElementById('show-password').addEventListener('change', function() {
-      form.password.type = this.checked ? 'text' : 'password';
+      form.matKhau.type = this.checked ? 'text' : 'password';
       form.confirmPassword.type = this.checked ? 'text' : 'password';
     });
   </script>

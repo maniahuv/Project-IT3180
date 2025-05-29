@@ -7,14 +7,7 @@ import utils.Validator;
 
 public class NhanKhauService {
 
-	private String taiKhoan;
-
-	public NhanKhauService(String taiKhoan) {
-		super();
-		this.taiKhoan = taiKhoan;
-	}
-
-	public boolean taoNhanKhauMoi(NhanKhau t) {
+	public static boolean taoNhanKhauMoi(String taiKhoan, NhanKhau t) {
 		if (kiemTraThongTin(t)) {
 			if (NhanKhauDao.instance.insert(t) > 0) {
 				LichSuService.ghiNhanLichSu(taiKhoan, "Them nhan khau", "", "");
@@ -24,7 +17,7 @@ public class NhanKhauService {
 		return false;
 	}
 
-	public boolean xoaNhanKhau(String id) {
+	public static boolean xoaNhanKhau(String taiKhoan, String id) {
 		if (NhanKhauDao.instance.delete(id) > 0) {
 			LichSuService.ghiNhanLichSu(taiKhoan, "Xoa nhan khau", "", "");
 			return true;
@@ -32,7 +25,7 @@ public class NhanKhauService {
 		return false;
 	}
 
-	public boolean capNhatThongTin(NhanKhau t) {
+	public static boolean capNhatThongTin(String taiKhoan, NhanKhau t) {
 		if (kiemTraThongTin(t)) {
 			if (NhanKhauDao.instance.update(t.getMaNhanKhau(),
 					new String[] { "NgheNghiep", "QuanHeVoiChuHo", "TinhTrangCuTru", "MaHoKhau" }, new Object[] {
@@ -44,24 +37,24 @@ public class NhanKhauService {
 		return false;
 	}
 
-	public boolean kiemTraTonTai(String id) {
+	public static boolean kiemTraTonTai(String id) {
 		if (NhanKhauDao.instance.selectByID(id) != null) {
 			return true;
 		}
 		return false;
 	}
 
-	public NhanKhau layThongTinNhanKhau(String id) {
+	public static NhanKhau layThongTinNhanKhau(String id) {
 		return NhanKhauDao.instance.selectByID(id);
 	}
 
-	public boolean kiemTraThongTin(NhanKhau t) {
+	public static boolean kiemTraThongTin(NhanKhau t) {
 		return Validator.validLength(t.getHoTen(), 100, false) && Validator.validLength(t.getSoCCCD(), 100, false)
 				&& Validator.isAllDigit(t.getSoCCCD()) && Validator.validLength(t.getNgheNghiep(), 100, true)
 				&& HoKhauDao.instance.selectByID(t.getMaHoKhau()) != null;
 	}
 
-	public NhanKhau traCuuThongTin(String userId) {
+	public static NhanKhau traCuuThongTin(String userId) {
 		return NhanKhauDao.instance.selectByID(userId);
 	}
 	/*
