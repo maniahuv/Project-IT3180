@@ -4,128 +4,92 @@ create database it3180;
 
 use it3180;
 
-CREATE TABLE NhanKhau (
-    ID VARCHAR(20) PRIMARY KEY,
-    HoTen VARCHAR(100),
-    SoCCCD VARCHAR(12),
-    NgaySinh DATE,
-    GioiTinh INT,
-    NgheNghiep VARCHAR(100),
-    QuanHeVoiChuHo VARCHAR(50),
-    TinhTrangCuTru VARCHAR(20),
-    MaHoKhau VARCHAR(20)
+CREATE TABLE taikhoan (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    vaiTro INT,
+    hoTen VARCHAR(100)
 );
 
-CREATE TABLE HoKhau (
-    ID VARCHAR(20) PRIMARY KEY,
-    SoCanHo VARCHAR(20),
-    DienTich DECIMAL(6,2),
-    SoNguoi INT,
-    ChuHo VARCHAR(20),
-    FOREIGN KEY (ChuHo) REFERENCES NhanKhau(ID)
+CREATE TABLE khoanthu (
+    maKhoanThu INT AUTO_INCREMENT PRIMARY KEY,
+    tenKhoanThu VARCHAR(100) NOT NULL,
+    loaiKhoanThu VARCHAR(50),
+    soTien FLOAT,
+    batBuoc boolean,
+    ghiChu VARCHAR(1000),
+    idNguoiTao INT,
+    FOREIGN KEY (idNguoiTao) REFERENCES taikhoan(id)
 );
 
-ALTER TABLE NhanKhau ADD FOREIGN KEY (MaHoKhau) REFERENCES HoKhau(ID);
-
-CREATE TABLE TaiKhoan (
-    ID VARCHAR(20) PRIMARY KEY,
-    Email VARCHAR(100),
-    MatKhau VARCHAR(100),
-    TenNguoiDung VARCHAR(100),
-    SoDienThoai VARCHAR(15),
-    VaiTro INT,
-    MaNhanKhau VARCHAR(20),
-    FOREIGN KEY (MaNhanKhau) REFERENCES NhanKhau(ID)
+CREATE TABLE dotthu (
+    maDotThu INT AUTO_INCREMENT PRIMARY KEY,
+    tenDotThu VARCHAR(100) NOT NULL,
+    ngayBatDau DATE,
+    ngayKetThuc DATE,
+    trangThai VARCHAR(50)
 );
 
-CREATE TABLE DotThu (
-    ID VARCHAR(20) PRIMARY KEY,
-    TenDotThu VARCHAR(100),
-    ThoiGianBatDau DATE,
-    ThoiGianKetThuc DATE,
-    MoTa TEXT,
-    TrangThai INT
+CREATE TABLE khoanthu_has_dotthu (
+    idKhoanThuDotThu INT AUTO_INCREMENT PRIMARY KEY,
+    maKhoanThu INT,
+    maDotThu INT,
+    FOREIGN KEY (maKhoanThu) REFERENCES khoanthu(maKhoanThu),
+    FOREIGN KEY (maDotThu) REFERENCES dotthu(maDotThu)
 );
 
-CREATE TABLE LoaiKhoanThu (
-    ID VARCHAR(20) PRIMARY KEY,
-    TenLoai VARCHAR(100),
-    DonViTinh VARCHAR(20),
-    BatBuoc BOOLEAN
+CREATE TABLE hokhau (
+    maHoKhau INT AUTO_INCREMENT PRIMARY KEY,
+    chuHo INT NOT NULL,
+    soNha VARCHAR(25) NOT NULL,
+    ngayLap DATE,
+    ngayCapNhat DATE,
+    dienTich FLOAT NOT NULL
 );
 
-CREATE TABLE KhoanThu (
-    ID VARCHAR(20) PRIMARY KEY,
-    MaDotThu VARCHAR(20),
-    MaHoKhau VARCHAR(20),
-    MaLoaiKhoanThu VARCHAR(20),
-    SoTienPhaiNop DECIMAL(12,2),
-    NgayNop     DATE,
-    TrangThaiThanhToan INT,
-    FOREIGN KEY (MaDotThu) REFERENCES DotThu(ID),
-    FOREIGN KEY (MaHoKhau) REFERENCES HoKhau(ID),
-    FOREIGN KEY (MaLoaiKhoanThu) REFERENCES LoaiKhoanThu(ID)
+CREATE TABLE nhankhau (
+    maNhanKhau INT AUTO_INCREMENT PRIMARY KEY,
+    hoTen VARCHAR(100) NOT NULL,
+    ngaySinh DATE,
+    gioiTinh boolean,
+    cmnd VARCHAR(25),
+    qhVoiChuHo VARCHAR(50),
+    trangThai VARCHAR(50),
+    maHoKhau INT,
+    FOREIGN KEY (maHoKhau) REFERENCES hokhau(maHoKhau)
 );
 
-CREATE TABLE PhieuThu (
-    ID VARCHAR(20) PRIMARY KEY,
-    MaHoKhau VARCHAR(20),
-    MaDotThu VARCHAR(20),
-    NgayThu DATE,
-    TongTien DECIMAL(12,2),
-    TrangThai INT,
-    DuongDanFile TEXT,
-    FOREIGN KEY (MaHoKhau) REFERENCES HoKhau(ID),
-    FOREIGN KEY (MaDotThu) REFERENCES DotThu(ID)
+CREATE TABLE lichsuhokhau (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    loaiThayDoi INT,
+    thoiGian DATETIME,
+    noiDung VARCHAR(1000),
+    maHoKhau INT,
+    maNhanKhau INT,
+    FOREIGN KEY (maHoKhau) REFERENCES hokhau(maHoKhau),
+    FOREIGN KEY (maNhanKhau) REFERENCES nhankhau(maNhanKhau)
 );
 
-CREATE TABLE ChiTietPhieuThu (
-    ID VARCHAR(20) PRIMARY KEY,
-    MaKhoanThu VARCHAR(20),
-    MaDotThu VARCHAR(20),
-    SoTienThu DECIMAL(12,2),
-    GhiChu TEXT,
-    FOREIGN KEY (MaKhoanThu) REFERENCES KhoanThu(ID)
+CREATE TABLE tamtrutamvang (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    loai VARCHAR(50),
+    ngayBatDau DATE,
+    ngayKetThuc DATE,
+    lyDo VARCHAR(1000),
+    maNhanKhau INT,
+    FOREIGN KEY (maNhanKhau) REFERENCES nhankhau(maNhanKhau)
 );
 
-CREATE TABLE LichSuGiaoDich (
-    ID VARCHAR(20) PRIMARY KEY,
-    ThoiGian DATETIME,
-    HanhDong VARCHAR(100),
-    MaTaiKhoan VARCHAR(20),
-    DoiTuongLienQuan VARCHAR(100),
-    MoTaChiTiet TEXT,
-    FOREIGN KEY (MaTaiKhoan) REFERENCES TaiKhoan(ID)
-);
-
-CREATE TABLE BaoCaoThuPhi (
-    ID VARCHAR(20) PRIMARY KEY,
-    TieuDe VARCHAR(100),
-    NgayTao DATE,
-    MaTaiKhoan VARCHAR(20),
-    MaDotThu VARCHAR(20),
-    DuLieuTongHop TEXT,
-    DuongDanFile TEXT,
-    FOREIGN KEY (MaTaiKhoan) REFERENCES TaiKhoan(ID),
-    FOREIGN KEY (MaDotThu) REFERENCES DotThu(ID)
-);
-
-CREATE TABLE TamTruTamVang (
-    ID VARCHAR(20) PRIMARY KEY,
-    MaNhanKhau VARCHAR(20),
-    Loai INT,
-    NoiTamTruTamVang TEXT,
-    TuNgay DATE,
-    DenNgay DATE,
-    FOREIGN KEY (MaNhanKhau) REFERENCES NhanKhau(ID)
-);
-
-CREATE TABLE Quyen (
-    ID VARCHAR(20) PRIMARY KEY,
-    TenQuyen INT
-);
-
-CREATE TABLE Role (
-    ID VARCHAR(20) PRIMARY KEY,
-    TenRole INT
+CREATE TABLE nopphi (
+    IDNopTien INT AUTO_INCREMENT PRIMARY KEY,
+    ngayThu DATE,
+    soTien FLOAT,
+    nguoiNop VARCHAR(100),
+    idNguoiThu INT,
+    maHoKhau INT NOT NULL,
+    idKhoanThuDotThu INT NOT NULL,
+    FOREIGN KEY (idNguoiThu) REFERENCES taikhoan(id),
+    FOREIGN KEY (maHoKhau) REFERENCES hokhau(maHoKhau),
+    FOREIGN KEY (idKhoanThuDotThu) REFERENCES khoanthu_has_dotthu(idKhoanThuDotThu)
 );

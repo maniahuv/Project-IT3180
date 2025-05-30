@@ -1,94 +1,86 @@
 package model;
 
-import java.sql.Date;
-import java.util.Objects;
+import jakarta.persistence.*;
+import java.time.LocalDate;
 
+@Entity
+@Table(name = "tamtrutamvang")
 public class TamTruTamVang {
 
-	private String maTamTruTamVang;
-	private String maNhanKhau;
-	private int loai;
-	private String noiTamTruTamVang;
-	private Date tuNgay;
-	private Date denNgay;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-	public TamTruTamVang(String maTamTruTamVang, String maNhanKhau, int loai, String noiTamTruTamVang, Date tuNgay,
-			Date denNgay) {
-		super();
-		this.maTamTruTamVang = maTamTruTamVang;
-		this.maNhanKhau = maNhanKhau;
-		this.loai = loai;
-		this.noiTamTruTamVang = noiTamTruTamVang;
-		this.tuNgay = tuNgay;
-		this.denNgay = denNgay;
-	}
+    @Column(length = 50)
+    private String loai;
 
-	public String getMaTamTruTamVang() {
-		return maTamTruTamVang;
-	}
+    private LocalDate ngayBatDau;
 
-	public void setMaTamTruTamVang(String maTamTruTamVang) {
-		this.maTamTruTamVang = maTamTruTamVang;
-	}
+    private LocalDate ngayKetThuc;
 
-	public String getMaNhanKhau() {
-		return maNhanKhau;
-	}
+    @Column(length = 1000)
+    private String lyDo;
 
-	public void setMaNhanKhau(String maNhanKhau) {
-		this.maNhanKhau = maNhanKhau;
-	}
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "maNhanKhau", nullable = false)
+    private NhanKhau nhanKhau;
 
-	public int getLoai() {
-		return loai;
-	}
+    public TamTruTamVang() {
+    }
 
-	public void setLoai(int loai) {
-		this.loai = loai;
-	}
+    public TamTruTamVang(String loai, LocalDate ngayBatDau, LocalDate ngayKetThuc, String lyDo, NhanKhau nhanKhau) {
+        this.loai = loai;
+        this.ngayBatDau = ngayBatDau;
+        this.ngayKetThuc = ngayKetThuc;
+        this.lyDo = lyDo;
+        this.nhanKhau = nhanKhau;
+    }
 
-	public String getNoiTamTruTamVang() {
-		return noiTamTruTamVang;
-	}
+    public Integer getId() {
+        return id;
+    }
 
-	public void setNoiTamTruTamVang(String noiTamTruTamVang) {
-		this.noiTamTruTamVang = noiTamTruTamVang;
-	}
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	public Date getTuNgay() {
-		return tuNgay;
-	}
+    public String getLoai() {
+        return loai;
+    }
 
-	public void setTuNgay(Date tuNgay) {
-		this.tuNgay = tuNgay;
-	}
+    public void setLoai(String loai) {
+        this.loai = loai;
+    }
 
-	public Date getDenNgay() {
-		return denNgay;
-	}
+    public LocalDate getNgayBatDau() {
+        return ngayBatDau;
+    }
 
-	public void setDenNgay(Date denNgay) {
-		this.denNgay = denNgay;
-	}
+    public void setNgayBatDau(LocalDate ngayBatDau) {
+        this.ngayBatDau = ngayBatDau;
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(denNgay, loai, maNhanKhau, maTamTruTamVang, noiTamTruTamVang, tuNgay);
-	}
+    public LocalDate getNgayKetThuc() {
+        return ngayKetThuc;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TamTruTamVang other = (TamTruTamVang) obj;
-		return Objects.equals(denNgay, other.denNgay) && Objects.equals(loai, other.loai)
-				&& Objects.equals(maNhanKhau, other.maNhanKhau)
-				&& Objects.equals(maTamTruTamVang, other.maTamTruTamVang)
-				&& Objects.equals(noiTamTruTamVang, other.noiTamTruTamVang) && Objects.equals(tuNgay, other.tuNgay);
-	}
+    public void setNgayKetThuc(LocalDate ngayKetThuc) {
+        this.ngayKetThuc = ngayKetThuc;
+    }
 
+    public String getLyDo() {
+        return lyDo;
+    }
+
+    public void setLyDo(String lyDo) {
+        this.lyDo = lyDo;
+    }
+
+    public NhanKhau getNhanKhau() {
+        return nhanKhau;
+    }
+
+    public void setNhanKhau(NhanKhau nhanKhau) {
+        this.nhanKhau = nhanKhau;
+    }
 }

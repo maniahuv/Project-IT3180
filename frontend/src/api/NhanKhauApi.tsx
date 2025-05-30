@@ -1,34 +1,33 @@
-// src/api/nhanKhauApi.ts
+// src/api/nhankhauApi.tsx
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api/nhankhau";
 
-
-export interface PersonRecord {
-  id: number;
-  personId: string;
-  householdId: string;
-  fullName: string;
-  citizenId: string;
-  birthDate?: string;
-  gender: string;
-  occupation?: string;
-  relationship?: string;
-  residenceStatus?: string;
+export interface NhanKhau {
+  maNhanKhau: number;
+  hoTen: string;
+  ngaySinh: string; // LocalDate will be serialized as string (e.g., "YYYY-MM-DD")
+  gioiTinh: boolean; // true = male, false = female
+  cmnd?: string; // Optional, as it may not be required for all records
+  qhVoiChuHo?: string; // Relationship with head of household
+  trangThai?: string; // Status
+  hoKhau?: { maHoKhau: number }; // Simplified reference to HoKhau entity
 }
-
-export type PersonRecordWithoutId = Omit<PersonRecord, "id">;
 
 export function fetchAllNhanKhau() {
-  return axios.get<PersonRecord[]>(API_BASE_URL);
+  return axios.get<NhanKhau[]>(API_BASE_URL);
 }
 
-export function createNhanKhau(data: PersonRecordWithoutId) {
-  return axios.post<PersonRecord>(API_BASE_URL, data);
+export function fetchNhanKhauById(id: number) {
+  return axios.get<NhanKhau>(`${API_BASE_URL}/${id}`);
 }
 
-export function updateNhanKhau(id: number, data: PersonRecordWithoutId) {
-  return axios.put(`${API_BASE_URL}/${id}`, data);
+export function createNhanKhau(data: NhanKhau) {
+  return axios.post<NhanKhau>(API_BASE_URL, data);
+}
+
+export function updateNhanKhau(id: number, data: NhanKhau) {
+  return axios.put<NhanKhau>(`${API_BASE_URL}/${id}`, data);
 }
 
 export function deleteNhanKhau(id: number) {

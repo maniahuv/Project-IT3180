@@ -1,126 +1,56 @@
 package model;
 
-import java.sql.Date;
-import java.util.Objects;
+import jakarta.persistence.*;
+import java.util.List;
 
+@Entity
+@Table(name = "khoanthu")
 public class KhoanThu {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer maKhoanThu;
 
-	private String maKhoanThu;
-	private String maDotThu;
-	private String maHoKhau;
-	private String maLoaiKHoanThu;
-	private Double soTienPhaiNop;
-	private int trangThaiThanhToan;
-	private Date ngayNop;
+    @Column(nullable = false, length = 100)
+    private String tenKhoanThu;
 
-	public static class TrangThaiThanhToan {
-		public static final int DA_NOP = 0;
-		public static final int CHUA_NOP = 1;
+    private String loaiKhoanThu;
 
-		public static String toString(int id) {
-			switch (id) {
-			case DA_NOP:
-				return "đã thu";
-			case CHUA_NOP:
-				return "chưa thu";
-			default:
-				return "";
-			}
-		}
-	}
+    private Float soTien;
 
-	public KhoanThu(String maKhoanThu, String maDotThu, String maHoKhau, String maLoaiKHoanThu, Double soTienPhaiNop,
-			int trangThaiThanhToan, Date ngayNop) {
-		this.maKhoanThu = maKhoanThu;
-		this.maDotThu = maDotThu;
-		this.maHoKhau = maHoKhau;
-		this.maLoaiKHoanThu = maLoaiKHoanThu;
-		this.soTienPhaiNop = soTienPhaiNop;
-		this.trangThaiThanhToan = trangThaiThanhToan;
-		this.ngayNop = ngayNop;
-	}
+    private boolean batBuoc;
 
-	public String getMaKhoanThu() {
-		return maKhoanThu;
-	}
+    @Column(length = 1000)
+    private String ghiChu;
 
-	public void setMaKhoanThu(String maKhoanThu) {
-		this.maKhoanThu = maKhoanThu;
-	}
+    @ManyToOne
+    @JoinColumn(name = "idNguoiTao")
+    private TaiKhoan nguoiTao;
 
-	public String getMaDotThu() {
-		return maDotThu;
-	}
+    @OneToMany(mappedBy = "khoanThu", cascade = CascadeType.ALL)
+    private List<KhoanThuDotThu> dotThus;
 
-	public void setMaDotThu(String maDotThu) {
-		this.maDotThu = maDotThu;
-	}
+    // Getters & Setters
+    public Integer getMaKhoanThu() { return maKhoanThu; }
+    public void setMaKhoanThu(Integer maKhoanThu) { this.maKhoanThu = maKhoanThu; }
 
-	public String getMaHoKhau() {
-		return maHoKhau;
-	}
+    public String getTenKhoanThu() { return tenKhoanThu; }
+    public void setTenKhoanThu(String tenKhoanThu) { this.tenKhoanThu = tenKhoanThu; }
 
-	public void setMaHoKhau(String maHoKhau) {
-		this.maHoKhau = maHoKhau;
-	}
+    public String getLoaiKhoanThu() { return loaiKhoanThu; }
+    public void setLoaiKhoanThu(String loaiKhoanThu) { this.loaiKhoanThu = loaiKhoanThu; }
 
-	public String getMaLoaiKHoanThu() {
-		return maLoaiKHoanThu;
-	}
+    public Float getSoTien() { return soTien; }
+    public void setSoTien(Float soTien) { this.soTien = soTien; }
 
-	public void setMaLoaiKHoanThu(String maLoaiKHoanThu) {
-		this.maLoaiKHoanThu = maLoaiKHoanThu;
-	}
+    public boolean isBatBuoc() { return batBuoc; }
+    public void setBatBuoc(boolean batBuoc) { this.batBuoc = batBuoc; }
 
-	public Double getSoTienPhaiNop() {
-		return soTienPhaiNop;
-	}
+    public String getGhiChu() { return ghiChu; }
+    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
 
-	public void setSoTienPhaiNop(Double soTienPhaiNop) {
-		this.soTienPhaiNop = soTienPhaiNop;
-	}
+    public TaiKhoan getNguoiTao() { return nguoiTao; }
+    public void setNguoiTao(TaiKhoan nguoiTao) { this.nguoiTao = nguoiTao; }
 
-	public int getTrangThaiThanhToan() {
-		return trangThaiThanhToan;
-	}
-
-	public void setTrangThaiThanhToan(int trangThaiThanhToan) {
-		this.trangThaiThanhToan = trangThaiThanhToan;
-	}
-
-	public Date getNgayNop() {
-		return ngayNop;
-	}
-
-	public void setNgayNop(Date ngayNop) {
-		this.ngayNop = ngayNop;
-	}
-
-	@Override
-	public String toString() {
-		return "KhoanThu [maKhoanThu=" + maKhoanThu + ", maDotThu=" + maDotThu + ", maHoKhau=" + maHoKhau
-				+ ", maLoaiKHoanThu=" + maLoaiKHoanThu + ", soTienPhaiNop=" + soTienPhaiNop + ", trangThaiThanhToan="
-				+ trangThaiThanhToan + ", ngayNop=" + ngayNop + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(maDotThu, maHoKhau, maKhoanThu, maLoaiKHoanThu, ngayNop, soTienPhaiNop, trangThaiThanhToan);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		KhoanThu other = (KhoanThu) obj;
-		return Objects.equals(maDotThu, other.maDotThu) && Objects.equals(maHoKhau, other.maHoKhau)
-				&& Objects.equals(maKhoanThu, other.maKhoanThu) && Objects.equals(maLoaiKHoanThu, other.maLoaiKHoanThu)
-				&& Objects.equals(ngayNop, other.ngayNop) && Objects.equals(soTienPhaiNop, other.soTienPhaiNop)
-				&& Objects.equals(trangThaiThanhToan, other.trangThaiThanhToan);
-	}
-
+    public List<KhoanThuDotThu> getDotThus() { return dotThus; }
+    public void setDotThus(List<KhoanThuDotThu> dotThus) { this.dotThus = dotThus; }
 }

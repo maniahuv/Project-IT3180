@@ -1,0 +1,32 @@
+import axios from "axios";
+
+const API_BASE_URL = "http://localhost:8080/api/tamtrutamvang";
+
+export interface TamTruTamVang {
+  id: number;
+  loai?: string; // Optional, as it may be null
+  ngayBatDau?: string; // LocalDate serialized as string (e.g., "YYYY-MM-DD")
+  ngayKetThuc?: string; // Optional, as it may be null
+  lyDo?: string; // Optional, as it may be null
+  nhanKhau: { maNhanKhau: number }; // Simplified reference to NhanKhau entity
+}
+
+export function fetchAllTamTruTamVang() {
+  return axios.get<TamTruTamVang[]>(API_BASE_URL);
+}
+
+export function fetchTamTruTamVangById(id: number) {
+  return axios.get<TamTruTamVang>(`${API_BASE_URL}/${id}`);
+}
+
+export function createTamTruTamVang(data: TamTruTamVang) {
+  return axios.post<TamTruTamVang>(API_BASE_URL, data);
+}
+
+export function updateTamTruTamVang(id: number, data: TamTruTamVang) {
+  return axios.put<TamTruTamVang>(`${API_BASE_URL}/${id}`, data);
+}
+
+export function deleteTamTruTamVang(id: number) {
+  return axios.delete(`${API_BASE_URL}/${id}`);
+}
