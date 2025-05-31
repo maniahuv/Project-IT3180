@@ -38,14 +38,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
   console.log(localStorage);
   if (!localStorage.getItem("token")) {
     // Nếu không có token, chuyển hướng về trang đăng nhập
-    navigate("//login");
+    navigate("/login");
     return null; // Trả về null để không render gì nếu không có token
   }
   const handleLogout = () => {    
     localStorage.removeItem("token");
 
     // Chuyển hướng về trang đăng nhập
-    navigate("//login");
+    navigate("/login");
   };
 
   return (
@@ -151,7 +151,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             
                   <li>
                     <Link
-                      to="/management/qlphieuthu"
+                      to="/management/qlnopphi"
                       className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
                     >
                       Xem phiếu thu

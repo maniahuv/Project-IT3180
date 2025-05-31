@@ -11,6 +11,7 @@ import MainLayout from '../../Layout/MainLayout';
 import {
   TamTruTamVang,
   fetchAllTamTruTamVang,
+  fetchTamTruTamVangById,
   createTamTruTamVang,
   updateTamTruTamVang,
   deleteTamTruTamVang
@@ -19,44 +20,19 @@ import {
 interface EditFormData {
   loai: string;
   ngayBatDau: string;
-  ngayKetThuc: string;
-  lyDo: string;
-  nhanKhauMaNhanKhau: number;
+  ngayKetThuc?: string;
+  lyDo?: string;
+  maNhanKhau: number;
 }
 
 const loaiOptions = [
-  { value: 'TAM_TRU', label: 'Tạm trú', color: 'bg-blue-100 text-blue-800' },
-  { value: 'TAM_VANG', label: 'Tạm vắng', color: 'bg-yellow-100 text-yellow-800' }
+  { value: 'TAM_TRU', label: 'Tạm trú' },
+  { value: 'TAM_VANG', label: 'Tạm vắng' }
 ];
 
 const getLoaiLabel = (loai?: string): string => {
   const option = loaiOptions.find(opt => opt.value === loai);
   return option ? option.label : 'Không xác định';
-};
-
-const getLoaiColor = (loai?: string): string => {
-  const option = loaiOptions.find(opt => opt.value === loai);
-  return option ? option.color : 'bg-gray-100 text-gray-800';
-};
-
-const formatDateISO = (dateStr: string): string => {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  const parts = dateStr.split('/');
-  if (parts.length === 3) {
-    const [dd, mm, yyyy] = parts;
-    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-  }
-  return '';
-};
-
-const formatDateDisplay = (dateStr?: string): string => {
-  if (!dateStr) return '-';
-  const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    const [yyyy, mm, dd] = parts;
-    return `${dd}/${mm}/${yyyy}`;
-  }
-  return dateStr;
 };
 
 const QLTamTruTamVang: React.FC = () => {
@@ -69,7 +45,7 @@ const QLTamTruTamVang: React.FC = () => {
     ngayBatDau: '',
     ngayKetThuc: '',
     lyDo: '',
-    nhanKhauMaNhanKhau: 0
+    maNhanKhau: 0
   });
   const [addingNew, setAddingNew] = useState<boolean>(false);
   const [newRowData, setNewRowData] = useState<EditFormData>({
@@ -77,7 +53,7 @@ const QLTamTruTamVang: React.FC = () => {
     ngayBatDau: '',
     ngayKetThuc: '',
     lyDo: '',
-    nhanKhauMaNhanKhau: 0
+    maNhanKhau: 0
   });
   const [searchCriteria, setSearchCriteria] = useState<string>('0');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
@@ -85,27 +61,26 @@ const QLTamTruTamVang: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
   useEffect(() => {
-    loadTamTruTamVang();
+    loadData();
   }, []);
 
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetchAllTamTruTamVang();
+      console.log('TamTruTamVang data loaded:', response.data);
+      setData(response.data);
+    } catch (err: any) {
+      setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
+      console.error('Error loading data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-   const loadTamTruTamVang = async () => {
-      try {
-        setLoading(true);
-        const response = await fetchAllTamTruTamVang();
-        console.log('TamTruTamVang response:', response.data);
-        // let dataArray: TamTruTamVang[] = Array.isArray(response.data) ? response.data : [];
-        // setData(dataArray);
-        setData(response.data);
-        setError('');
-      } catch (err: any) {
-        console.error('Error loading tam tru tam vang:', err);
-        setError('Có lỗi xảy ra khi tải dữ liệu.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  // const getMaNhanKhau = (nhanKhau?: { maNhanKhau: number }): string => {
+  //   return nhanKhau && nhanKhau.maNhanKhau ? nhanKhau.maNhanKhau.toString() : '-';
+  // };
 
   const handleEditClick = async (row: TamTruTamVang): Promise<void> => {
     if (editRowId === row.id) {
@@ -113,38 +88,33 @@ const QLTamTruTamVang: React.FC = () => {
         const updateData: TamTruTamVang = {
           id: row.id,
           loai: editFormData.loai,
-          ngayBatDau: editFormData.ngayBatDau ? formatDateISO(editFormData.ngayBatDau) : undefined,
-          ngayKetThuc: editFormData.ngayKetThuc ? formatDateISO(editFormData.ngayKetThuc) : undefined,
+          ngayBatDau: editFormData.ngayBatDau,
+          ngayKetThuc: editFormData.ngayKetThuc || undefined,
           lyDo: editFormData.lyDo || undefined,
-          nhanKhau: { maNhanKhau: editFormData.nhanKhauMaNhanKhau }
+          nhanKhau: { maNhanKhau: editFormData.maNhanKhau }
         };
         await updateTamTruTamVang(row.id!, updateData);
-        await loadTamTruTamVang();
+        await loadData();
         setEditRowId(null);
         setEditFormData({
           loai: 'TAM_TRU',
           ngayBatDau: '',
           ngayKetThuc: '',
           lyDo: '',
-          nhanKhauMaNhanKhau: 0
+          maNhanKhau: 0
         });
       } catch (err: any) {
         alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
         console.error('Error updating tam tru tam vang:', err);
-        if (err.response?.status === 401) {
-          setError('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
-          localStorage.removeItem('token');
-          localStorage.removeItem('vaiTro');
-        }
       }
     } else {
       setEditRowId(row.id!);
       setEditFormData({
         loai: row.loai || 'TAM_TRU',
-        ngayBatDau: row.ngayBatDau ? formatDateDisplay(row.ngayBatDau) : '',
-        ngayKetThuc: row.ngayKetThuc ? formatDateDisplay(row.ngayKetThuc) : '',
+        ngayBatDau: row.ngayBatDau || '',
+        ngayKetThuc: row.ngayKetThuc || '',
         lyDo: row.lyDo || '',
-        nhanKhauMaNhanKhau: row.nhanKhau.maNhanKhau
+        maNhanKhau: row.nhanKhau?.maNhanKhau || 0
       });
     }
   };
@@ -153,7 +123,7 @@ const QLTamTruTamVang: React.FC = () => {
     if (window.confirm('Bạn có chắc muốn xóa bản ghi này?')) {
       try {
         await deleteTamTruTamVang(id);
-        await loadTamTruTamVang();
+        await loadData();
         if (editRowId === id) {
           setEditRowId(null);
           setEditFormData({
@@ -161,19 +131,22 @@ const QLTamTruTamVang: React.FC = () => {
             ngayBatDau: '',
             ngayKetThuc: '',
             lyDo: '',
-            nhanKhauMaNhanKhau: 0
+            maNhanKhau: 0
           });
         }
       } catch (err: any) {
         alert('Có lỗi xảy ra khi xóa: ' + (err.response?.data?.message || err.message));
         console.error('Error deleting tam tru tam vang:', err);
-        if (err.response?.status === 401) {
-          setError('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
-          localStorage.removeItem('token');
-          localStorage.removeItem('vaiTro');
-        }
       }
     }
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: name === 'maNhanKhau' ? parseInt(value) || 0 : value
+    }));
   };
 
   const handleAddNewClick = (): void => {
@@ -183,36 +156,28 @@ const QLTamTruTamVang: React.FC = () => {
       ngayBatDau: '',
       ngayKetThuc: '',
       lyDo: '',
-      nhanKhauMaNhanKhau: 0
+      maNhanKhau: 0
     });
   };
 
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
-    const { name, value } = e.target;
-    setEditFormData(prev => ({
-      ...prev,
-      [name]: name === 'nhanKhauMaNhanKhau' ? Number(value) : value
-    }));
-  };
-
-  const handleNewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+  const handleNewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void => {
     const { name, value } = e.target;
     setNewRowData(prev => ({
       ...prev,
-      [name]: name === 'nhanKhauMaNhanKhau' ? Number(value) : value
+      [name]: name === 'maNhanKhau' ? parseInt(value) || 0 : value
     }));
   };
 
   const handleSaveNewRow = async (): Promise<void> => {
-    if (!newRowData.loai.trim()) {
+    if (!newRowData.loai) {
       alert('Vui lòng chọn loại.');
       return;
     }
-    if (!newRowData.ngayBatDau.trim()) {
+    if (!newRowData.ngayBatDau) {
       alert('Vui lòng nhập ngày bắt đầu.');
       return;
     }
-    if (newRowData.nhanKhauMaNhanKhau <= 0) {
+    if (newRowData.maNhanKhau <= 0) {
       alert('Vui lòng nhập mã nhân khẩu hợp lệ.');
       return;
     }
@@ -220,29 +185,24 @@ const QLTamTruTamVang: React.FC = () => {
     try {
       const newTamTruTamVang: TamTruTamVang = {
         loai: newRowData.loai,
-        ngayBatDau: formatDateISO(newRowData.ngayBatDau),
-        ngayKetThuc: newRowData.ngayKetThuc ? formatDateISO(newRowData.ngayKetThuc) : undefined,
+        ngayBatDau: newRowData.ngayBatDau,
+        ngayKetThuc: newRowData.ngayKetThuc || undefined,
         lyDo: newRowData.lyDo || undefined,
-        nhanKhau: { maNhanKhau: newRowData.nhanKhauMaNhanKhau }
+        nhanKhau: { maNhanKhau: newRowData.maNhanKhau }
       };
       await createTamTruTamVang(newTamTruTamVang);
-      await loadTamTruTamVang();
+      await loadData();
       setAddingNew(false);
       setNewRowData({
         loai: 'TAM_TRU',
         ngayBatDau: '',
         ngayKetThuc: '',
         lyDo: '',
-        nhanKhauMaNhanKhau: 0
+        maNhanKhau: 0
       });
     } catch (err: any) {
       alert('Có lỗi xảy ra khi tạo bản ghi: ' + (err.response?.data?.message || err.message));
       console.error('Error creating tam tru tam vang:', err);
-      if (err.response?.status === 401) {
-        setError('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
-        localStorage.removeItem('token');
-        localStorage.removeItem('vaiTro');
-      }
     }
   };
 
@@ -253,7 +213,7 @@ const QLTamTruTamVang: React.FC = () => {
       ngayBatDau: '',
       ngayKetThuc: '',
       lyDo: '',
-      nhanKhauMaNhanKhau: 0
+      maNhanKhau: 0
     });
   };
 
@@ -267,12 +227,12 @@ const QLTamTruTamVang: React.FC = () => {
       const fields = [
         item.id?.toString() || '',
         getLoaiLabel(item.loai),
-        formatDateDisplay(item.ngayBatDau),
-        formatDateDisplay(item.ngayKetThuc),
+        item.ngayBatDau || '',
+        item.ngayKetThuc || '',
         item.lyDo || '',
-        item.nhanKhau.maNhanKhau.toString()
+        item.nhanKhau?.maNhanKhau?.toString() || '' // Safe access
       ];
-      return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
+      return fields[crit]?.toString().toLowerCase().includes(searchKeyword.toLowerCase());
     });
 
     if (found) {
@@ -288,12 +248,6 @@ const QLTamTruTamVang: React.FC = () => {
     if (e.key === 'Enter') {
       handleSearch();
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('vaiTro');
-    window.location.href = '/login';
   };
 
   if (loading) {
@@ -318,10 +272,10 @@ const QLTamTruTamVang: React.FC = () => {
           <div className="text-center text-red-600">
             <p>{error}</p>
             <button
-              onClick={handleLogout}
+              onClick={loadData}
               className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
-              Đăng nhập lại
+              Thử lại
             </button>
           </div>
         </div>
@@ -331,8 +285,8 @@ const QLTamTruTamVang: React.FC = () => {
 
   return (
     <MainLayout>
-      <main className="flex-1 p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý Tạm trú Tạm vắng</h2>
+      <div className="flex-1 flex flex-col">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý tạm trú tạm vắng</h2>
 
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-2">
@@ -370,7 +324,7 @@ const QLTamTruTamVang: React.FC = () => {
             onClick={handleAddNewClick}
           >
             <FaPlus />
-            <span>Thêm bản ghi</span>
+            <span>Tạo mới</span>
           </button>
         </div>
 
@@ -413,27 +367,24 @@ const QLTamTruTamVang: React.FC = () => {
                       </td>
                       <td className="px-4 py-3">
                         <input
-                          type="text"
+                          type="date"
                           name="ngayBatDau"
-                          value={editFormData.ngayBatDau || ''}
+                          value={editFormData.ngayBatDau}
                           onChange={handleEditChange}
-                          placeholder="DD/MM/YYYY"
                           className="w-full px-2 py-1 border rounded"
                         />
                       </td>
                       <td className="px-4 py-3">
                         <input
-                          type="text"
+                          type="date"
                           name="ngayKetThuc"
                           value={editFormData.ngayKetThuc || ''}
                           onChange={handleEditChange}
-                          placeholder="DD/MM/YYYY"
                           className="w-full px-2 py-1 border rounded"
                         />
                       </td>
                       <td className="px-4 py-3">
-                        <input
-                          type="text"
+                        <textarea
                           name="lyDo"
                           value={editFormData.lyDo || ''}
                           onChange={handleEditChange}
@@ -443,8 +394,8 @@ const QLTamTruTamVang: React.FC = () => {
                       <td className="px-4 py-3">
                         <input
                           type="number"
-                          name="nhanKhauMaNhanKhau"
-                          value={editFormData.nhanKhauMaNhanKhau || 0}
+                          name="maNhanKhau"
+                          value={editFormData.maNhanKhau || ''}
                           onChange={handleEditChange}
                           className="w-full px-2 py-1 border rounded"
                         />
@@ -452,15 +403,19 @@ const QLTamTruTamVang: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <td className="px-4 py-3 text-sm">
-                        <span className={`px-2 py-1 text-xs rounded-full ${getLoaiColor(row.loai)}`}>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            row.loai === 'TAM_TRU' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                          }`}
+                        >
                           {getLoaiLabel(row.loai)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayBatDau)}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayKetThuc)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{row.ngayBatDau || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{row.ngayKetThuc || '-'}</td>
                       <td className="px-4 py-3 text-sm text-gray-900">{row.lyDo || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{row.nhanKhau.maNhanKhau}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{(row.maNhanKhau)}</td>
                     </>
                   )}
                   <td className="px-4 py-3">
@@ -468,12 +423,12 @@ const QLTamTruTamVang: React.FC = () => {
                       <button
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                         onClick={() => handleEditClick(row)}
-                        title={editRowId === row.id ? "Lưu" : "Chỉnh sửa"}
+                        title={editRowId === row.id ? 'Lưu' : 'Chỉnh sửa'}
                       >
                         {editRowId === row.id ? <FaSave /> : <FaPen />}
                       </button>
                       <button
-                        className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded"
                         onClick={() => handleDeleteClick(row.id!)}
                         title="Xóa"
                       >
@@ -485,7 +440,7 @@ const QLTamTruTamVang: React.FC = () => {
               ))}
               {addingNew && (
                 <tr className="bg-blue-50">
-                  <td className="px-4 py-3 text-sm text-gray-900">-</td>
+                  <td className="px-4 py-3 text-sm text-gray-800">-</td>
                   <td className="px-4 py-3">
                     <select
                       name="loai"
@@ -502,27 +457,24 @@ const QLTamTruTamVang: React.FC = () => {
                   </td>
                   <td className="px-4 py-3">
                     <input
-                      type="text"
+                      type="date"
                       name="ngayBatDau"
-                      placeholder="DD/MM/YYYY"
-                      value={newRowData.ngayBatDau || ''}
+                      value={newRowData.ngayBatDau}
                       onChange={handleNewChange}
                       className="w-full px-2 py-1 border rounded"
                     />
                   </td>
                   <td className="px-4 py-3">
                     <input
-                      type="text"
+                      type="date"
                       name="ngayKetThuc"
-                      placeholder="DD/MM/YYYY"
                       value={newRowData.ngayKetThuc || ''}
                       onChange={handleNewChange}
                       className="w-full px-2 py-1 border rounded"
                     />
                   </td>
                   <td className="px-4 py-3">
-                    <input
-                      type="text"
+                    <textarea
                       name="lyDo"
                       placeholder="Lý do"
                       value={newRowData.lyDo || ''}
@@ -533,9 +485,9 @@ const QLTamTruTamVang: React.FC = () => {
                   <td className="px-4 py-3">
                     <input
                       type="number"
-                      name="nhanKhauMaNhanKhau"
+                      name="maNhanKhau"
                       placeholder="Mã nhân khẩu"
-                      value={newRowData.nhanKhauMaNhanKhau || 0}
+                      value={newRowData.maNhanKhau || ''}
                       onChange={handleNewChange}
                       className="w-full px-2 py-1 border rounded"
                     />
@@ -572,9 +524,9 @@ const QLTamTruTamVang: React.FC = () => {
               value={itemsPerPage}
               onChange={e => setItemsPerPage(Number(e.target.value))}
             >
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
             </select>
             <span className="text-sm text-gray-700">mục</span>
           </div>
@@ -582,7 +534,7 @@ const QLTamTruTamVang: React.FC = () => {
             Tổng cộng: {data.length} bản ghi
           </div>
         </div>
-      </main>
+      </div>
     </MainLayout>
   );
 };

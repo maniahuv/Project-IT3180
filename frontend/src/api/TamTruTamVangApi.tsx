@@ -19,6 +19,7 @@ export interface TamTruTamVang {
   ngayBatDau?: string; // LocalDate serialized as string (e.g., "YYYY-MM-DD")
   ngayKetThuc?: string; // Optional, as it may be null
   lyDo?: string; // Optional, as it may be null
+  maNhanKhau: number;
   nhanKhau: { maNhanKhau: number }; // Simplified reference to NhanKhau entity
 }
 
