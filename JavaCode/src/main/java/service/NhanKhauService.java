@@ -16,7 +16,7 @@ public class NhanKhauService {
         this.nhanKhauRepository = nhanKhauRepository;
     }
 
-    public List<NhanKhau> getAll() {
+    public List<NhanKhau> findAll() {
         return nhanKhauRepository.findAll();
     }
 

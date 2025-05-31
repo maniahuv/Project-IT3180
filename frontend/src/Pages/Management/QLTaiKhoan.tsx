@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FaPlus,
   FaSearch,
@@ -8,29 +8,19 @@ import {
   FaTimes
 } from 'react-icons/fa';
 import MainLayout from '../../Layout/MainLayout';
-
-// Interface definitions
-interface NhanKhau {
-  id: number;
-  maHoKhau: string;
-  hoTen: string;
-  tenDangNhap: string;
-  email: string;
-  soDienThoai: string;
-  ngayBatDau: string;
-  phanQuyen: string;
-  trangThai: string;
-}
+import { 
+  TaiKhoan, 
+  fetchAllTaiKhoan, 
+  createTaiKhoan, 
+  updateTaiKhoan, 
+  deleteTaiKhoan 
+} from '../../api/TaiKhoanApi';
 
 interface EditFormData {
-  maHoKhau: string;
+  username: string;
+  password?: string;
   hoTen: string;
-  tenDangNhap: string;
-  email: string;
-  soDienThoai: string;
-  ngayBatDau: string;
-  phanQuyen: string;
-  trangThai: string;
+  vaiTro?: number;
 }
 
 // Utility functions
@@ -53,66 +43,35 @@ const formatDateDisplay = (dateStr: string): string => {
   return dateStr;
 };
 
-// Initial data
-const initialData: NhanKhau[] = [
-  {
-    id: 1,
-    maHoKhau: 'HK001',
-    hoTen: 'Nguyễn Văn A',
-    tenDangNhap: 'nguyenvana',
-    email: 'nguyenvana@example.com',
-    soDienThoai: '0987654321',
-    ngayBatDau: '01/05/2022',
-    phanQuyen: 'Admin',
-    trangThai: 'Hoạt động'
-  },
-  {
-    id: 2,
-    maHoKhau: 'HK002',
-    hoTen: 'Trần Thị B',
-    tenDangNhap: 'tranthib',
-    email: 'tranthib@example.com',
-    soDienThoai: '0987654322',
-    ngayBatDau: '15/06/2022',
-    phanQuyen: 'User',
-    trangThai: 'Hoạt động'
-  },
-  {
-    id: 3,
-    maHoKhau: 'HK003',
-    hoTen: 'Lê Văn C',
-    tenDangNhap: 'levanc',
-    email: 'levanc@example.com',
-    soDienThoai: '0987654323',
-    ngayBatDau: '20/07/2022',
-    phanQuyen: 'User',
-    trangThai: 'Tạm khóa'
-  }
+// Vai trò mapping
+const vaiTroOptions = [
+  { value: 1, label: 'TO_TRUONG' },
+  { value: 2, label: 'TO_PHO' },
+  { value: 3, label: 'KE_TOAN' }
 ];
 
-const QuanLyNhanKhau: React.FC = () => {
-  const [data, setData] = useState<NhanKhau[]>(initialData);
+const getVaiTroLabel = (vaiTro?: number): string => {
+  const option = vaiTroOptions.find(opt => opt.value === vaiTro);
+  return option ? option.label : 'Không xác định';
+};
+
+const QLTaiKhoan: React.FC = () => {
+  const [data, setData] = useState<TaiKhoan[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editFormData, setEditFormData] = useState<EditFormData>({
-    maHoKhau: '',
+    username: '',
+    password: '',
     hoTen: '',
-    tenDangNhap: '',
-    email: '',
-    soDienThoai: '',
-    ngayBatDau: '',
-    phanQuyen: '',
-    trangThai: ''
+    vaiTro: 1
   });
   const [addingNew, setAddingNew] = useState<boolean>(false);
   const [newRowData, setNewRowData] = useState<EditFormData>({
-    maHoKhau: '',
+    username: '',
+    password: '',
     hoTen: '',
-    tenDangNhap: '',
-    email: '',
-    soDienThoai: '',
-    ngayBatDau: '',
-    phanQuyen: '',
-    trangThai: ''
+    vaiTro: 1
   });
 
   const [searchCriteria, setSearchCriteria] = useState<string>('0');
@@ -120,128 +79,161 @@ const QuanLyNhanKhau: React.FC = () => {
   const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
+  // Fetch data from API
+  useEffect(() => {
+    loadTaiKhoan();
+  }, []);
+
+  const loadTaiKhoan = async () => {
+    try {
+      setLoading(true);
+      const response = await fetchAllTaiKhoan();
+      console.log('Tai khoan data loaded:', response.data);
+      setData(response.data);
+      setError('');
+    } catch (err: any) {
+      setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
+      console.error('Error loading tai khoan:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle edit click
-  const handleEditClick = (row: NhanKhau): void => {
+  const handleEditClick = async (row: TaiKhoan): Promise<void> => {
     if (editRowId === row.id) {
       // Save changes
-      setData(data.map(item => (item.id === row.id ? { 
-        ...item, 
-        ...editFormData,
-        ngayBatDau: editFormData.ngayBatDau ? formatDateDisplay(editFormData.ngayBatDau) : item.ngayBatDau
-      } : item)));
-      setEditRowId(null);
-      setEditFormData({
-        maHoKhau: '',
-        hoTen: '',
-        tenDangNhap: '',
-        email: '',
-        soDienThoai: '',
-        ngayBatDau: '',
-        phanQuyen: '',
-        trangThai: ''
-      });
+      try {
+        const updateData: TaiKhoan = {
+          ...editFormData,
+          id: row.id
+        };
+        
+        await updateTaiKhoan(row.id!, updateData);
+        await loadTaiKhoan(); // Reload data after update
+        setEditRowId(null);
+        setEditFormData({
+          username: '',
+          password: '',
+          hoTen: '',
+          vaiTro: 1
+        });
+        // alert('Cập nhật tài khoản thành công!');
+      } catch (err: any) {
+        alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
+        console.error('Error updating tai khoan:', err);
+      }
     } else {
       // Start editing
-      setEditRowId(row.id);
+      setEditRowId(row.id!);
       setEditFormData({
-        maHoKhau: row.maHoKhau,
+        username: row.username,
+        password: '', // Don't show existing password
         hoTen: row.hoTen,
-        tenDangNhap: row.tenDangNhap,
-        email: row.email,
-        soDienThoai: row.soDienThoai,
-        ngayBatDau: formatDateISO(row.ngayBatDau),
-        phanQuyen: row.phanQuyen,
-        trangThai: row.trangThai,
+        vaiTro: row.vaiTro
       });
     }
   };
 
   // Handle delete click
-  const handleDeleteClick = (id: number): void => {
-    if (window.confirm('Bạn có chắc muốn xóa nhân khẩu này?')) {
-      setData(data.filter(item => item.id !== id));
-      if (editRowId === id) {
-        setEditRowId(null);
-        setEditFormData({
-          maHoKhau: '',
-          hoTen: '',
-          tenDangNhap: '',
-          email: '',
-          soDienThoai: '',
-          ngayBatDau: '',
-          phanQuyen: '',
-          trangThai: ''
-        });
+  const handleDeleteClick = async (id: number): Promise<void> => {
+    if (window.confirm('Bạn có chắc muốn xóa tài khoản này?')) {
+      try {
+        await deleteTaiKhoan(id);
+        await loadTaiKhoan(); // Reload data after delete
+        if (editRowId === id) {
+          setEditRowId(null);
+          setEditFormData({
+            username: '',
+            password: '',
+            hoTen: '',
+            vaiTro: 1
+          });
+        }
+        // alert('Xóa tài khoản thành công!');
+      } catch (err: any) {
+        alert('Có lỗi xảy ra khi xóa: ' + (err.response?.data?.message || err.message));
+        console.error('Error deleting tai khoan:', err);
       }
     }
   };
 
   // Handle edit input change
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
-    setEditFormData(prev => ({ ...prev, [name]: value }));
+    setEditFormData(prev => ({ 
+      ...prev, 
+      [name]: name === 'vaiTro' ? parseInt(value) : value 
+    }));
   };
 
   // Handle add new click
   const handleAddNewClick = (): void => {
     setAddingNew(true);
     setNewRowData({
-      maHoKhau: '',
+      username: '',
+      password: '',
       hoTen: '',
-      tenDangNhap: '',
-      email: '',
-      soDienThoai: '',
-      ngayBatDau: '',
-      phanQuyen: '',
-      trangThai: ''
+      vaiTro: 1
     });
   };
 
   // Handle new row input change
-  const handleNewChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleNewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
-    setNewRowData(prev => ({ ...prev, [name]: value }));
+    setNewRowData(prev => ({ 
+      ...prev, 
+      [name]: name === 'vaiTro' ? parseInt(value) : value 
+    }));
   };
 
   // Save new row
-  const handleSaveNewRow = (): void => {
+  const handleSaveNewRow = async (): Promise<void> => {
     if (!newRowData.hoTen.trim()) {
       alert('Vui lòng nhập họ và tên.');
       return;
     }
-    const newId = data.length > 0 ? Math.max(...data.map(d => d.id)) + 1 : 1;
-    const newItem: NhanKhau = { 
-      id: newId, 
-      ...newRowData, 
-      ngayBatDau: newRowData.ngayBatDau ? formatDateDisplay(newRowData.ngayBatDau) : '' 
-    };
-    setData([...data, newItem]);
-    setAddingNew(false);
-    setNewRowData({
-      maHoKhau: '',
-      hoTen: '',
-      tenDangNhap: '',
-      email: '',
-      soDienThoai: '',
-      ngayBatDau: '',
-      phanQuyen: '',
-      trangThai: ''
-    });
+    if (!newRowData.username.trim()) {
+      alert('Vui lòng nhập tên đăng nhập.');
+      return;
+    }
+    if (!newRowData.password?.trim()) {
+      alert('Vui lòng nhập mật khẩu.');
+      return;
+    }
+
+    try {
+      const newTaiKhoan: TaiKhoan = {
+        username: newRowData.username,
+        password: newRowData.password,
+        hoTen: newRowData.hoTen,
+        vaiTro: newRowData.vaiTro
+      };
+      
+      await createTaiKhoan(newTaiKhoan);
+      await loadTaiKhoan(); // Reload data after create
+      setAddingNew(false);
+      setNewRowData({
+        username: '',
+        password: '',
+        hoTen: '',
+        vaiTro: 1
+      });
+      // alert('Tạo tài khoản thành công!');
+    } catch (err: any) {
+      alert('Có lỗi xảy ra khi tạo tài khoản: ' + (err.response?.data?.message || err.message));
+      console.error('Error creating tai khoan:', err);
+    }
   };
 
   // Cancel new row
   const handleCancelNewRow = (): void => {
     setAddingNew(false);
     setNewRowData({
-      maHoKhau: '',
+      username: '',
+      password: '',
       hoTen: '',
-      tenDangNhap: '',
-      email: '',
-      soDienThoai: '',
-      ngayBatDau: '',
-      phanQuyen: '',
-      trangThai: ''
+      vaiTro: 1
     });
   };
 
@@ -254,25 +246,20 @@ const QuanLyNhanKhau: React.FC = () => {
     const crit = parseInt(searchCriteria, 10);
     const found = data.find(item => {
       const fields = [
-        item.id.toString(),
-        item.maHoKhau,
+        item.id?.toString() || '',
+        item.username,
         item.hoTen,
-        item.tenDangNhap,
-        item.email,
-        item.soDienThoai,
-        item.ngayBatDau,
-        item.phanQuyen,
-        item.trangThai
+        getVaiTroLabel(item.vaiTro)
       ];
       return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
     });
     
     if (found) {
-      setHighlightedRowId(found.id);
+      setHighlightedRowId(found.id!);
       setTimeout(() => setHighlightedRowId(null), 3000);
       document.getElementById(`row-${found.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
-      alert('Không tìm thấy nhân khẩu phù hợp.');
+      alert('Không tìm thấy tài khoản phù hợp.');
     }
   };
 
@@ -283,18 +270,46 @@ const QuanLyNhanKhau: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="spinner-border" role="status">
+              <span className="sr-only">Đang tải...</span>
+            </div>
+            <p className="mt-2">Đang tải dữ liệu...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <MainLayout>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center text-red-600">
+            <p>{error}</p>
+            <button 
+              onClick={loadTaiKhoan}
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Thử lại
+            </button>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
-   
-
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Topbar */}
-     
-
         {/* Content */}
         <main className="flex-1 p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý nhân khẩu</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý tài khoản</h2>
 
           {/* Actions */}
           <div className="flex justify-between items-center mb-6">
@@ -305,14 +320,9 @@ const QuanLyNhanKhau: React.FC = () => {
                 onChange={e => setSearchCriteria(e.target.value)}
               >
                 <option value="0">ID</option>
-                <option value="1">Mã hộ khẩu</option>
+                <option value="1">Tên đăng nhập</option>
                 <option value="2">Họ và tên</option>
-                <option value="3">Tên đăng nhập</option>
-                <option value="4">Email</option>
-                <option value="5">Số điện thoại</option>
-                <option value="6">Ngày bắt đầu</option>
-                <option value="7">Phân quyền</option>
-                <option value="8">Trạng thái</option>
+                <option value="3">Vai trò</option>
               </select>
               <input
                 type="text"
@@ -346,14 +356,10 @@ const QuanLyNhanKhau: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã hộ khẩu</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Họ và tên</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Tên đăng nhập</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Email</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Số điện thoại</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày bắt đầu</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Phân quyền</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Trạng thái</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Họ và tên</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mật khẩu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Vai trò</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hành động</th>
                 </tr>
               </thead>
@@ -367,31 +373,61 @@ const QuanLyNhanKhau: React.FC = () => {
                     <td className="px-4 py-3 text-sm text-gray-900">{row.id}</td>
                     {editRowId === row.id ? (
                       <>
-                        <td className="px-4 py-3"><input type="text" name="maHoKhau" value={editFormData.maHoKhau} onChange={handleEditChange} className="w-full px-2 py-1 border rounded" /></td>
-                        <td className="px-4 py-3"><input type="text" name="hoTen" value={editFormData.hoTen} onChange={handleEditChange} className="w-full px-2 py-1 border rounded" /></td>
-                        <td className="px-4 py-3"><input type="text" name="tenDangNhap" value={editFormData.tenDangNhap} onChange={handleEditChange} className="w-full px-2 py-1 border rounded" /></td>
-                        <td className="px-4 py-3"><input type="email" name="email" value={editFormData.email} onChange={handleEditChange} className="w-full px-2 py-1 border rounded" /></td>
-                        <td className="px-4 py-3"><input type="tel" name="soDienThoai" value={editFormData.soDienThoai} onChange={handleEditChange} className="w-full px-2 py-1 border rounded" /></td>
-                        <td className="px-4 py-3"><input type="date" name="ngayBatDau" value={editFormData.ngayBatDau} onChange={handleEditChange} className="w-full px-2 py-1 border rounded" /></td>
-                        <td className="px-4 py-3"><input type="text" name="phanQuyen" value={editFormData.phanQuyen} onChange={handleEditChange} className="w-full px-2 py-1 border rounded" /></td>
-                        <td className="px-4 py-3"><input type="text" name="trangThai" value={editFormData.trangThai} onChange={handleEditChange} className="w-full px-2 py-1 border rounded" /></td>
+                        <td className="px-4 py-3">
+                          <input 
+                            type="text" 
+                            name="username" 
+                            value={editFormData.username} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded" 
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input 
+                            type="text" 
+                            name="hoTen" 
+                            value={editFormData.hoTen} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded" 
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input 
+                            type="password" 
+                            name="password" 
+                            value={editFormData.password || ''} 
+                            onChange={handleEditChange} 
+                            placeholder="Nhập mật khẩu mới (để trống nếu không thay đổi)"
+                            className="w-full px-2 py-1 border rounded" 
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <select 
+                            name="vaiTro" 
+                            value={editFormData.vaiTro} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded"
+                          >
+                            {vaiTroOptions.map(option => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
                       </>
                     ) : (
                       <>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.maHoKhau}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.username}</td>
                         <td className="px-4 py-3 text-sm text-gray-900">{row.hoTen}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.tenDangNhap}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.email}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.soDienThoai}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.ngayBatDau}</td>
+                        <td className="px-4 py-3 text-sm text-gray-500">••••••••</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-1 text-xs rounded-full ${row.phanQuyen === 'Admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>
-                            {row.phanQuyen}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-1 text-xs rounded-full ${row.trangThai === 'Hoạt động' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {row.trangThai}
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            row.vaiTro === 1 ? 'bg-purple-100 text-purple-800' : 
+                            row.vaiTro === 2 ? 'bg-blue-100 text-blue-800' : 
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {getVaiTroLabel(row.vaiTro)}
                           </span>
                         </td>
                       </>
@@ -407,7 +443,7 @@ const QuanLyNhanKhau: React.FC = () => {
                         </button>
                         <button 
                           className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
-                          onClick={() => handleDeleteClick(row.id)}
+                          onClick={() => handleDeleteClick(row.id!)}
                           title="Xóa"
                         >
                           <FaTrashAlt />
@@ -419,15 +455,51 @@ const QuanLyNhanKhau: React.FC = () => {
 
                 {addingNew && (
                   <tr className="bg-blue-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">{data.length > 0 ? Math.max(...data.map(d => d.id)) + 1 : 1}</td>
-                    <td className="px-4 py-3"><input type="text" name="maHoKhau" placeholder="Mã hộ khẩu" value={newRowData.maHoKhau} onChange={handleNewChange} className="w-full px-2 py-1 border rounded" /></td>
-                    <td className="px-4 py-3"><input type="text" name="hoTen" placeholder="Họ và tên" value={newRowData.hoTen} onChange={handleNewChange} className="w-full px-2 py-1 border rounded" /></td>
-                    <td className="px-4 py-3"><input type="text" name="tenDangNhap" placeholder="Tên đăng nhập" value={newRowData.tenDangNhap} onChange={handleNewChange} className="w-full px-2 py-1 border rounded" /></td>
-                    <td className="px-4 py-3"><input type="email" name="email" placeholder="Email" value={newRowData.email} onChange={handleNewChange} className="w-full px-2 py-1 border rounded" /></td>
-                    <td className="px-4 py-3"><input type="tel" name="soDienThoai" placeholder="Số điện thoại" value={newRowData.soDienThoai} onChange={handleNewChange} className="w-full px-2 py-1 border rounded" /></td>
-                    <td className="px-4 py-3"><input type="date" name="ngayBatDau" value={newRowData.ngayBatDau} onChange={handleNewChange} className="w-full px-2 py-1 border rounded" /></td>
-                    <td className="px-4 py-3"><input type="text" name="phanQuyen" placeholder="Phân quyền" value={newRowData.phanQuyen} onChange={handleNewChange} className="w-full px-2 py-1 border rounded" /></td>
-                    <td className="px-4 py-3"><input type="text" name="trangThai" placeholder="Trạng thái" value={newRowData.trangThai} onChange={handleNewChange} className="w-full px-2 py-1 border rounded" /></td>
+                    <td className="px-4 py-3 text-sm text-gray-900">-</td>
+                    <td className="px-4 py-3">
+                      <input 
+                        type="text" 
+                        name="username" 
+                        placeholder="Tên đăng nhập" 
+                        value={newRowData.username} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded" 
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input 
+                        type="text" 
+                        name="hoTen" 
+                        placeholder="Họ và tên" 
+                        value={newRowData.hoTen} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded" 
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input 
+                        type="password" 
+                        name="password" 
+                        placeholder="Mật khẩu" 
+                        value={newRowData.password || ''} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded" 
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <select 
+                        name="vaiTro" 
+                        value={newRowData.vaiTro} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded"
+                      >
+                        {vaiTroOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex space-x-2">
                         <button 
@@ -468,7 +540,7 @@ const QuanLyNhanKhau: React.FC = () => {
               <span className="text-sm text-gray-700">mục</span>
             </div>
             <div className="text-sm text-gray-700">
-              Tổng cộng: {data.length} nhân khẩu
+              Tổng cộng: {data.length} tài khoản
             </div>
           </div>
         </main>
@@ -477,4 +549,4 @@ const QuanLyNhanKhau: React.FC = () => {
   );
 };
 
-export default QuanLyNhanKhau;
+export default QLTaiKhoan;

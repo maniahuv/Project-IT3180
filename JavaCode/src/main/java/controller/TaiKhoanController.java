@@ -10,8 +10,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/taikhoan")
-@CrossOrigin(origins = "*")  // Cho phép React frontend truy cập API
-@PreAuthorize("hasRole('TO_TRUONG') or hasRole('TO_PHO')")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@PreAuthorize("hasRole('TOTRUONG')")
 public class TaiKhoanController {
 
     private final TaiKhoanService taiKhoanService;
@@ -28,8 +28,8 @@ public class TaiKhoanController {
     @GetMapping("/{id}")
     public ResponseEntity<TaiKhoan> getById(@PathVariable Integer id) {
         return taiKhoanService.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping

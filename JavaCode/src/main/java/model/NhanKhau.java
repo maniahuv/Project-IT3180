@@ -1,6 +1,7 @@
 package model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.time.LocalDate;
 
 @Entity
@@ -11,91 +12,47 @@ public class NhanKhau {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maNhanKhau;
 
-    @Column(nullable = false, length = 100)
+    @Column
     private String hoTen;
 
+    @Column
     private LocalDate ngaySinh;
 
-    private Boolean gioiTinh;  // true = nam, false = nữ (hoặc ngược lại tùy định nghĩa)
+    @Column
+    private Boolean gioiTinh;
 
-    @Column(length = 25)
+    @Column
     private String cmnd;
 
-    @Column(length = 50)
+    @Column
     private String qhVoiChuHo;
 
-    @Column(length = 50)
+    @Column
     private String trangThai;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maHoKhau")
+    @JsonBackReference(value = "hokhau-nhankhau")
     private HoKhau hoKhau;
 
+    // Constructors
     public NhanKhau() {}
 
-    // Getter & Setter
-
-    public Integer getMaNhanKhau() {
-        return maNhanKhau;
-    }
-
-    public void setMaNhanKhau(Integer maNhanKhau) {
-        this.maNhanKhau = maNhanKhau;
-    }
-
-    public String getHoTen() {
-        return hoTen;
-    }
-
-    public void setHoTen(String hoTen) {
-        this.hoTen = hoTen;
-    }
-
-    public LocalDate getNgaySinh() {
-        return ngaySinh;
-    }
-
-    public void setNgaySinh(LocalDate ngaySinh) {
-        this.ngaySinh = ngaySinh;
-    }
-
-    public Boolean getGioiTinh() {
-        return gioiTinh;
-    }
-
-    public void setGioiTinh(Boolean gioiTinh) {
-        this.gioiTinh = gioiTinh;
-    }
-
-    public String getCmnd() {
-        return cmnd;
-    }
-
-    public void setCmnd(String cmnd) {
-        this.cmnd = cmnd;
-    }
-
-    public String getQhVoiChuHo() {
-        return qhVoiChuHo;
-    }
-
-    public void setQhVoiChuHo(String qhVoiChuHo) {
-        this.qhVoiChuHo = qhVoiChuHo;
-    }
-
-    public String getTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(String trangThai) {
-        this.trangThai = trangThai;
-    }
-
-    public HoKhau getHoKhau() {
-        return hoKhau;
-    }
-
-    public void setHoKhau(HoKhau hoKhau) {
-        this.hoKhau = hoKhau;
-    }
+    // Getters and Setters
+    public Integer getMaNhanKhau() { return maNhanKhau; }
+    public void setMaNhanKhau(Integer maNhanKhau) { this.maNhanKhau = maNhanKhau; }
+    public String getHoTen() { return hoTen; }
+    public void setHoTen(String hoTen) { this.hoTen = hoTen; }
+    public LocalDate getNgaySinh() { return ngaySinh; }
+    public void setNgaySinh(LocalDate ngaySinh) { this.ngaySinh = ngaySinh; }
+    public Boolean getGioiTinh() { return gioiTinh; }
+    public void setGioiTinh(Boolean gioiTinh) { this.gioiTinh = gioiTinh; }
+    public String getCmnd() { return cmnd; }
+    public void setCmnd(String cmnd) { this.cmnd = cmnd; }
+    public String getQhVoiChuHo() { return qhVoiChuHo; }
+    public void setQhVoiChuHo(String qhVoiChuHo) { this.qhVoiChuHo = qhVoiChuHo; }
+    public String getTrangThai() { return trangThai; }
+    public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
+    public HoKhau getHoKhau() { return hoKhau; }
+    public void setHoKhau(HoKhau hoKhau) { this.hoKhau = hoKhau; }
 }

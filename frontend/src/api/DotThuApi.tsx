@@ -2,13 +2,25 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api/dotthu";
 
+// Add Axios interceptor to include token
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export interface DotThu {
-  maDotThu: number;
+  maDotThu?: number;
   tenDotThu: string;
-  ngayBatDau?: string; // LocalDate serialized as string (e.g., "YYYY-MM-DD")
-  ngayKetThuc?: string; // Optional, as it may be null
-  trangThai?: string; // Optional, as it may be null
-  khoanThus?: { maKhoanThuDotThu: number }[]; // Simplified reference to KhoanThuDotThu entities
+  ngayBatDau?: string;
+  ngayKetThuc?: string;
+  trangThai?: string;
+  khoanThus?: { maKhoanThuDotThu: number }[];
 }
 
 export function fetchAllDotThu() {

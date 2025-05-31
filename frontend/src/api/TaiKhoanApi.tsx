@@ -3,8 +3,19 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api/taikhoan";
 
+axios.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
 export interface TaiKhoan {
-  id: number;
+  id?: number;
   username: string;
   password?: string; // Password may not be returned in GET responses for security
   vaiTro?: number;

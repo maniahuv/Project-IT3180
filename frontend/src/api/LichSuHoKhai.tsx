@@ -2,8 +2,19 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api/lichsuhokhau";
 
+axios.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
 export interface LichSuHoKhau {
-  id: number;
+  id?: number;
   loaiThayDoi: number; // 1 = add to household, 2 = remove from household
   thoiGian: string; // LocalDateTime serialized as string (e.g., "YYYY-MM-DDTHH:mm:ss")
   hoKhau: { maHoKhau: number }; // Simplified reference to HoKhau entity

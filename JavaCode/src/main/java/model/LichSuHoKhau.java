@@ -1,91 +1,44 @@
 package model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "lichsuhokhau")
+@Table(name = "lichsu_hokhau")
 public class LichSuHoKhau {
-
-    // Hằng số mô tả loại thay đổi
-    public static final int LOAI_THEM_VAO = 1;
-    public static final int LOAI_XOA_RA = 2;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer maLichSu;
 
-    @Column(name = "loaiThayDoi", nullable = false)
-    private int loaiThayDoi;  // 1 - thêm vào hộ khẩu, 2 - xóa ra
+    @Column
+    private Integer loaiThayDoi;
 
-    @Column(name = "thoiGian", nullable = false)
+    @Column
     private LocalDateTime thoiGian;
 
-    // @Column(name = "noiDung", length = 1000)
-    // private String noiDung;
-
-    @ManyToOne
-    @JoinColumn(name = "maHoKhau", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "maHoKhau")
+    @JsonBackReference(value = "hokhau-lichsu")
     private HoKhau hoKhau;
 
-    @ManyToOne
-    @JoinColumn(name = "maNhanKhau", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "maNhanKhau")
     private NhanKhau nhanKhau;
 
     // Constructors
     public LichSuHoKhau() {}
 
-    public LichSuHoKhau(int loaiThayDoi, LocalDateTime thoiGian, String noiDung, HoKhau hoKhau, NhanKhau nhanKhau) {
-        this.loaiThayDoi = loaiThayDoi;
-        this.thoiGian = thoiGian;
-        // this.noiDung = noiDung;
-        this.hoKhau = hoKhau;
-        this.nhanKhau = nhanKhau;
-    }
-
-    // Getters và setters
-
-    public Integer getId() {
-        return id;
-    }
-
-    public int getLoaiThayDoi() {
-        return loaiThayDoi;
-    }
-
-    public void setLoaiThayDoi(int loaiThayDoi) {
-        this.loaiThayDoi = loaiThayDoi;
-    }
-
-    public LocalDateTime getThoiGian() {
-        return thoiGian;
-    }
-
-    public void setThoiGian(LocalDateTime thoiGian) {
-        this.thoiGian = thoiGian;
-    }
-
-    // public String getNoiDung() {
-    //     return noiDung;
-    // }
-
-    // public void setNoiDung(String noiDung) {
-    //     this.noiDung = noiDung;
-    // }
-
-    public HoKhau getHoKhau() {
-        return hoKhau;
-    }
-
-    public void setHoKhau(HoKhau hoKhau) {
-        this.hoKhau = hoKhau;
-    }
-
-    public NhanKhau getNhanKhau() {
-        return nhanKhau;
-    }
-
-    public void setNhanKhau(NhanKhau nhanKhau) {
-        this.nhanKhau = nhanKhau;
-    }
+    // Getters and Setters
+    public Integer getMaLichSu() { return maLichSu; }
+    public void setMaLichSu(Integer maLichSu) { this.maLichSu = maLichSu; }
+    public Integer getLoaiThayDoi() { return loaiThayDoi; }
+    public void setLoaiThayDoi(Integer loaiThayDoi) { this.loaiThayDoi = loaiThayDoi; }
+    public LocalDateTime getThoiGian() { return thoiGian; }
+    public void setThoiGian(LocalDateTime thoiGian) { this.thoiGian = thoiGian; }
+    public HoKhau getHoKhau() { return hoKhau; }
+    public void setHoKhau(HoKhau hoKhau) { this.hoKhau = hoKhau; }
+    public NhanKhau getNhanKhau() { return nhanKhau; }
+    public void setNhanKhau(NhanKhau nhanKhau) { this.nhanKhau = nhanKhau; }
 }

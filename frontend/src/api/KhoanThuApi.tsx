@@ -2,8 +2,19 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api/khoanthu";
 
+axios.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
 export interface KhoanThu {
-  maKhoanThu: number;
+  maKhoanThu?: number;
   tenKhoanThu: string;
   loaiKhoanThu?: string; // Optional, as it may be null
   soTien?: number; // Using number for Float in TypeScript

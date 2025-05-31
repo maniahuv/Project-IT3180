@@ -2,8 +2,19 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api/nopphi";
 
+axios.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
 export interface NopPhi {
-  id: number;
+  id?: number;
   ngayThu?: string; // LocalDate serialized as string (e.g., "YYYY-MM-DD")
   soTien?: number; // Using number for Float in TypeScript
   nguoiNop?: string; // Optional, as it may be null

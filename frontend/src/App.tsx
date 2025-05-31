@@ -10,6 +10,7 @@ import Account from './Pages/Account';
 import HomePage from './Pages/HomePage';
 import XemPhieuThu from './Pages/Management/XemPhieuThu';
 import QLNhanKhau from './Pages/Management/QLNhanKhau';
+import QLTamTruTamVang from './Pages/Management/QLTamTruTamVang';
 
 // import XuatBaoCao from './Pages/Management/XuatBaoCao';
 
@@ -85,6 +86,7 @@ export default function App() {
         <Route path='/management/qlhokhau' element={<QLHoKhau />}/>
         <Route path="/management/qlkhoanthu" element={<QLKhoanThu />} />
         <Route path="/management/qlnhankhau" element={<QLNhanKhau />} />
+        <Route path="/management/qlnhankhau" element={<QLTamTruTamVang />} />
         <Route path="/account" element={<Account />} />
         <Route path="/management/xemphieuthu" element={<XemPhieuThu />} />
         {/* <Route path="/management/xuatbaocao" element={<XuatBaoCao />} /> */}

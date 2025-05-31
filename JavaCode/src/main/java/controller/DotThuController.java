@@ -43,7 +43,7 @@ public class DotThuController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('KE_TOAN')")
+    @PreAuthorize("hasRole('KE_TOAN') or hasRole('TO_TRUONG')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

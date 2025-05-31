@@ -1,6 +1,8 @@
 package controller;
 
 import model.NhanKhau;
+import model.TaiKhoan;
+import service.HoKhauService;
 import service.NhanKhauService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,15 +16,22 @@ import java.util.List;
 public class NhanKhauController {
 
     private final NhanKhauService nhanKhauService;
+    private final HoKhauService hoKhauService;
 
-    public NhanKhauController(NhanKhauService nhanKhauService) {
+    public NhanKhauController(NhanKhauService nhanKhauService, HoKhauService hoKhauService) {
         this.nhanKhauService = nhanKhauService;
+        this.hoKhauService = hoKhauService;
     }
 
     @GetMapping
-    public ResponseEntity<List<NhanKhau>> getAll() {
-        return ResponseEntity.ok(nhanKhauService.getAll());
+    public List<NhanKhau> getAll() {
+        return nhanKhauService.findAll();
     }
+
+    // @GetMapping
+    // public ResponseEntity<List<NhanKhau>> getAll() {
+    //     return ResponseEntity.ok(nhanKhauService.getAll());
+    // }
 
     @GetMapping("/{id}")
     public ResponseEntity<NhanKhau> getById(@PathVariable Integer id) {

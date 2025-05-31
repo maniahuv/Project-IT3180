@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,6 +21,10 @@ public class HoKhauService {
     public HoKhauService(HoKhauRepository hoKhauRepository, LichSuHoKhauRepository lichSuHoKhauRepository) {
         this.hoKhauRepository = hoKhauRepository;
         this.lichSuHoKhauRepository = lichSuHoKhauRepository;
+    }
+
+    public List<HoKhau> findAll() {
+        return hoKhauRepository.findAll();
     }
 
     public Optional<HoKhau> findById(Integer id) {

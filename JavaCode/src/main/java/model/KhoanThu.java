@@ -22,6 +22,15 @@ public class KhoanThu {
     @Column(length = 1000)
     private String ghiChu;
 
+    public KhoanThu() {}
+    public KhoanThu(String tenKhoanThu, String loaiKhoanThu, Float soTien, boolean batBuoc, String ghiChu) {
+        this.tenKhoanThu = tenKhoanThu;
+        this.loaiKhoanThu = loaiKhoanThu;
+        this.soTien = soTien;
+        this.batBuoc = batBuoc;
+        this.ghiChu = ghiChu;
+    }
+
     @ManyToOne
     @JoinColumn(name = "idNguoiTao")
     private TaiKhoan nguoiTao;

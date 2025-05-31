@@ -55,15 +55,4 @@ public class TaiKhoan implements UserDetails {
         return Collections.singletonList(() -> "ROLE_" + role.getRoleName());
     }
 
-    @Override
-    public boolean isAccountNonExpired() { return true; }
-
-    @Override
-    public boolean isAccountNonLocked() { return true; }
-
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
-
-    @Override
-    public boolean isEnabled() { return true; }
 }

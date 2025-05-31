@@ -31,17 +31,18 @@ export default function Login() {
       const response = await login({ username: data.username, password: data.password });
 
       if (response.status === 200) {
-        setStatus('Đăng nhập thành công!');
-        // Redirect to /homepage after successful login
+        setStatus(response.data.message);
+        // Store token and vaiTro in localStorage
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('vaiTro', response.data.vaiTro.toString());
+        // Redirect to /homepage
         navigate('/homepage');
       } else {
         setErrors({ general: 'Đăng nhập thất bại' });
       }
     } catch (error: any) {
       if (error.response && error.response.data) {
-        const respData = error.response.data;
-        // Handle error messages from backend (e.g., "Đăng nhập thất bại" or detailed errors)
-        setErrors({ general: respData || 'Đăng nhập thất bại' });
+        setErrors({ general: error.response.data || 'Đăng nhập thất bại' });
       } else {
         setErrors({ general: 'Lỗi kết nối đến server' });
       }

@@ -2,8 +2,19 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api/khoanthu-dotthu";
 
+axios.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
 export interface KhoanThuDotThu {
-  idKhoanThuDotThu: number;
+  idKhoanThuDotThu?: number;
   khoanThu: { maKhoanThu: number }; // Simplified reference to KhoanThu entity
   dotThu: { maDotThu: number }; // Simplified reference to DotThu entity
 }

@@ -3,8 +3,19 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api/nhankhau";
 
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export interface NhanKhau {
-  maNhanKhau: number;
+  maNhanKhau?: number;
   hoTen: string;
   ngaySinh: string; // LocalDate will be serialized as string (e.g., "YYYY-MM-DD")
   gioiTinh: boolean; // true = male, false = female

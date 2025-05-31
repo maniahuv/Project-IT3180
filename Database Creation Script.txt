@@ -64,7 +64,6 @@ CREATE TABLE lichsuhokhau (
     id INT AUTO_INCREMENT PRIMARY KEY,
     loaiThayDoi INT,
     thoiGian DATETIME,
-    noiDung VARCHAR(1000),
     maHoKhau INT,
     maNhanKhau INT,
     FOREIGN KEY (maHoKhau) REFERENCES hokhau(maHoKhau),

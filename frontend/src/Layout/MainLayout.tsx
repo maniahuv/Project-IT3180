@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";  // thêm useNavigate để chuyển hướng
 import ApplicationLogo from "../Component/ApplicationLogo";
 import {
   FaHome,
@@ -18,6 +18,15 @@ type MainLayoutProps = {
 export default function MainLayout({ children }: MainLayoutProps) {
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const [userPopoverOpen, setUserPopoverOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Xóa token lưu trong localStorage (hoặc cookie tuỳ cách bạn lưu)
+    localStorage.removeItem("token");
+
+    // Chuyển hướng về trang đăng nhập
+    navigate("/auth/login");
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -25,10 +34,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <aside className="w-64 fixed top-0 left-0 h-full bg-slate-800 shadow-lg flex flex-col z-10">
         {/* Logo Section */}
         <div className="flex items-center p-6 border-b border-slate-700">
-       
           <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3">
-      
-          <ApplicationLogo></ApplicationLogo>
+            <ApplicationLogo />
           </div>
           <span className="font-bold text-xl text-white">Bluemoon</span>
         </div>
@@ -53,7 +60,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 onClick={() => setSubmenuOpen(!submenuOpen)}
                 type="button"
               >
-                     <span className="flex items-center">
+                <span className="flex items-center">
                   <FaCog size="1.125rem" />
                   <span className="ml-5">Dịch Vụ</span>
                 </span>
@@ -62,7 +69,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     submenuOpen ? "rotate-180" : "rotate-0"
                   }`}
                 >
-                  <FaCaretDown size="0.875rem"/>
+                  <FaCaretDown size="0.875rem" />
                 </div>
               </button>
               {submenuOpen && (
@@ -105,6 +112,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
                       className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
                     >
                       Quản lí tài khoản
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/management/qltamtrutamvang"
+                      className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                    >
+                      Quản lí tạm trú tạm vắng
                     </Link>
                   </li>
                   <li>
@@ -224,15 +239,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
                       </span>
                       <span className="text-gray-700">Thêm tài khoản khác</span>
                     </Link>
-                    <Link
-                      to="/"
-                      className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors border-t"
+                    {/* Đổi Link thành button để gọi hàm logout */}
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors border-t w-full text-left"
+                      type="button"
                     >
                       <span className="text-gray-500 mr-4">
                         <FaSignOutAlt />
                       </span>
                       <span className="text-gray-700">Đăng xuất khỏi tất cả các tài khoản</span>
-                    </Link>
+                    </button>
                   </div>
                 </div>
               )}
