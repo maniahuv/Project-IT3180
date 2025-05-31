@@ -32,10 +32,10 @@ export default function Login() {
 
       if (response.status === 200) {
         setStatus(response.data.message);
-        // Store token and vaiTro in localStorage
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('vaiTro', response.data.vaiTro.toString());
-        // Redirect to /homepage
+        localStorage.setItem('hoTen', response.data.hoTen); // 👈 lưu họ tên
+
         navigate('/homepage');
       } else {
         setErrors({ general: 'Đăng nhập thất bại' });

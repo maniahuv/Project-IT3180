@@ -134,9 +134,9 @@ const QLNopPhi: React.FC = () => {
         ngayThu: row.ngayThu ? formatDateDisplay(row.ngayThu) : '',
         soTien: row.soTien || 0,
         nguoiNop: row.nguoiNop || '',
-        nguoiThuId: row.nguoiThu?.id || 0,
-        hoKhauMaHoKhau: row.hoKhau?.maHoKhau || 0,
-        khoanThuMaKhoanThu: row.khoanThu?.maKhoanThu || 0
+        nguoiThuId: row.idNguoiThu || 0,
+        hoKhauMaHoKhau: row.maHoKhau || 0,
+        khoanThuMaKhoanThu: row.maKhoanThu || 0
       });
     }
   };
@@ -227,9 +227,9 @@ const QLNopPhi: React.FC = () => {
         ngayThu: formatDateISO(newRowData.ngayThu),
         soTien: newRowData.soTien,
         nguoiNop: newRowData.nguoiNop,
-        nguoiThu: { id: newRowData.nguoiThuId },
-        hoKhau: { maHoKhau: newRowData.hoKhauMaHoKhau },
-        khoanThu: { maKhoanThu: newRowData.khoanThuMaKhoanThu }
+        idNguoiThu: newRowData.nguoiThuId,
+        maHoKhau: newRowData.hoKhauMaHoKhau,
+        maKhoanThu: newRowData.khoanThuMaKhoanThu
       };
       await createNopPhi(newNopPhi);
       await loadNopPhi();
@@ -276,9 +276,9 @@ const QLNopPhi: React.FC = () => {
         formatDateDisplay(item.ngayThu),
         item.soTien?.toString() || '',
         item.nguoiNop || '',
-        item.nguoiThu?.id.toString() || '',
-        item.hoKhau?.maHoKhau.toString() || '',
-        item.khoanThu?.maKhoanThu.toString() || ''
+        item.idNguoiThu?.toString() || '',
+        item.maHoKhau?.toString() || '',
+        item.maKhoanThu?.toString() || ''
       ];
       return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
     });
@@ -467,9 +467,9 @@ const QLNopPhi: React.FC = () => {
                       <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayThu)}</td>
                       <td className="px-4 py-3 text-sm text-gray-900">{row.soTien?.toLocaleString() || '-'}</td>
                       <td className="px-4 py-3 text-sm text-gray-900">{row.nguoiNop || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{row.nguoiThu?.id || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{row.hoKhau?.maHoKhau || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{row.khoanThu?.maKhoanThu || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{row.idNguoiThu || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{row.maHoKhau || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{row.maKhoanThu || '-'}</td>
                     </>
                   )}
                   <td className="px-4 py-3">

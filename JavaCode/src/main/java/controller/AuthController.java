@@ -51,11 +51,13 @@ public class AuthController {
             TaiKhoan taiKhoan = taiKhoanService.findByUsername(username); // Assume this method exists
             System.out.println("TK sau xác thực: " + taiKhoan);
             Integer vaiTro = taiKhoan.getVaiTro(); // Get vaiTro (1, 2, or 3)
-            String token = jwtTokenProvider.generateToken(userDetails, vaiTro);
+            String hoTen = taiKhoan.getHoTen(); // Get hoTen
+            String token = jwtTokenProvider.generateToken(userDetails, vaiTro, hoTen);
 
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("vaiTro", vaiTro);
+            response.put("hoTen", hoTen);
             response.put("message", "Đăng nhập thành công");
 
             return ResponseEntity.ok(response);

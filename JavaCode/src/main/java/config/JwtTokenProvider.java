@@ -21,9 +21,10 @@ public class JwtTokenProvider {
     
     private final long EXPIRATION_TIME = 86400000; // 24 hours
 
-    public String generateToken(UserDetails userDetails, Integer vaiTro) {
+    public String generateToken(UserDetails userDetails, Integer vaiTro, String hoTen) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("vaiTro", vaiTro);
+        claims.put("hoTen", hoTen); // Assuming hoTen is the username for simplicity
 
         return Jwts.builder()
                 .setClaims(claims)

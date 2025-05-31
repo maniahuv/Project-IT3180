@@ -26,8 +26,8 @@ interface EditFormData {
 }
 
 const loaiOptions = [
-  { value: 'TAM_TRU', label: 'Tạm trú' },
-  { value: 'TAM_VANG', label: 'Tạm vắng' }
+  { value: 'Tạm trú', label: 'Tạm trú' },
+  { value: 'Tạm vắng', label: 'Tạm vắng' }
 ];
 
 const getLoaiLabel = (loai?: string): string => {

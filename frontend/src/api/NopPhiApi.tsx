@@ -18,6 +18,9 @@ axios.interceptors.request.use(
     ngayThu?: string;
     soTien?: number;
     nguoiNop?: string;
+    idNguoiThu?: number;
+    maHoKhau?: number;
+    maKhoanThu?: number;
     nguoiThu?: { id: number };
     hoKhau?: { maHoKhau: number };
     khoanThu?: { maKhoanThu: number };

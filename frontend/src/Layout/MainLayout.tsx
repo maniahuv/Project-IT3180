@@ -34,6 +34,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [userPopoverOpen, setUserPopoverOpen] = useState(false);
   const navigate = useNavigate();
   const vaiTro = localStorage.getItem("vaiTro");
+  const hoTen = localStorage.getItem("hoTen");
   const vaiTroLabel = vaiTro ? getVaiTroLabel(parseInt(vaiTro)) : "Người dùng";
   console.log(localStorage);
   if (!localStorage.getItem("token")) {
@@ -200,7 +201,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   className="w-8 h-8 rounded-full border-2 border-gray-200"
                 />
                 <span className="text-gray-700 font-medium flex items-center">
-                {vaiTroLabel}
+                  {hoTen ? hoTen : "Người dùng"}
+
                   <span className="ml-2 text-xs">
                     <FaCaretDown />
                   </span>
@@ -235,7 +237,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     />
                     <div>
                       <div className="font-semibold text-gray-900 text-lg">
-                        Nguyễn Kiều Oanh
+                      {vaiTroLabel}
                       </div>
                       <Link
                         to="/quan-ly-tai-khoan"
