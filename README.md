@@ -231,4 +231,3 @@ Dự án được phát triển cho mục đích học tập. Có thể sử d�
 
 ---
 
-File `.md` đã được chỉnh sửa và tối ưu hóa. Bạn có thể sao chép nội dung trên và lưu vào file `README.md` trong dự án. Nếu cần thêm chỉnh sửa hoặc bổ sung nội dung cụ thể, hãy cho mình biết!
