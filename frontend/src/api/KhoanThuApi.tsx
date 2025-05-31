@@ -15,16 +15,26 @@ axios.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export interface KhoanThu {
-  maKhoanThu?: number;
-  tenKhoanThu: string;
-  loaiKhoanThu?: string;
-  soTien?: number;
-  batBuoc: boolean;
-  ghiChu?: string;
-  dotThu?: { maDotThu: number };
-}
+// export interface KhoanThu {
+//   maKhoanThu?: number;
+//   tenKhoanThu: string;
+//   loaiKhoanThu?: string;
+//   soTien?: number;
+//   batBuoc: boolean;
+//   ghiChu?: string;
+//   dotThu?: { maDotThu: number };
+// }
 
+export interface KhoanThu {
+    maKhoanThu?: number;
+    tenKhoanThu: string;
+    loaiKhoanThu?: string;
+    soTien?: number;
+    batBuoc: boolean;
+    ghiChu?: string;
+    maDotThu?: number; // Add maDotThu field
+    dotThu?: { maDotThu: number; tenDotThu?: string }; // Keep for create/update
+  }
 export function fetchAllKhoanThu() {
   return axios.get<KhoanThu[]>(API_BASE_URL);
 }

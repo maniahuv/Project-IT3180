@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { KhoanThu } from './KhoanThuApi';
 
 const API_BASE_URL = 'http://localhost:8080/api/dotthu';
 
@@ -12,14 +13,23 @@ axios.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
 export interface DotThu {
-  maDotThu?: number;
-  tenDotThu: string;
-  ngayBatDau?: string;
-  ngayKetThuc?: string;
-  trangThai?: string;
-}
+    maDotThu?: number;
+    tenDotThu: string;
+    ngayBatDau?: string;
+    ngayKetThuc?: string;
+    trangThai?: string;
+    khoanThus?: KhoanThu[];
+  }
+  
+
+// export interface DotThu {
+//   maDotThu?: number;
+//   tenDotThu: string;
+//   ngayBatDau?: string;
+//   ngayKetThuc?: string;
+//   trangThai?: string;
+// }
 
 export function fetchAllDotThu() {
   return axios.get<DotThu[]>(API_BASE_URL);

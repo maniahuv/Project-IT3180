@@ -11,11 +11,9 @@ import java.util.Optional;
 public class NhanKhauService {
 
     private final NhanKhauRepository nhanKhauRepository;
-    private final HoKhauService hoKhauService;
 
-    public NhanKhauService(NhanKhauRepository nhanKhauRepository, HoKhauService hoKhauService) {
+    public NhanKhauService(NhanKhauRepository nhanKhauRepository) {
         this.nhanKhauRepository = nhanKhauRepository;
-        this.hoKhauService = hoKhauService;
     }
 
     public List<NhanKhau> findAll() {

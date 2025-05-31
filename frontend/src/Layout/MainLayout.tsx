@@ -36,11 +36,16 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const vaiTro = localStorage.getItem("vaiTro");
   const vaiTroLabel = vaiTro ? getVaiTroLabel(parseInt(vaiTro)) : "Người dùng";
   console.log(localStorage);
+  if (!localStorage.getItem("token")) {
+    // Nếu không có token, chuyển hướng về trang đăng nhập
+    navigate("//login");
+    return null; // Trả về null để không render gì nếu không có token
+  }
   const handleLogout = () => {    
     localStorage.removeItem("token");
 
     // Chuyển hướng về trang đăng nhập
-    navigate("/auth/login");
+    navigate("//login");
   };
 
   return (
@@ -90,7 +95,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               {submenuOpen && (
                 <ul className="ml-8 mt-2 space-y-1">
                   <li>
-                    <Link
+                    <Link 
                       to="/management/qlnhankhau"
                       className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
                     >
@@ -121,22 +126,29 @@ export default function MainLayout({ children }: MainLayoutProps) {
                       Quản lí khoản thu
                     </Link>
                   </li>
-                  <li>
-                    <Link
-                      to="/management/qltaikhoan"
-                      className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                    >
-                      Quản lí tài khoản
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/management/qltamtrutamvang"
-                      className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                    >
-                      Quản lí tạm trú tạm vắng
-                    </Link>
-                  </li>
+                  {vaiTro === "1" && ( /* Tổ trưởng */
+                   <div>
+                    <li>
+                      <Link
+                        to="/management/qltaikhoan"
+                        className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                      >
+                        Quản lí tài khoản
+                      </Link>
+                    </li>
+                          <li>
+                          <Link
+                            to="/management/qltamtrutamvang"
+                            className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                          >
+                            Quản lí tạm trú tạm vắng
+                          </Link>
+                        </li>
+                       </div>
+                      
+                  )}
+                  
+            
                   <li>
                     <Link
                       to="/management/qlphieuthu"

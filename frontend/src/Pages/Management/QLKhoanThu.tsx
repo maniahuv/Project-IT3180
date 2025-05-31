@@ -15,6 +15,7 @@ import {
   updateKhoanThu, 
   deleteKhoanThu 
 } from '../../api/KhoanThuApi';
+import { DotThu, fetchAllDotThu } from '../../api/DotThuApi'; // Import DotThu API
 
 interface EditFormData {
   tenKhoanThu: string;
@@ -22,10 +23,9 @@ interface EditFormData {
   soTien?: number;
   batBuoc: boolean;
   ghiChu?: string;
-  dotThu?: { maDotThu: number; tenDotThu?: string };
+  maDotThu?: number; // Use maDotThu directly
 }
 
-// Loại khoản thu options
 const loaiKhoanThuOptions = [
   { value: 'HOC_PHI', label: 'Học phí' },
   { value: 'HOAT_DONG', label: 'Hoạt động' },
@@ -39,6 +39,7 @@ const getLoaiKhoanThuLabel = (loai?: string): string => {
 
 const QLKhoanThu: React.FC = () => {
   const [data, setData] = useState<KhoanThu[]>([]);
+  const [dotThuData, setDotThuData] = useState<DotThu[]>([]); // Store DotThu data
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -48,7 +49,7 @@ const QLKhoanThu: React.FC = () => {
     soTien: 0,
     batBuoc: false,
     ghiChu: '',
-    dotThu: { maDotThu: 0 }
+    maDotThu: undefined
   });
   const [addingNew, setAddingNew] = useState<boolean>(false);
   const [newRowData, setNewRowData] = useState<EditFormData>({
@@ -57,47 +58,64 @@ const QLKhoanThu: React.FC = () => {
     soTien: 0,
     batBuoc: false,
     ghiChu: '',
-    dotThu: { maDotThu: 0 }
+    maDotThu: undefined
   });
-
   const [searchCriteria, setSearchCriteria] = useState<string>('0');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
-  // Fetch data from API
   useEffect(() => {
-    loadKhoanThu();
+    loadData();
   }, []);
 
-  const loadKhoanThu = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetchAllKhoanThu();
-      console.log('Khoan thu data loaded:', response.data);
-      setData(response.data);
+      // Load KhoanThu
+      const khoanThuResponse = await fetchAllKhoanThu();
+      console.log('Khoan thu data loaded:', khoanThuResponse.data);
+      setData(khoanThuResponse.data);
+
+      // Load DotThu for dropdown and display
+      const dotThuResponse = await fetchAllDotThu();
+      let dotThuArray: DotThu[] = [];
+      if (typeof dotThuResponse.data === 'string') {
+        dotThuArray = JSON.parse(dotThuResponse.data);
+      } else if (Array.isArray(dotThuResponse.data)) {
+        dotThuArray = dotThuResponse.data;
+      }
+      setDotThuData(dotThuArray);
+
       setError('');
     } catch (err: any) {
       setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
-      console.error('Error loading khoan thu:', err);
+      console.error('Error loading data:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle edit click
+  const getTenDotThu = (maDotThu?: number): string => {
+    if (!maDotThu) return '-';
+    const dotThu = dotThuData.find(dt => dt.maDotThu === maDotThu);
+    return dotThu ? `${dotThu.maDotThu} - ${dotThu.tenDotThu}` : `${maDotThu}`;
+  };
+
   const handleEditClick = async (row: KhoanThu): Promise<void> => {
     if (editRowId === row.maKhoanThu) {
-      // Save changes
       try {
         const updateData: KhoanThu = {
-          ...editFormData,
           maKhoanThu: row.maKhoanThu,
-          // nguoiTao: row.nguoiTao
+          tenKhoanThu: editFormData.tenKhoanThu,
+          loaiKhoanThu: editFormData.loaiKhoanThu,
+          soTien: editFormData.soTien,
+          batBuoc: editFormData.batBuoc,
+          ghiChu: editFormData.ghiChu,
+          dotThu: editFormData.maDotThu ? { maDotThu: editFormData.maDotThu } : undefined
         };
-        
         await updateKhoanThu(row.maKhoanThu!, updateData);
-        await loadKhoanThu(); // Reload data after update
+        await loadData();
         setEditRowId(null);
         setEditFormData({
           tenKhoanThu: '',
@@ -105,15 +123,13 @@ const QLKhoanThu: React.FC = () => {
           soTien: 0,
           batBuoc: false,
           ghiChu: '',
-          dotThu: { maDotThu: 0 }
+          maDotThu: undefined
         });
-        // alert('Cập nhật khoản thu thành công!');
       } catch (err: any) {
         alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
         console.error('Error updating khoan thu:', err);
       }
     } else {
-      // Start editing
       setEditRowId(row.maKhoanThu!);
       setEditFormData({
         tenKhoanThu: row.tenKhoanThu,
@@ -121,17 +137,16 @@ const QLKhoanThu: React.FC = () => {
         soTien: row.soTien,
         batBuoc: row.batBuoc,
         ghiChu: row.ghiChu,
-        dotThu: row.dotThu
+        maDotThu: row.maDotThu
       });
     }
   };
 
-  // Handle delete click
   const handleDeleteClick = async (id: number): Promise<void> => {
     if (window.confirm('Bạn có chắc muốn xóa khoản thu này?')) {
       try {
         await deleteKhoanThu(id);
-        await loadKhoanThu(); // Reload data after delete
+        await loadData();
         if (editRowId === id) {
           setEditRowId(null);
           setEditFormData({
@@ -140,28 +155,26 @@ const QLKhoanThu: React.FC = () => {
             soTien: 0,
             batBuoc: false,
             ghiChu: '',
-            dotThu: { maDotThu: 0 }
+            maDotThu: undefined
           });
         }
-        // alert('Xóa khoản thu thành công!');
       } catch (err: any) {
-        alert('Có lỗI xảy ra khi xóa: ' + (err.response?.data?.message || err.message));
+        alert('Có lỗi xảy ra khi xóa: ' + (err.response?.data?.message || err.message));
         console.error('Error deleting khoan thu:', err);
       }
     }
   };
 
-  // Handle edit input change
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
     setEditFormData(prev => ({ 
       ...prev, 
-      [name]: type === 'checkbox' ? checked : name === 'soTien' ? parseFloat(value) || 0 : value 
+      [name]: type === 'checkbox' ? checked : name === 'soTien' ? parseFloat(value) || 0 : 
+              name === 'maDotThu' ? parseInt(value) || undefined : value 
     }));
   };
 
-  // Handle add new click
   const handleAddNewClick = (): void => {
     setAddingNew(true);
     setNewRowData({
@@ -170,21 +183,20 @@ const QLKhoanThu: React.FC = () => {
       soTien: 0,
       batBuoc: false,
       ghiChu: '',
-      dotThu: { maDotThu: 0 }
+      maDotThu: undefined
     });
   };
 
-  // Handle new row input change
   const handleNewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
     setNewRowData(prev => ({ 
       ...prev, 
-      [name]: type === 'checkbox' ? checked : name === 'soTien' ? parseFloat(value) || 0 : value 
+      [name]: type === 'checkbox' ? checked : name === 'soTien' ? parseFloat(value) || 0 : 
+              name === 'maDotThu' ? parseInt(value) || undefined : value 
     }));
   };
 
-  // Save new row
   const handleSaveNewRow = async (): Promise<void> => {
     if (!newRowData.tenKhoanThu.trim()) {
       alert('Vui lòng nhập tên khoản thu.');
@@ -194,8 +206,8 @@ const QLKhoanThu: React.FC = () => {
       alert('Vui lòng nhập số tiền hợp lệ.');
       return;
     }
-    if (!newRowData.dotThu?.maDotThu) {
-      alert('Vui lòng nhập mã đợt thu.');
+    if (!newRowData.maDotThu) {
+      alert('Vui lòng chọn đợt thu.');
       return;
     }
 
@@ -206,11 +218,10 @@ const QLKhoanThu: React.FC = () => {
         soTien: newRowData.soTien,
         batBuoc: newRowData.batBuoc,
         ghiChu: newRowData.ghiChu,
-        dotThu: newRowData.dotThu
+        dotThu: { maDotThu: newRowData.maDotThu }
       };
-      
       await createKhoanThu(newKhoanThu);
-      await loadKhoanThu(); // Reload data after create
+      await loadData();
       setAddingNew(false);
       setNewRowData({
         tenKhoanThu: '',
@@ -218,16 +229,14 @@ const QLKhoanThu: React.FC = () => {
         soTien: 0,
         batBuoc: false,
         ghiChu: '',
-        dotThu: { maDotThu: 0 }
+        maDotThu: undefined
       });
-      // alert('Tạo khoản thu thành công!');
     } catch (err: any) {
       alert('Có lỗi xảy ra khi tạo khoản thu: ' + (err.response?.data?.message || err.message));
       console.error('Error creating khoan thu:', err);
     }
   };
 
-  // Cancel new row
   const handleCancelNewRow = (): void => {
     setAddingNew(false);
     setNewRowData({
@@ -236,11 +245,10 @@ const QLKhoanThu: React.FC = () => {
       soTien: 0,
       batBuoc: false,
       ghiChu: '',
-      dotThu: { maDotThu: 0 }
+      maDotThu: undefined
     });
   };
 
-  // Handle search
   const handleSearch = (): void => {
     if (!searchKeyword.trim()) {
       alert('Vui lòng nhập từ khóa tìm kiếm.');
@@ -254,8 +262,7 @@ const QLKhoanThu: React.FC = () => {
         getLoaiKhoanThuLabel(item.loaiKhoanThu),
         item.soTien?.toString() || '',
         item.batBuoc ? 'Có' : 'Không',
-        item.dotThu?.maDotThu.toString || '',
-        // item.nguoiTao?.id.toString() || ''
+        item.maDotThu?.toString() || ''
       ];
       return fields[crit]?.toString().toLowerCase().includes(searchKeyword.toLowerCase());
     });
@@ -269,7 +276,6 @@ const QLKhoanThu: React.FC = () => {
     }
   };
 
-  // Handle search on Enter key
   const handleSearchKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
       handleSearch();
@@ -298,7 +304,7 @@ const QLKhoanThu: React.FC = () => {
           <div className="text-center text-red-600">
             <p>{error}</p>
             <button 
-              onClick={loadKhoanThu}
+              onClick={loadData}
               className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
               Thử lại
@@ -311,13 +317,10 @@ const QLKhoanThu: React.FC = () => {
 
   return (
     <MainLayout>
-      {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Content */}
-        <main className="flex-1 p-6">
+       
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý khoản thu</h2>
 
-          {/* Actions */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center space-x-2">
               <select
@@ -331,7 +334,6 @@ const QLKhoanThu: React.FC = () => {
                 <option value="3">Số tiền</option>
                 <option value="4">Bắt buộc</option>
                 <option value="5">Đợt thu</option>
-                <option value="6">Người tạo</option>
               </select>
               <input
                 type="text"
@@ -359,7 +361,6 @@ const QLKhoanThu: React.FC = () => {
             </button>
           </div>
 
-          {/* Table */}
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
@@ -371,7 +372,6 @@ const QLKhoanThu: React.FC = () => {
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Bắt buộc</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ghi chú</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Đợt thu</th>
-                  {/* <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Người tạo</th> */}
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hành động</th>
                 </tr>
               </thead>
@@ -435,36 +435,37 @@ const QLKhoanThu: React.FC = () => {
                           />
                         </td>
                         <td className="px-4 py-3">
-                          <input 
-                            type="number" 
+                          <select 
                             name="maDotThu" 
-                            value={editFormData.dotThu?.maDotThu || ''} 
-                            onChange={e => setEditFormData(prev => ({
-                              ...prev,
-                              dotThu: { ...prev.dotThu, maDotThu: parseInt(e.target.value) || 0 }
-                            }))} 
-                            className="w-full px-2 py-1 border rounded" 
-                          />
+                            value={editFormData.maDotThu || ''} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded"
+                          >
+                            <option value="">Chọn đợt thu</option>
+                            {dotThuData.map(dt => (
+                              <option key={dt.maDotThu} value={dt.maDotThu}>
+                                {dt.maDotThu} - {dt.tenDotThu}
+                              </option>
+                            ))}
+                          </select>
                         </td>
-                        {/* <td className="px-4 py-3 text-sm text-gray-900">nguoiTao{row.?.id || '-'}</td> */}
                       </>
                     ) : (
                       <>
                         <td className="px-4 py-3 text-sm text-gray-900">{row.tenKhoanThu}</td>
                         <td className="px-4 py-3">
                           <span className={`px-2 py-1 text-xs rounded-full ${
-                            row.loaiKhoanThu === 'HOC_PHI' ? 'bg-purple-100 text-purple-800' : 
-                            row.loaiKhoanThu === 'HOAT_DONG' ? 'bg-blue-100 text-blue-800' : 
+                            row.loaiKhoanThu === 'HOC_PHI' ? 'bg-blue-100 text-blue-800' :
+                            row.loaiKhoanThu === 'HOAT_DONG' ? 'bg-purple-100 text-purple-800' :
                             'bg-gray-100 text-gray-800'
                           }`}>
                             {getLoaiKhoanThuLabel(row.loaiKhoanThu)}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.soTien?.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.soTien?.toLocaleString() || '-'}</td>
                         <td className="px-4 py-3 text-sm text-gray-900">{row.batBuoc ? 'Có' : 'Không'}</td>
                         <td className="px-4 py-3 text-sm text-gray-900">{row.ghiChu || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{ row.dotThu?.maDotThu || '-'}</td>
-                        {/* <td className="px-4 py-3 text-sm text-gray-900">{row.nguoiTao?.id || '-'}</td> */}
+                        <td className="px-4 py-3 text-sm text-gray-900">{getTenDotThu(row.maDotThu)}</td>
                       </>
                     )}
                     <td className="px-4 py-3">
@@ -477,7 +478,7 @@ const QLKhoanThu: React.FC = () => {
                           {editRowId === row.maKhoanThu ? <FaSave /> : <FaPen />}
                         </button>
                         <button 
-                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                          className="p-2 text-red-600 hover:bg-red-50 rounded"
                           onClick={() => handleDeleteClick(row.maKhoanThu!)}
                           title="Xóa"
                         >
@@ -487,10 +488,9 @@ const QLKhoanThu: React.FC = () => {
                     </td>
                   </tr>
                 ))}
-
                 {addingNew && (
                   <tr className="bg-blue-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">-</td>
+                    <td className="px-4 py-3 text-sm text-gray-800">-</td>
                     <td className="px-4 py-3">
                       <input 
                         type="text" 
@@ -519,7 +519,7 @@ const QLKhoanThu: React.FC = () => {
                       <input 
                         type="number" 
                         name="soTien" 
-                        placeholder="Số tiền" 
+                        placeholder="0" 
                         value={newRowData.soTien || ''} 
                         onChange={handleNewChange} 
                         className="w-full px-2 py-1 border rounded" 
@@ -530,8 +530,8 @@ const QLKhoanThu: React.FC = () => {
                         type="checkbox" 
                         name="batBuoc" 
                         checked={newRowData.batBuoc} 
-                        onChange={handleNewChange} 
-                        className="h-4 w-4 text-blue-600 border-gray-300 rounded" 
+                        onChange={handleNewChange}
+                        className="h-4 w-4 rounded" 
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -544,19 +544,20 @@ const QLKhoanThu: React.FC = () => {
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input 
-                        type="number" 
+                      <select 
                         name="maDotThu" 
-                        placeholder="Mã đợt thu" 
-                        value={newRowData.dotThu?.maDotThu || ''} 
-                        onChange={e => setNewRowData(prev => ({
-                          ...prev,
-                          dotThu: { ...prev.dotThu, maDotThu: parseInt(e.target.value) || 0 }
-                        }))} 
-                        className="w-full px-2 py-1 border rounded" 
-                      />
+                        value={newRowData.maDotThu || ''} 
+                        onChange={handleNewChange} 
+                        className="w-full px-4 py-1 border rounded"
+                      >
+                        <option value="">Chọn đợt thu</option>
+                        {dotThuData.map(dt => (
+                          <option key={dt.maDotThu} value={dt.maDotThu}>
+                            {dt.maDotThu} - {dt.tenDotThu}
+                          </option>
+                        ))}
+                      </select>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">-</td>
                     <td className="px-4 py-3">
                       <div className="flex space-x-2">
                         <button 
@@ -581,7 +582,6 @@ const QLKhoanThu: React.FC = () => {
             </table>
           </div>
 
-          {/* Pagination */}
           <div className="mt-4 flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-700">Hiển thị</span>
@@ -590,9 +590,9 @@ const QLKhoanThu: React.FC = () => {
                 value={itemsPerPage}
                 onChange={e => setItemsPerPage(Number(e.target.value))}
               >
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
               </select>
               <span className="text-sm text-gray-700">mục</span>
             </div>
@@ -600,10 +600,9 @@ const QLKhoanThu: React.FC = () => {
               Tổng cộng: {data.length} khoản thu
             </div>
           </div>
-        </main>
-      </div>
+          </div>
     </MainLayout>
-  );
+  )
 };
 
 export default QLKhoanThu;

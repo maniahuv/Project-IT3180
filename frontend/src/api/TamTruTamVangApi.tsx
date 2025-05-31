@@ -22,9 +22,19 @@ export interface TamTruTamVang {
   nhanKhau: { maNhanKhau: number }; // Simplified reference to NhanKhau entity
 }
 
-export function fetchAllTamTruTamVang() {
-  return axios.get<TamTruTamVang[]>(API_BASE_URL);
-}
+export const fetchAllTamTruTamVang = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('No token found');
+  }
+  console.log('TamTruTamVangApi - Sending request to /api/tamtrutamvang with token:', token.substring(0, 20) + '...');
+  return axios.get('http://localhost:8080/api/tamtrutamvang', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+};
 
 export function fetchTamTruTamVangById(id: number) {
   return axios.get<TamTruTamVang>(`${API_BASE_URL}/${id}`);

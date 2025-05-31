@@ -15,6 +15,7 @@ import {
   updateDotThu, 
   deleteDotThu 
 } from '../../api/DotThuApi';
+import { KhoanThu } from '../../api/KhoanThuApi';
 
 interface EditFormData {
   tenDotThu: string;
@@ -23,15 +24,15 @@ interface EditFormData {
   trangThai?: string;
 }
 
-// Define trangThai options with backend display values
 const trangThaiOptions = [
-  { value: 'Đang diễn ra', label: 'Đang diễn ra', color: 'bg-green-100 text-green-800' },
-  { value: 'Đã hoàn thành', label: 'Đã hoàn thành', color: 'bg-blue-100 text-blue-800' },
-  { value: 'Tạm hoãn', label: 'Tạm hoãn', color: 'bg-yellow-100 text-yellow-800' }
+  { value: 'DANG_DIEN_RA', label: 'Đang diễn ra', color: 'bg-green-100 text-green-800' },
+  { value: 'DA_HOAN_THANH', label: 'Đã hoàn thành', color: 'bg-blue-100 text-blue-800' },
+  { value: 'TAM_HOAN', label: 'Tạm hoãn', color: 'bg-yellow-100 text-yellow-800' }
 ];
 
 const getTrangThaiLabel = (trangThai?: string): string => {
-  return trangThai || 'Không xác định';
+  const option = trangThaiOptions.find(opt => opt.value === trangThai);
+  return option ? option.label : 'Không xác định';
 };
 
 const getTrangThaiColor = (trangThai?: string): string => {
@@ -39,16 +40,6 @@ const getTrangThaiColor = (trangThai?: string): string => {
   return option ? option.color : 'bg-gray-100 text-gray-800';
 };
 
-const mapToEnumValue = (displayValue: string): string => {
-  switch (displayValue) {
-    case 'Đang diễn ra': return 'DANG_DIEN_RA';
-    case 'Đã hoàn thành': return 'DA_HOAN_THANH';
-    case 'Tạm hoãn': return 'TAM_HOAN';
-    default: return 'DANG_DIEN_RA';
-  }
-};
-
-// Utility functions
 const formatDateISO = (dateStr: string): string => {
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
   const parts = dateStr.split('/');
@@ -78,14 +69,14 @@ const QLDotThu: React.FC = () => {
     tenDotThu: '',
     ngayBatDau: '',
     ngayKetThuc: '',
-    trangThai: 'Đang diễn ra'
+    trangThai: 'DANG_DIEN_RA'
   });
   const [addingNew, setAddingNew] = useState<boolean>(false);
   const [newRowData, setNewRowData] = useState<EditFormData>({
     tenDotThu: '',
     ngayBatDau: '',
     ngayKetThuc: '',
-    trangThai: 'Đang diễn ra'
+    trangThai: 'DANG_DIEN_RA'
   });
   const [searchCriteria, setSearchCriteria] = useState<string>('0');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
@@ -106,7 +97,16 @@ const QLDotThu: React.FC = () => {
       const response = await fetchAllDotThu();
       console.log('Raw API response:', JSON.stringify(response, null, 2));
       console.log('Response data type:', typeof response.data, Array.isArray(response.data));
-      const dataArray = Array.isArray(response.data) ? response.data : [];
+      let dataArray: DotThu[] = [];
+      if (typeof response.data === 'string') {
+        try {
+          dataArray = JSON.parse(response.data);
+        } catch (parseError) {
+          console.error('Failed to parse response.data:', parseError);
+        }
+      } else if (Array.isArray(response.data)) {
+        dataArray = response.data;
+      }
       setData(dataArray);
       setError('');
     } catch (err: any) {
@@ -127,7 +127,7 @@ const QLDotThu: React.FC = () => {
           tenDotThu: editFormData.tenDotThu,
           ngayBatDau: editFormData.ngayBatDau ? formatDateISO(editFormData.ngayBatDau) : undefined,
           ngayKetThuc: editFormData.ngayKetThuc ? formatDateISO(editFormData.ngayKetThuc) : undefined,
-          trangThai: mapToEnumValue(editFormData.trangThai || 'Đang diễn ra')
+          trangThai: editFormData.trangThai
         };
         await updateDotThu(row.maDotThu!, updateData);
         await loadDotThu();
@@ -136,7 +136,7 @@ const QLDotThu: React.FC = () => {
           tenDotThu: '',
           ngayBatDau: '',
           ngayKetThuc: '',
-          trangThai: 'Đang diễn ra'
+          trangThai: 'DANG_DIEN_RA'
         });
       } catch (err: any) {
         alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
@@ -148,7 +148,7 @@ const QLDotThu: React.FC = () => {
         tenDotThu: row.tenDotThu,
         ngayBatDau: row.ngayBatDau ? formatDateDisplay(row.ngayBatDau) : '',
         ngayKetThuc: row.ngayKetThuc ? formatDateDisplay(row.ngayKetThuc) : '',
-        trangThai: row.trangThai || 'Đang diễn ra'
+        trangThai: row.trangThai || 'DANG_DIEN_RA'
       });
     }
   };
@@ -164,7 +164,7 @@ const QLDotThu: React.FC = () => {
             tenDotThu: '',
             ngayBatDau: '',
             ngayKetThuc: '',
-            trangThai: 'Đang diễn ra'
+            trangThai: 'DANG_DIEN_RA'
           });
         }
       } catch (err: any) {
@@ -180,7 +180,7 @@ const QLDotThu: React.FC = () => {
       tenDotThu: '',
       ngayBatDau: '',
       ngayKetThuc: '',
-      trangThai: 'Đang diễn ra'
+      trangThai: 'DANG_DIEN_RA'
     });
   };
 
@@ -219,7 +219,7 @@ const QLDotThu: React.FC = () => {
         tenDotThu: newRowData.tenDotThu,
         ngayBatDau: newRowData.ngayBatDau ? formatDateISO(newRowData.ngayBatDau) : undefined,
         ngayKetThuc: newRowData.ngayKetThuc ? formatDateISO(newRowData.ngayKetThuc) : undefined,
-        trangThai: mapToEnumValue(newRowData.trangThai)
+        trangThai: newRowData.trangThai
       };
       await createDotThu(newDotThu);
       await loadDotThu();
@@ -228,7 +228,7 @@ const QLDotThu: React.FC = () => {
         tenDotThu: '',
         ngayBatDau: '',
         ngayKetThuc: '',
-        trangThai: 'Đang diễn ra'
+        trangThai: 'DANG_DIEN_RA'
       });
     } catch (err: any) {
       alert('Có lỗi xảy ra khi tạo đợt thu: ' + (err.response?.data?.message || err.message));
@@ -242,7 +242,7 @@ const QLDotThu: React.FC = () => {
       tenDotThu: '',
       ngayBatDau: '',
       ngayKetThuc: '',
-      trangThai: 'Đang diễn ra'
+      trangThai: 'DANG_DIEN_RA'
     });
   };
 
@@ -278,8 +278,8 @@ const QLDotThu: React.FC = () => {
     }
   };
 
-  const getSoKhoanThu = (maDotThu?: number): string => {
-    return '0'; // Placeholder
+  const getSoKhoanThu = (maDotThu?: number, khoanThus?: KhoanThu[]): string => {
+    return khoanThus ? khoanThus.length.toString() : '0';
   };
 
   if (loading) {
@@ -317,9 +317,11 @@ const QLDotThu: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="flex-1 flex flex-col">
+
         <main className="flex-1 p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý đợt thu</h2>
+          {/* Add the rest of the content here */}
+        </main>
 
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center space-x-2">
@@ -426,7 +428,7 @@ const QLDotThu: React.FC = () => {
                             ))}
                           </select>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{getSoKhoanThu(row.maDotThu)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{getSoKhoanThu(row.maDotThu, row.khoanThus)}</td>
                       </>
                     ) : (
                       <>
@@ -438,7 +440,7 @@ const QLDotThu: React.FC = () => {
                             {getTrangThaiLabel(row.trangThai)}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{getSoKhoanThu(row.maDotThu)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{getSoKhoanThu(row.maDotThu, row.khoanThus)}</td>
                       </>
                     )}
                     <td className="px-4 py-3">
@@ -551,8 +553,8 @@ const QLDotThu: React.FC = () => {
               Tổng cộng: {data.length} đợt thu
             </div>
           </div>
-        </main>
-      </div>
+  
+
     </MainLayout>
   );
 };

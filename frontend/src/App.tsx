@@ -22,7 +22,7 @@ function Home() {
       <header className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
         <div className="text-2xl font-bold text-[#dc3545]">Bluemoon</div>
         <nav className="space-x-6 text-sm font-medium text-gray-700">
-          <Link to="/auth/login">Đăng nhập</Link>
+          <Link to="//login">Đăng nhập</Link>
           <a href="#">Sản phẩm</a>
           <a href="#">Giải pháp</a>
           <a href="#">Tài nguyên</a>
@@ -38,7 +38,7 @@ function Home() {
         </h1>
         <div className="space-x-4">
           <Link
-            to="/auth/login"
+            to="//login"
             className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded font-semibold"
           >
             Đăng nhập
@@ -79,7 +79,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/homepage" element={<HomePage />} />
-        <Route path="/auth/login" element={<Login />} />
+        <Route path="//login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} />
         <Route path="/management/qltaikhoan" element={<QLTaiKhoan />} />
         <Route path="/management/qldotthu" element={<QLDotThu />} />

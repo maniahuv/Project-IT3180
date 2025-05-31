@@ -1,8 +1,8 @@
-// KhoanThu.java
 package model;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "khoanthu")
@@ -29,6 +29,16 @@ public class KhoanThu {
     @JsonBackReference
     private DotThu dotThu;
 
+    @Transient // Not persisted in the database
+    @JsonProperty("maDotThu") // Include in JSON response
+    private Integer maDotThuTransient;
+
+    // Initialize transient field after loading entity
+    @PostLoad
+    private void populateMaDotThu() {
+        this.maDotThuTransient = (dotThu != null) ? dotThu.getMaDotThu() : null;
+    }
+
     // Getters and Setters
     public Integer getMaKhoanThu() { return maKhoanThu; }
     public void setMaKhoanThu(Integer maKhoanThu) { this.maKhoanThu = maKhoanThu; }
@@ -43,5 +53,10 @@ public class KhoanThu {
     public String getGhiChu() { return ghiChu; }
     public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
     public DotThu getDotThu() { return dotThu; }
-    public void setDotThu(DotThu dotThu) { this.dotThu = dotThu; }
+    public void setDotThu(DotThu dotThu) { 
+        this.dotThu = dotThu; 
+        this.maDotThuTransient = (dotThu != null) ? dotThu.getMaDotThu() : null; 
+    }
+    public Integer getMaDotThuTransient() { return maDotThuTransient; }
+    public void setMaDotThuTransient(Integer maDotThuTransient) { this.maDotThuTransient = maDotThuTransient; }
 }

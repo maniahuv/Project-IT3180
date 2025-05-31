@@ -3,6 +3,9 @@ package model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Entity
 @Table(name = "tamtrutamvang")
 public class TamTruTamVang {
@@ -21,9 +24,25 @@ public class TamTruTamVang {
     @Column(length = 1000)
     private String lyDo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne
     @JoinColumn(name = "maNhanKhau", nullable = false)
+    @JsonBackReference
     private NhanKhau nhanKhau;
+
+    @Transient // Not persisted in the database
+    @JsonProperty("maNhanKhau") // Include in JSON response
+    private Integer maNhanKhauTransient;
+
+    // Initialize transient field after loading entity
+    @PostLoad
+    private void populateMaNhanKhau() {
+        this.maNhanKhauTransient = (nhanKhau != null) ? nhanKhau.getMaNhanKhau() : null;
+    }
+
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "maNhanKhau", nullable = false)
+    // private NhanKhau nhanKhau;
 
     public TamTruTamVang() {
     }
