@@ -1,6 +1,7 @@
 package model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.time.LocalDate;
 
 @Entity
@@ -22,32 +23,34 @@ public class NopPhi {
     // Người thu - liên kết tới tài khoản kế toán
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idNguoiThu", nullable = false)
+    @JsonBackReference
     private TaiKhoan nguoiThu;
 
     // Mã hộ khẩu
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maHoKhau", nullable = false)
+    @JsonBackReference
     private HoKhau hoKhau;
 
-    // Liên kết tới bảng khoanthu_has_dotthu (KhoanThuDotThu)
+    // Liên kết tới bảng khoanthu
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idKhoanThuDotThu", nullable = false)
-    private KhoanThuDotThu khoanThuDotThu;
+    @JoinColumn(name = "maKhoanThu", nullable = false)
+    @JsonBackReference
+    private KhoanThu khoanThu;
 
     public NopPhi() {
     }
 
-    public NopPhi(LocalDate ngayThu, Float soTien, String nguoiNop, TaiKhoan nguoiThu, HoKhau hoKhau, KhoanThuDotThu khoanThuDotThu) {
+    public NopPhi(LocalDate ngayThu, Float soTien, String nguoiNop, TaiKhoan nguoiThu, HoKhau hoKhau, KhoanThu khoanThu) {
         this.ngayThu = ngayThu;
         this.soTien = soTien;
         this.nguoiNop = nguoiNop;
         this.nguoiThu = nguoiThu;
         this.hoKhau = hoKhau;
-        this.khoanThuDotThu = khoanThuDotThu;
+        this.khoanThu = khoanThu;
     }
 
-    // Getters và Setters
-
+    // Getters and Setters
     public Integer getId() {
         return id;
     }
@@ -96,12 +99,11 @@ public class NopPhi {
         this.hoKhau = hoKhau;
     }
 
-    public KhoanThuDotThu getKhoanThuDotThu() {
-        return khoanThuDotThu;
+    public KhoanThu getKhoanThu() {
+        return khoanThu;
     }
 
-    public void setKhoanThuDotThu(KhoanThuDotThu khoanThuDotThu) {
-        this.khoanThuDotThu = khoanThuDotThu;
+    public void setKhoanThu(KhoanThu khoanThu) {
+        this.khoanThu = khoanThu;
     }
-    
 }

@@ -1,7 +1,8 @@
+// KhoanThu.java
 package model;
 
 import jakarta.persistence.*;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "khoanthu")
@@ -13,6 +14,7 @@ public class KhoanThu {
     @Column(nullable = false, length = 100)
     private String tenKhoanThu;
 
+    @Column(length = 50)
     private String loaiKhoanThu;
 
     private Float soTien;
@@ -22,44 +24,24 @@ public class KhoanThu {
     @Column(length = 1000)
     private String ghiChu;
 
-    public KhoanThu() {}
-    public KhoanThu(String tenKhoanThu, String loaiKhoanThu, Float soTien, boolean batBuoc, String ghiChu) {
-        this.tenKhoanThu = tenKhoanThu;
-        this.loaiKhoanThu = loaiKhoanThu;
-        this.soTien = soTien;
-        this.batBuoc = batBuoc;
-        this.ghiChu = ghiChu;
-    }
-
     @ManyToOne
-    @JoinColumn(name = "idNguoiTao")
-    private TaiKhoan nguoiTao;
+    @JoinColumn(name = "maDotThu")
+    @JsonBackReference
+    private DotThu dotThu;
 
-    @OneToMany(mappedBy = "khoanThu", cascade = CascadeType.ALL)
-    private List<KhoanThuDotThu> dotThus;
-
-    // Getters & Setters
+    // Getters and Setters
     public Integer getMaKhoanThu() { return maKhoanThu; }
     public void setMaKhoanThu(Integer maKhoanThu) { this.maKhoanThu = maKhoanThu; }
-
     public String getTenKhoanThu() { return tenKhoanThu; }
     public void setTenKhoanThu(String tenKhoanThu) { this.tenKhoanThu = tenKhoanThu; }
-
     public String getLoaiKhoanThu() { return loaiKhoanThu; }
     public void setLoaiKhoanThu(String loaiKhoanThu) { this.loaiKhoanThu = loaiKhoanThu; }
-
     public Float getSoTien() { return soTien; }
     public void setSoTien(Float soTien) { this.soTien = soTien; }
-
     public boolean isBatBuoc() { return batBuoc; }
     public void setBatBuoc(boolean batBuoc) { this.batBuoc = batBuoc; }
-
     public String getGhiChu() { return ghiChu; }
     public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
-
-    public TaiKhoan getNguoiTao() { return nguoiTao; }
-    public void setNguoiTao(TaiKhoan nguoiTao) { this.nguoiTao = nguoiTao; }
-
-    public List<KhoanThuDotThu> getDotThus() { return dotThus; }
-    public void setDotThus(List<KhoanThuDotThu> dotThus) { this.dotThus = dotThus; }
+    public DotThu getDotThu() { return dotThu; }
+    public void setDotThu(DotThu dotThu) { this.dotThu = dotThu; }
 }

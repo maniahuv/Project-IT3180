@@ -1,23 +1,17 @@
 USE it3180;
 
--- 2. Insert dữ liệu cho bảng khoanthu
-INSERT INTO khoanthu (ten_khoan_thu, loai_khoan_thu, so_tien, bat_buoc, ghi_chu, id_nguoi_tao) VALUES
-('Phí vệ sinh', 'Phí dịch vụ', 50000, TRUE, 'Phí vệ sinh hàng tháng', 2),
-('Phí điện nước', 'Phí dịch vụ', 150000, TRUE, 'Phí điện nước theo tiêu thụ', 2),
-('Phí giữ xe', 'Phí dịch vụ', 20000, FALSE, 'Phí giữ xe tháng', 2);
-
 -- 3. Insert dữ liệu cho bảng dotthu
 INSERT INTO dotthu (ten_dot_thu, ngay_bat_dau, ngay_ket_thuc, trang_thai) VALUES
-('Đợt thu tháng 5/2025', '2025-05-01', '2025-05-31', 'Đang diễn ra'),
-('Đợt thu tháng 6/2025', '2025-06-01', '2025-06-30', 'Chưa bắt đầu');
+('Đợt thu tháng 5/2025', '2025-05-01', '2025-05-31', '1'),
+('Đợt thu tháng 6/2025', '2025-06-01', '2025-06-30', '2');
 
--- 4. Insert dữ liệu cho bảng khoanthu_has_dotthu
-INSERT INTO khoanthu_has_dotthu (ma_khoan_thu, ma_dot_thu) VALUES
-(1, 1),
-(2, 1),
-(3, 1),
-(1, 2),
-(2, 2);
+-- 2. Insert dữ liệu cho bảng khoanthu
+INSERT INTO khoanthu (ten_khoan_thu, loai_khoan_thu, so_tien, bat_buoc, ghi_chu, ma_dot_thu) VALUES
+('Phí vệ sinh', 'Phí dịch vụ', 50000, TRUE, 'Phí vệ sinh hàng tháng', 2),
+('Phí điện nước', 'Phí dịch vụ', 150000, TRUE, 'Phí điện nước theo tiêu thụ', 1),
+('Phí giữ xe', 'Phí dịch vụ', 20000, FALSE, 'Phí giữ xe tháng', 2);
+
+
 
 -- 5. Insert dữ liệu cho bảng hokhau
 INSERT INTO hokhau (chu_ho, so_nha, ngay_lap, ngay_cap_nhat, dien_tich) VALUES
@@ -31,7 +25,7 @@ INSERT INTO nhankhau (ho_ten, ngay_sinh, gioi_tinh, cmnd, qh_voi_chu_ho, trang_t
 ('Tran Van C', '1990-07-10', TRUE, '112233445', 'Chủ hộ', 'Đang sống', 2);
 
 -- 7. Insert dữ liệu cho bảng lichsuhokhau
-INSERT INTO lichsuhokhau (loai_thay_doi, thoi_gian, ma_ho_khau, ma_nhan_khau) VALUES
+INSERT INTO lichsu_hokhau (loai_thay_doi, thoi_gian, ma_ho_khau, ma_nhan_khau) VALUES
 (1, '2025-05-10 10:00:00', 1, 2),
 (2, '2025-05-12 14:30:00', 1, NULL);
 
@@ -41,7 +35,7 @@ INSERT INTO tamtrutamvang (loai, ngay_bat_dau, ngay_ket_thuc, ly_do, ma_nhan_kha
 ('Tạm vắng', '2025-05-01', '2025-05-15', 'Đi du lịch', 3);
 
 -- 9. Insert dữ liệu cho bảng nopphi
-INSERT INTO nopphi (ngay_thu, so_tien, nguoi_nop, id_nguoi_thu, ma_ho_khau, id_khoan_thu_dot_thu) VALUES
-('2025-05-05', 50000, 'Nguyen Van A', 2, 1, 1),
-('2025-05-06', 150000, 'Nguyen Van A', 2, 1, 2),
-('2025-05-07', 20000, 'Tran Van C', 2, 2, 3);
+INSERT INTO nopphi (ngay_thu, so_tien, nguoi_nop, id_nguoi_thu, ma_ho_khau) VALUES
+('2025-05-05', 50000, 'Nguyen Van A', 2, 1),
+('2025-05-06', 150000, 'Nguyen Van A', 2, 1),
+('2025-05-07', 20000, 'Tran Van C', 2, 2);

@@ -18,12 +18,12 @@ import {
 
 interface EditFormData {
   hoTen: string;
-  ngaySinh: string; // Use string for input consistency
+  ngaySinh: string;
   gioiTinh: boolean;
   cmnd: string;
   qhVoiChuHo: string;
   trangThai: string;
-  hoKhau: { maHoKhau: number };
+  maHoKhau?: number; // Changed from hoKhau
 }
 
 // Utility functions
@@ -68,7 +68,7 @@ const QLNhanKhau: React.FC = () => {
     cmnd: '',
     qhVoiChuHo: '',
     trangThai: '',
-    hoKhau: { maHoKhau: 0 }
+    maHoKhau: undefined
   });
 
   const [addingNew, setAddingNew] = useState<boolean>(false);
@@ -79,7 +79,7 @@ const QLNhanKhau: React.FC = () => {
     cmnd: '',
     qhVoiChuHo: '',
     trangThai: '',
-    hoKhau: { maHoKhau: 0 }
+    maHoKhau: undefined
   });
 
   const [searchCriteria, setSearchCriteria] = useState<string>('0');
@@ -96,8 +96,7 @@ const QLNhanKhau: React.FC = () => {
     try {
       setLoading(true);
       const response = await fetchAllNhanKhau();
-      console.log(response.data);
-      
+      console.log('NhanKhau response:', response.data);
       setData(response.data);
       setError('');
     } catch (err: any) {
@@ -114,9 +113,14 @@ const QLNhanKhau: React.FC = () => {
       // Save changes
       try {
         const updateData: NhanKhau = {
-          ...editFormData,
           maNhanKhau: row.maNhanKhau,
-          ngaySinh: formatDateISO(editFormData.ngaySinh)
+          hoTen: editFormData.hoTen,
+          ngaySinh: formatDateISO(editFormData.ngaySinh),
+          gioiTinh: editFormData.gioiTinh,
+          cmnd: editFormData.cmnd,
+          qhVoiChuHo: editFormData.qhVoiChuHo,
+          trangThai: editFormData.trangThai,
+          maHoKhau: editFormData.maHoKhau
         };
         
         await updateNhanKhau(row.maNhanKhau!, updateData);
@@ -129,7 +133,7 @@ const QLNhanKhau: React.FC = () => {
           cmnd: '',
           qhVoiChuHo: '',
           trangThai: '',
-          hoKhau: { maHoKhau: 0 }
+          maHoKhau: undefined
         });
       } catch (err: any) {
         alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
@@ -140,12 +144,12 @@ const QLNhanKhau: React.FC = () => {
       setEditRowId(row.maNhanKhau!);
       setEditFormData({
         hoTen: row.hoTen,
-        ngaySinh: row.ngaySinh,
+        ngaySinh: formatDateDisplay(row.ngaySinh),
         gioiTinh: row.gioiTinh,
         cmnd: row.cmnd || '',
         qhVoiChuHo: row.qhVoiChuHo || '',
         trangThai: row.trangThai || '',
-        hoKhau: { maHoKhau: row.hoKhau?.maHoKhau ?? 0 }
+        maHoKhau: row.maHoKhau // Use maHoKhau directly
       });
     }
   };
@@ -165,7 +169,7 @@ const QLNhanKhau: React.FC = () => {
             cmnd: '',
             qhVoiChuHo: '',
             trangThai: '',
-            hoKhau: { maHoKhau: 0 }
+            maHoKhau: undefined
           });
         }
       } catch (err: any) {
@@ -180,7 +184,7 @@ const QLNhanKhau: React.FC = () => {
     const { name, value } = e.target;
     setEditFormData(prev => ({
       ...prev,
-      [name]: name === 'gioiTinh' ? value === 'true' : name === 'maHoKhau' ? { maHoKhau: parseInt(value) } : value
+      [name]: name === 'gioiTinh' ? value === 'true' : name === 'maHoKhau' ? (value ? Number(value) : undefined) : value
     }));
   };
 
@@ -194,7 +198,7 @@ const QLNhanKhau: React.FC = () => {
       cmnd: '',
       qhVoiChuHo: '',
       trangThai: '',
-      hoKhau: { maHoKhau: 1 }
+      maHoKhau: undefined
     });
   };
 
@@ -203,7 +207,7 @@ const QLNhanKhau: React.FC = () => {
     const { name, value } = e.target;
     setNewRowData(prev => ({
       ...prev,
-      [name]: name === 'gioiTinh' ? value === 'true' : name === 'maHoKhau' ? { maHoKhau: parseInt(value) } : value
+      [name]: name === 'gioiTinh' ? value === 'true' : name === 'maHoKhau' ? (value ? Number(value) : undefined) : value
     }));
   };
 
@@ -229,8 +233,8 @@ const QLNhanKhau: React.FC = () => {
       alert('Vui lòng nhập trạng thái.');
       return;
     }
-    if (!newRowData.hoKhau.maHoKhau) {
-      alert('Vui lòng chọn hộ khẩu.');
+    if (newRowData.maHoKhau === undefined || newRowData.maHoKhau === 0) {
+      alert('Vui lòng nhập mã hộ khẩu.');
       return;
     }
 
@@ -242,7 +246,7 @@ const QLNhanKhau: React.FC = () => {
         cmnd: newRowData.cmnd,
         qhVoiChuHo: newRowData.qhVoiChuHo,
         trangThai: newRowData.trangThai,
-        hoKhau: { maHoKhau: newRowData.hoKhau.maHoKhau }
+        maHoKhau: newRowData.maHoKhau
       };
       
       await createNhanKhau(newNhanKhau);
@@ -255,7 +259,7 @@ const QLNhanKhau: React.FC = () => {
         cmnd: '',
         qhVoiChuHo: '',
         trangThai: '',
-        hoKhau: { maHoKhau: 0 }
+        maHoKhau: undefined
       });
     } catch (err: any) {
       alert('Có lỗi xảy ra khi tạo nhân khẩu: ' + (err.response?.data?.message || err.message));
@@ -273,7 +277,7 @@ const QLNhanKhau: React.FC = () => {
       cmnd: '',
       qhVoiChuHo: '',
       trangThai: '',
-      hoKhau: { maHoKhau: 0 }
+      maHoKhau: undefined
     });
   };
 
@@ -292,7 +296,7 @@ const QLNhanKhau: React.FC = () => {
         getGioiTinhLabel(item.gioiTinh),
         item.qhVoiChuHo || '',
         item.trangThai || '',
-        item.hoKhau?.maHoKhau.toString() || ''
+        item.maHoKhau?.toString() || '' // Updated to use maHoKhau
       ];
       return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
     });
@@ -433,7 +437,7 @@ const QLNhanKhau: React.FC = () => {
                           <input 
                             type="date" 
                             name="ngaySinh" 
-                            value={editFormData.ngaySinh} 
+                            value={editFormData.ngaySinh.split('/').reverse().join('-')} // Convert DD/MM/YYYY to YYYY-MM-DD for input
                             onChange={handleEditChange} 
                             className="w-full px-2 py-1 border rounded" 
                           />
@@ -483,7 +487,7 @@ const QLNhanKhau: React.FC = () => {
                           <input 
                             type="number" 
                             name="maHoKhau" 
-                            value={editFormData.hoKhau.maHoKhau} 
+                            value={editFormData.maHoKhau ?? ''} 
                             onChange={handleEditChange} 
                             className="w-full px-2 py-1 border rounded" 
                           />
@@ -497,7 +501,7 @@ const QLNhanKhau: React.FC = () => {
                         <td className="px-4 py-3 text-sm text-gray-900">{row.cmnd || '-'}</td>
                         <td className="px-4 py-3 text-sm text-gray-900">{row.qhVoiChuHo || '-'}</td>
                         <td className="px-4 py-3 text-sm text-gray-900">{row.trangThai || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.hoKhau?.maHoKhau || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.maHoKhau || '-'}</td>
                       </>
                     )}
                     <td className="px-4 py-3">
@@ -538,7 +542,7 @@ const QLNhanKhau: React.FC = () => {
                       <input 
                         type="date" 
                         name="ngaySinh" 
-                        value={newRowData.ngaySinh} 
+                        value={newRowData.ngaySinh.split('/').reverse().join('-') || ''} 
                         onChange={handleNewChange} 
                         className="w-full px-2 py-1 border rounded" 
                       />
@@ -592,7 +596,7 @@ const QLNhanKhau: React.FC = () => {
                         type="number" 
                         name="maHoKhau" 
                         placeholder="Mã hộ khẩu" 
-                        value={newRowData.hoKhau.maHoKhau} 
+                        value={newRowData.maHoKhau ?? ''} 
                         onChange={handleNewChange} 
                         className="w-full px-2 py-1 border rounded" 
                       />

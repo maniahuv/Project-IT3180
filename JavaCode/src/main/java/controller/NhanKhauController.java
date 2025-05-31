@@ -1,7 +1,6 @@
 package controller;
 
 import model.NhanKhau;
-import model.TaiKhoan;
 import service.HoKhauService;
 import service.NhanKhauService;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/nhankhau")
-@CrossOrigin(origins = "*")  // Cho phép React frontend truy cập API
+@CrossOrigin(origins = "*")
 public class NhanKhauController {
 
     private final NhanKhauService nhanKhauService;
@@ -28,11 +27,6 @@ public class NhanKhauController {
         return nhanKhauService.findAll();
     }
 
-    // @GetMapping
-    // public ResponseEntity<List<NhanKhau>> getAll() {
-    //     return ResponseEntity.ok(nhanKhauService.getAll());
-    // }
-
     @GetMapping("/{id}")
     public ResponseEntity<NhanKhau> getById(@PathVariable Integer id) {
         return nhanKhauService.getById(id)
@@ -43,13 +37,33 @@ public class NhanKhauController {
     @PostMapping
     @PreAuthorize("hasAnyRole('TO_TRUONG', 'TO_PHO')")
     public ResponseEntity<NhanKhau> create(@RequestBody NhanKhau nhanKhau) {
-        return ResponseEntity.ok(nhanKhauService.create(nhanKhau));
+        if (nhanKhau.getMaHoKhau() != null) {
+            return hoKhauService.findById(nhanKhau.getMaHoKhau())
+                    .map(hoKhau -> {
+                        nhanKhau.setHoKhau(hoKhau);
+                        NhanKhau saved = nhanKhauService.create(nhanKhau);
+                        return ResponseEntity.ok(saved);
+                    })
+                    .orElseGet(() -> ResponseEntity.badRequest().build());
+        }
+        NhanKhau saved = nhanKhauService.create(nhanKhau);
+        return ResponseEntity.ok(saved);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('TO_TRUONG', 'TO_PHO')")
     public ResponseEntity<NhanKhau> update(@PathVariable Integer id, @RequestBody NhanKhau nhanKhau) {
-        return ResponseEntity.ok(nhanKhauService.update(id, nhanKhau));
+        if (nhanKhau.getMaHoKhau() != null) {
+            return hoKhauService.findById(nhanKhau.getMaHoKhau())
+                    .map(hoKhau -> {
+                        nhanKhau.setHoKhau(hoKhau);
+                        NhanKhau updated = nhanKhauService.update(id, nhanKhau);
+                        return ResponseEntity.ok(updated);
+                    })
+                    .orElseGet(() -> ResponseEntity.badRequest().build());
+        }
+        NhanKhau updated = nhanKhauService.update(id, nhanKhau);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")

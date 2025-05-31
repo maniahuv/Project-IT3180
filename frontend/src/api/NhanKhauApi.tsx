@@ -1,4 +1,3 @@
-// src/api/nhankhauApi.tsx
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080/api/nhankhau";
@@ -9,6 +8,8 @@ axios.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    config.headers['Content-Type'] = 'application/json';
+    config.headers['Accept'] = 'application/json';
     return config;
   },
   (error) => Promise.reject(error)
@@ -17,30 +18,52 @@ axios.interceptors.request.use(
 export interface NhanKhau {
   maNhanKhau?: number;
   hoTen: string;
-  ngaySinh: string; // LocalDate will be serialized as string (e.g., "YYYY-MM-DD")
+  ngaySinh: string; // LocalDate serialized as "YYYY-MM-DD"
   gioiTinh: boolean; // true = male, false = female
-  cmnd?: string; // Optional, as it may not be required for all records
-  qhVoiChuHo?: string; // Relationship with head of household
-  trangThai?: string; // Status
-  hoKhau?: { maHoKhau: number }; // Simplified reference to HoKhau entity
+  cmnd?: string;
+  qhVoiChuHo?: string;
+  trangThai?: string;
+  maHoKhau?: number; // Direct reference to HoKhau's maHoKhau
 }
 
 export function fetchAllNhanKhau() {
-  return axios.get<NhanKhau[]>(API_BASE_URL);
+  return axios.get<NhanKhau[]>(API_BASE_URL, {
+    headers: {
+      Accept: 'application/json'
+    }
+  });
 }
 
 export function fetchNhanKhauById(id: number) {
-  return axios.get<NhanKhau>(`${API_BASE_URL}/${id}`);
+  return axios.get<NhanKhau>(`${API_BASE_URL}/${id}`, {
+    headers: {
+      Accept: 'application/json'
+    }
+  });
 }
 
 export function createNhanKhau(data: NhanKhau) {
-  return axios.post<NhanKhau>(API_BASE_URL, data);
+  return axios.post<NhanKhau>(API_BASE_URL, data, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  });
 }
 
 export function updateNhanKhau(id: number, data: NhanKhau) {
-  return axios.put<NhanKhau>(`${API_BASE_URL}/${id}`, data);
+  return axios.put<NhanKhau>(`${API_BASE_URL}/${id}`, data, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  });
 }
 
 export function deleteNhanKhau(id: number) {
-  return axios.delete(`${API_BASE_URL}/${id}`);
+  return axios.delete(`${API_BASE_URL}/${id}`, {
+    headers: {
+      Accept: 'application/json'
+    }
+  });
 }

@@ -1,8 +1,7 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API_BASE_URL = "http://localhost:8080/api/dotthu";
+const API_BASE_URL = 'http://localhost:8080/api/dotthu';
 
-// Add Axios interceptor to include token
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -20,7 +19,6 @@ export interface DotThu {
   ngayBatDau?: string;
   ngayKetThuc?: string;
   trangThai?: string;
-  khoanThus?: { maKhoanThuDotThu: number }[];
 }
 
 export function fetchAllDotThu() {
@@ -32,13 +30,25 @@ export function fetchDotThuById(id: number) {
 }
 
 export function createDotThu(data: DotThu) {
-  return axios.post<DotThu>(API_BASE_URL, data);
+  console.log('Creating DotThu:', data);
+  return axios.post<DotThu>(API_BASE_URL, data).catch(err => {
+    console.error('Create DotThu error:', err.response?.data || err.message);
+    throw err;
+  });
 }
 
 export function updateDotThu(id: number, data: DotThu) {
-  return axios.put<DotThu>(`${API_BASE_URL}/${id}`, data);
+  console.log('Updating DotThu ID:', id, 'Data:', data);
+  return axios.put<DotThu>(`${API_BASE_URL}/${id}`, data).catch(err => {
+    console.error('Update DotThu error:', err.response?.data || err.message);
+    throw err;
+  });
 }
 
 export function deleteDotThu(id: number) {
-  return axios.delete(`${API_BASE_URL}/${id}`);
+  console.log('Deleting DotThu ID:', id);
+  return axios.delete(`${API_BASE_URL}/${id}`).catch(err => {
+    console.error('Delete DotThu error:', err.response?.data || err.message);
+    throw err;
+  });
 }

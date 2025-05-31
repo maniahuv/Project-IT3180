@@ -30,6 +30,9 @@ public class NhanKhau {
     @Column
     private String trangThai;
 
+    @Column(name = "maHoKhau", insertable = false, updatable = false)
+    private Integer maHoKhau; // Direct reference to the foreign key
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maHoKhau")
     @JsonBackReference(value = "hokhau-nhankhau")
@@ -53,6 +56,8 @@ public class NhanKhau {
     public void setQhVoiChuHo(String qhVoiChuHo) { this.qhVoiChuHo = qhVoiChuHo; }
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
+    public Integer getMaHoKhau() { return maHoKhau; }
+    public void setMaHoKhau(Integer maHoKhau) { this.maHoKhau = maHoKhau; }
     public HoKhau getHoKhau() { return hoKhau; }
     public void setHoKhau(HoKhau hoKhau) { this.hoKhau = hoKhau; }
 }

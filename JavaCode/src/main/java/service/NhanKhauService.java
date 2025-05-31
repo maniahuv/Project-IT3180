@@ -11,9 +11,11 @@ import java.util.Optional;
 public class NhanKhauService {
 
     private final NhanKhauRepository nhanKhauRepository;
+    private final HoKhauService hoKhauService;
 
-    public NhanKhauService(NhanKhauRepository nhanKhauRepository) {
+    public NhanKhauService(NhanKhauRepository nhanKhauRepository, HoKhauService hoKhauService) {
         this.nhanKhauRepository = nhanKhauRepository;
+        this.hoKhauService = hoKhauService;
     }
 
     public List<NhanKhau> findAll() {
@@ -29,16 +31,18 @@ public class NhanKhauService {
     }
 
     public NhanKhau update(Integer id, NhanKhau nhanKhau) {
-        return nhanKhauRepository.findById(id).map(existing -> {
-            existing.setHoTen(nhanKhau.getHoTen());
-            existing.setNgaySinh(nhanKhau.getNgaySinh());
-            existing.setGioiTinh(nhanKhau.getGioiTinh());
-            existing.setCmnd(nhanKhau.getCmnd());
-            existing.setQhVoiChuHo(nhanKhau.getQhVoiChuHo());
-            existing.setTrangThai(nhanKhau.getTrangThai());
-            existing.setHoKhau(nhanKhau.getHoKhau());
-            return nhanKhauRepository.save(existing);
-        }).orElseThrow(() -> new RuntimeException("Không tìm thấy nhân khẩu với id = " + id));
+        return nhanKhauRepository.findById(id)
+                .map(existing -> {
+                    existing.setHoTen(nhanKhau.getHoTen());
+                    existing.setNgaySinh(nhanKhau.getNgaySinh());
+                    existing.setGioiTinh(nhanKhau.getGioiTinh());
+                    existing.setCmnd(nhanKhau.getCmnd());
+                    existing.setQhVoiChuHo(nhanKhau.getQhVoiChuHo());
+                    existing.setTrangThai(nhanKhau.getTrangThai());
+                    existing.setHoKhau(nhanKhau.getHoKhau());
+                    return nhanKhauRepository.save(existing);
+                })
+                .orElseThrow(() -> new RuntimeException("NhanKhau not found with id " + id));
     }
 
     public void delete(Integer id) {

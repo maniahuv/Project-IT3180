@@ -36,6 +36,7 @@ export function createTaiKhoan(data: TaiKhoan) {
 }
 
 export function updateTaiKhoan(id: number, data: TaiKhoan) {
+    console.log('updateTaiKhoan:',(data));
   return axios.put<TaiKhoan>(`${API_BASE_URL}/${id}`, data);
 }
 

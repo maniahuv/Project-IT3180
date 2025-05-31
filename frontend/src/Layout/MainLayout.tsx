@@ -15,13 +15,28 @@ type MainLayoutProps = {
   children: React.ReactNode;
 };
 
+
+const getVaiTroLabel = (vaiTro: number) => {
+  switch (vaiTro) {
+    case 1:
+      return "Tổ trưởng";
+    case 2:
+      return "Tổ phó";
+    case 3:
+      return "Kế toán";
+    default:
+      return "Người dùng";
+  }
+}
+
 export default function MainLayout({ children }: MainLayoutProps) {
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const [userPopoverOpen, setUserPopoverOpen] = useState(false);
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    // Xóa token lưu trong localStorage (hoặc cookie tuỳ cách bạn lưu)
+  const vaiTro = localStorage.getItem("vaiTro");
+  const vaiTroLabel = vaiTro ? getVaiTroLabel(parseInt(vaiTro)) : "Người dùng";
+  console.log(localStorage);
+  const handleLogout = () => {    
     localStorage.removeItem("token");
 
     // Chuyển hướng về trang đăng nhập
@@ -124,7 +139,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   </li>
                   <li>
                     <Link
-                      to="/management/xemphieuthu"
+                      to="/management/qlphieuthu"
                       className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
                     >
                       Xem phiếu thu
@@ -173,7 +188,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   className="w-8 h-8 rounded-full border-2 border-gray-200"
                 />
                 <span className="text-gray-700 font-medium flex items-center">
-                  Kieu Oanh
+                {vaiTroLabel}
                   <span className="ml-2 text-xs">
                     <FaCaretDown />
                   </span>

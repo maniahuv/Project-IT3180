@@ -1,414 +1,552 @@
-import React, { useEffect, useState } from "react";
-import { FaSearch, FaPlus, FaPen, FaTrashAlt, FaSave, FaTimes } from "react-icons/fa";
-import MainLayout from "../../Layout/MainLayout";
-
+import React, { useState, useEffect } from 'react';
+import {
+  FaPlus,
+  FaSearch,
+  FaPen,
+  FaTrashAlt,
+  FaSave,
+  FaTimes
+} from 'react-icons/fa';
+import MainLayout from '../../Layout/MainLayout';
 import { 
   TamTruTamVang, 
   fetchAllTamTruTamVang, 
   createTamTruTamVang, 
   updateTamTruTamVang, 
   deleteTamTruTamVang 
-} from "../../api/TamTruTamVang";
+} from '../../api/TamTruTamVangApi';
 
-export default function QLTamTruTamVang() {
-  const [TamTruTamVangs, setTamTruTamVangs] = useState<TamTruTamVang[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+interface EditFormData {
+  loai?: string;
+  ngayBatDau?: string;
+  ngayKetThuc?: string;
+  lyDo?: string;
+  nhanKhau: { maNhanKhau: number };
+}
 
-  const [searchCriteria, setSearchCriteria] = useState("0");
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [highlightedId, setHighlightedId] = useState<number | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
-  const [itemsPerPage, setItemsPerPage] = useState("10");
+// Define loai options with colors
+const loaiOptions = [
+  { value: 'Tạm trú', label: 'Tạm trú', color: 'bg-blue-100 text-blue-800' },
+  { value: 'Tạm vắng', label: 'Tạm vắng', color: 'bg-yellow-100 text-yellow-800' }
+];
 
-  const [newTamTruTamVang, setNewTamTruTamVang] = useState<Partial<TamTruTamVang>>({
-    id: "",
-    personId: "",
-    type: "tamtru",
-    fromDate: "",
-    toDate: "",
-    location: ""
+const getLoaiColor = (loai?: string): string => {
+  const option = loaiOptions.find(opt => opt.value === loai);
+  return option ? option.color : 'bg-gray-100 text-gray-800';
+};
+
+const QLTamTruTamVang: React.FC = () => {
+  const [data, setData] = useState<TamTruTamVang[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const [editRowId, setEditRowId] = useState<number | null>(null);
+  const [editFormData, setEditFormData] = useState<EditFormData>({
+    loai: 'Tạm trú',
+    ngayBatDau: '',
+    ngayKetThuc: '',
+    lyDo: '',
+    nhanKhau: { maNhanKhau: 0 }
   });
 
-  // --- Format date helpers ---
-  const formatDateISO = (dateStr: string): string => {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    const parts = dateStr.split('/');
-    if (parts.length === 3) {
-      const [dd, mm, yyyy] = parts;
-      return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-    }
-    return '';
-  };
+  const [addingNew, setAddingNew] = useState<boolean>(false);
+  const [newRowData, setNewRowData] = useState<EditFormData>({
+    loai: 'Tạm trú',
+    ngayBatDau: '',
+    ngayKetThuc: '',
+    lyDo: '',
+    nhanKhau: { maNhanKhau: 0 }
+  });
 
-  const formatDateDisplay = (dateStr: string): string => {
-    const parts = dateStr.split('-');
-    if (parts.length === 3) {
-      const [yyyy, mm, dd] = parts;
-      return `${dd}/${mm}/${yyyy}`;
-    }
-    return dateStr;
-  };
+  const [searchCriteria, setSearchCriteria] = useState<string>('0');
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
-  // --- Load data từ API khi component mount ---
+  // Fetch data from API
   useEffect(() => {
-    setLoading(true);
-    fetchAllTamTruTamVang()
-      .then(res => {
-        setTamTruTamVangs(res.data.map(r => ({
-          ...r,
-          // convert ngày yyyy-MM-dd sang dd/MM/yyyy để hiển thị
-          fromDate: formatDateDisplay(r.fromDate),
-          toDate: formatDateDisplay(r.toDate),
-        })));
-        setLoading(false);
-      })
-      .catch(err => {
-        setError("Lỗi khi tải dữ liệu");
-        setLoading(false);
-      });
+    loadTamTruTamVang();
   }, []);
 
-  // --- Các hàm xử lý thêm sửa xóa gọi API ---
-  const handleAddNew = () => {
-    setIsAdding(true);
-    setNewTamTruTamVang({
-      id: "",
-      personId: "",
-      type: "tamtru",
-      fromDate: "",
-      toDate: "",
-      location: ""
+  const loadTamTruTamVang = async () => {
+    try {
+      setLoading(true);
+      const response = await fetchAllTamTruTamVang();
+      console.log('TamTruTamVang response:', response.data);
+      setData(response.data);
+      setError('');
+    } catch (err: any) {
+      setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
+      console.error('Error loading tam tru tam vang:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle edit click
+  const handleEditClick = async (row: TamTruTamVang): Promise<void> => {
+    if (editRowId === row.id) {
+      try {
+        const updateData: TamTruTamVang = {
+          id: row.id,
+          loai: editFormData.loai,
+          ngayBatDau: editFormData.ngayBatDau,
+          ngayKetThuc: editFormData.ngayKetThuc,
+          lyDo: editFormData.lyDo,
+          nhanKhau: editFormData.nhanKhau
+        };
+        
+        await updateTamTruTamVang(row.id!, updateData);
+        await loadTamTruTamVang();
+        setEditRowId(null);
+        setEditFormData({
+          loai: 'Tạm trú',
+          ngayBatDau: '',
+          ngayKetThuc: '',
+          lyDo: '',
+          nhanKhau: { maNhanKhau: 0 }
+        });
+      } catch (err: any) {
+        alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
+        console.error('Error updating tam tru tam vang:', err);
+      }
+    } else {
+      setEditRowId(row.id!);
+      setEditFormData({
+        loai: row.loai || 'Tạm trú',
+        ngayBatDau: row.ngayBatDau || '',
+        ngayKetThuc: row.ngayKetThuc || '',
+        lyDo: row.lyDo || '',
+        nhanKhau: row.nhanKhau
+      });
+    }
+  };
+
+  // Handle delete click
+  const handleDeleteClick = async (id: number): Promise<void> => {
+    if (window.confirm('Bạn có chắc muốn xóa bản ghi này?')) {
+      try {
+        await deleteTamTruTamVang(id);
+        await loadTamTruTamVang();
+        if (editRowId === id) {
+          setEditRowId(null);
+          setEditFormData({
+            loai: 'Tạm trú',
+            ngayBatDau: '',
+            ngayKetThuc: '',
+            lyDo: '',
+            nhanKhau: { maNhanKhau: 0 }
+          });
+        }
+      } catch (err: any) {
+        alert('Có lỗi xảy ra khi xóa: ' + (err.response?.data?.message || err.message));
+        console.error('Error deleting tam tru tam vang:', err);
+      }
+    }
+  };
+
+  // Handle edit input change
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: name === 'nhanKhau.maNhanKhau' ? { maNhanKhau: Number(value) } : value
+    }));
+  };
+
+  // Handle add new click
+  const handleAddNewClick = (): void => {
+    setAddingNew(true);
+    setNewRowData({
+      loai: 'Tạm trú',
+      ngayBatDau: '',
+      ngayKetThuc: '',
+      lyDo: '',
+      nhanKhau: { maNhanKhau: 0 }
     });
   };
 
-  const handleSaveNew = () => {
-    if (!newTamTruTamVang.id?.trim() || !newTamTruTamVang.personId?.trim()) {
-      alert('Vui lòng nhập đầy đủ mã tạm trú và mã nhân khẩu.');
+  // Handle new row input change
+  const handleNewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void => {
+    const { name, value } = e.target;
+    setNewRowData(prev => ({
+      ...prev,
+      [name]: name === 'nhanKhau.maNhanKhau' ? { maNhanKhau: Number(value) } : value
+    }));
+  };
+
+  // Save new row
+  const handleSaveNewRow = async (): Promise<void> => {
+    if (!newRowData.loai?.trim()) {
+      alert('Vui lòng chọn loại (Tạm trú/Tạm vắng).');
       return;
     }
-    // Chuẩn hóa ngày trước khi gửi
-    const payload: TamTruTamVang = {
-      id: newTamTruTamVang.id!,
-      personId: newTamTruTamVang.personId!,
-      type: newTamTruTamVang.type!,
-      fromDate: formatDateISO(newTamTruTamVang.fromDate || ""),
-      toDate: formatDateISO(newTamTruTamVang.toDate || ""),
-      location: newTamTruTamVang.location || "",
-    };
+    if (!newRowData.ngayBatDau?.trim()) {
+      alert('Vui lòng nhập ngày bắt đầu.');
+      return;
+    }
+    if (newRowData.nhanKhau.maNhanKhau <= 0) {
+      alert('Vui lòng nhập mã nhân khẩu hợp lệ.');
+      return;
+    }
 
-    createTamTruTamVang(payload)
-      .then(res => {
-        const added = res.data;
-        // Hiển thị ngày dưới dạng dd/MM/yyyy
-        added.fromDate = formatDateDisplay(added.fromDate);
-        added.toDate = formatDateDisplay(added.toDate);
-        setTamTruTamVangs([...TamTruTamVangs, added]);
-        setIsAdding(false);
-        setNewTamTruTamVang({});
-      })
-      .catch(err => {
-        alert("Lỗi khi thêm bản ghi mới");
+    try {
+      const newTamTruTamVang: TamTruTamVang = {
+        loai: newRowData.loai,
+        ngayBatDau: newRowData.ngayBatDau,
+        ngayKetThuc: newRowData.ngayKetThuc,
+        lyDo: newRowData.lyDo,
+        nhanKhau: newRowData.nhanKhau
+      };
+      
+      await createTamTruTamVang(newTamTruTamVang);
+      await loadTamTruTamVang();
+      setAddingNew(false);
+      setNewRowData({
+        loai: 'Tạm trú',
+        ngayBatDau: '',
+        ngayKetThuc: '',
+        lyDo: '',
+        nhanKhau: { maNhanKhau: 0 }
       });
-  };
-
-  const handleCancelNew = () => {
-    setIsAdding(false);
-    setNewTamTruTamVang({});
-  };
-
-  const handleEdit = (id: number) => {
-    setTamTruTamVangs(TamTruTamVangs.map(TamTruTamVang =>
-      TamTruTamVang.id === id ? { ...TamTruTamVang, isEditing: !TamTruTamVang.isEditing } : TamTruTamVang
-    ));
-  };
-
-  const handleSaveEdit = (id: number, updatedData: Partial<TamTruTamVang>) => {
-    // Lấy TamTruTamVang hiện tại
-    const oldTamTruTamVang = TamTruTamVangs.find(r => r.id === id);
-    if (!oldTamTruTamVang) return;
-
-    // Chuẩn hóa ngày trước khi gửi
-    const payload: TamTruTamVang = {
-      id,
-      id: updatedData.id ?? oldTamTruTamVang.id,
-      personId: updatedData.personId ?? oldTamTruTamVang.personId,
-      type: updatedData.type ?? oldTamTruTamVang.type,
-      fromDate: updatedData.fromDate ? formatDateISO(updatedData.fromDate) : formatDateISO(oldTamTruTamVang.fromDate),
-      toDate: updatedData.toDate ? formatDateISO(updatedData.toDate) : formatDateISO(oldTamTruTamVang.toDate),
-      location: updatedData.location ?? oldTamTruTamVang.location,
-    };
-
-    updateTamTruTamVang(id, payload)
-      .then(res => {
-        const updated = res.data;
-        updated.fromDate = formatDateDisplay(updated.fromDate);
-        updated.toDate = formatDateDisplay(updated.toDate);
-        setTamTruTamVangs(TamTruTamVangs.map(r =>
-          r.id === id ? { ...updated, isEditing: false } : r
-        ));
-      })
-      .catch(err => {
-        alert("Lỗi khi cập nhật bản ghi");
-      });
-  };
-
-  const handleDelete = (id: number) => {
-    if (window.confirm('Bạn có chắc muốn xóa bản ghi này?')) {
-      deleteTamTruTamVang(id)
-        .then(() => {
-          setTamTruTamVangs(TamTruTamVangs.filter(TamTruTamVang => TamTruTamVang.id !== id));
-        })
-        .catch(() => alert("Lỗi khi xóa bản ghi"));
+    } catch (err: any) {
+      alert('Có lỗi xảy ra khi tạo bản ghi: ' + (err.response?.data?.message || err.message));
+      console.error('Error creating tam tru tam vang:', err);
     }
   };
 
-  // --- Hàm tìm kiếm giữ nguyên như bạn có ---
-  const handleSearch = () => {
+  // Cancel new row
+  const handleCancelNewRow = (): void => {
+    setAddingNew(false);
+    setNewRowData({
+      loai: 'Tạm trú',
+      ngayBatDau: '',
+      ngayKetThuc: '',
+      lyDo: '',
+      nhanKhau: { maNhanKhau: 0 }
+    });
+  };
+
+  // Handle search
+  const handleSearch = (): void => {
     if (!searchKeyword.trim()) {
       alert('Vui lòng nhập từ khóa tìm kiếm.');
       return;
     }
-
-    const criteriaMap = ['id', 'personId', 'type', 'fromDate', 'toDate', 'location'];
-    const searchField = criteriaMap[parseInt(searchCriteria)];
-    
-    const foundTamTruTamVang = TamTruTamVangs.find(TamTruTamVang => {
-      const fieldValue = TamTruTamVang[searchField as keyof TamTruTamVang]?.toString().toLowerCase();
-      return fieldValue?.includes(searchKeyword.toLowerCase());
+    const crit = parseInt(searchCriteria, 10);
+    const found = data.find(item => {
+      const fields = [
+        item.id?.toString() || '',
+        item.loai || '',
+        item.ngayBatDau || '',
+        item.ngayKetThuc || '',
+        item.lyDo || '',
+        item.nhanKhau.maNhanKhau.toString()
+      ];
+      return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
     });
-
-    if (foundTamTruTamVang) {
-      setHighlightedId(foundTamTruTamVang.id);
-      setTimeout(() => setHighlightedId(null), 3000);
+    
+    if (found) {
+      setHighlightedRowId(found.id!);
+      setTimeout(() => setHighlightedRowId(null), 3000);
+      document.getElementById(`row-${found.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
       alert('Không tìm thấy bản ghi phù hợp.');
     }
   };
 
-  // --- Phần render giữ nguyên như bạn đã làm ---
+  // Handle search on Enter key
+  const handleSearchKeyDown = (e: React.KeyboardEvent): void => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="spinner-border" role="status">
+              <span className="sr-only">Đang tải...</span>
+            </div>
+            <p className="mt-2">Đang tải dữ liệu...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <MainLayout>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center text-red-600">
+            <p>{error}</p>
+            <button 
+              onClick={loadTamTruTamVang}
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Thử lại
+            </button>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
-      <div className="bg-white rounded-lg shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Quản lí tạm trú tạm vắng</h2>
-        </div>
+      <div className="flex-1 flex flex-col">
+        <main className="flex-1 p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý tạm trú tạm vắng</h2>
 
-        <div className="p-6">
-          {/* Search and Actions */}
+          {/* Actions */}
           <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               <select
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchCriteria}
-                onChange={(e) => setSearchCriteria(e.target.value)}
-                className="px-3 py-2 border rounded"
+                onChange={e => setSearchCriteria(e.target.value)}
               >
-                <option value="0">Mã tạm trú</option>
-                <option value="1">Mã nhân khẩu</option>
-                <option value="2">Loại</option>
-                <option value="3">Từ ngày</option>
-                <option value="4">Đến ngày</option>
-                <option value="5">Địa chỉ</option>
+                <option value="0">ID</option>
+                <option value="1">Loại</option>
+                <option value="2">Ngày bắt đầu</option>
+                <option value="3">Ngày kết thúc</option>
+                <option value="4">Lý do</option>
+                <option value="5">Mã nhân khẩu</option>
               </select>
               <input
                 type="text"
-                placeholder="Nhập từ khóa"
+                placeholder="Nhập từ khóa tìm kiếm"
+                className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchKeyword}
                 onChange={e => setSearchKeyword(e.target.value)}
-                className="px-3 py-2 border rounded"
+                onKeyDown={handleSearchKeyDown}
               />
-              <button
+              <button 
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
                 onClick={handleSearch}
-                className="text-white bg-blue-600 px-3 py-2 rounded"
               >
                 <FaSearch />
+                <span>Tìm kiếm</span>
               </button>
             </div>
-            <div>
-              <button
-                onClick={handleAddNew}
-                className="text-white bg-green-600 px-3 py-2 rounded flex items-center space-x-2"
-              >
-                <FaPlus /> <span>Thêm mới</span>
-              </button>
-            </div>
+
+            <button 
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
+              onClick={handleAddNewClick}
+            >
+              <FaPlus />
+              <span>Thêm bản ghi</span>
+            </button>
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã tạm trú</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã nhân khẩu</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Từ ngày</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đến ngày</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Địa chỉ</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Loại</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày bắt đầu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày kết thúc</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Lý do</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã nhân khẩu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hành động</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {loading && <tr><td colSpan={7} className="text-center py-4">Đang tải dữ liệu...</td></tr>}
-
-                {!loading && isAdding && (
-                  <tr className="bg-green-50">
-                    <td>
-                      <input
-                        type="text"
-                        value={newTamTruTamVang.id}
-                        onChange={e => setNewTamTruTamVang({ ...newTamTruTamVang, id: e.target.value })}
-                        className="border px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        value={newTamTruTamVang.personId}
-                        onChange={e => setNewTamTruTamVang({ ...newTamTruTamVang, personId: e.target.value })}
-                        className="border px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td>
-                      <select
-                        value={newTamTruTamVang.type}
-                        onChange={e => setNewTamTruTamVang({ ...newTamTruTamVang, type: e.target.value as "tamtru" | "tamvang" })}
-                        className="border px-2 py-1 w-full"
-                      >
-                        <option value="tamtru">Tạm trú</option>
-                        <option value="tamvang">Tạm vắng</option>
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        placeholder="dd/mm/yyyy"
-                        value={newTamTruTamVang.fromDate}
-                        onChange={e => setNewTamTruTamVang({ ...newTamTruTamVang, fromDate: e.target.value })}
-                        className="border px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        placeholder="dd/mm/yyyy"
-                        value={newTamTruTamVang.toDate}
-                        onChange={e => setNewTamTruTamVang({ ...newTamTruTamVang, toDate: e.target.value })}
-                        className="border px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        value={newTamTruTamVang.location}
-                        onChange={e => setNewTamTruTamVang({ ...newTamTruTamVang, location: e.target.value })}
-                        className="border px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td className="text-center space-x-2">
-                      <button onClick={handleSaveNew} className="text-green-600">
-                        <FaSave />
-                      </button>
-                      <button onClick={handleCancelNew} className="text-red-600">
-                        <FaTimes />
-                      </button>
-                    </td>
-                  </tr>
-                )}
-
-                {!loading && TamTruTamVangs.map(TamTruTamVang => (
-                  <tr key={TamTruTamVang.id} className={highlightedId === TamTruTamVang.id ? "bg-yellow-100" : ""}>
-                    {TamTruTamVang.isEditing ? (
+              <tbody className="divide-y divide-gray-200">
+                {data.map(row => (
+                  <tr
+                    key={row.id}
+                    id={`row-${row.id}`}
+                    className={`hover:bg-gray-50 ${highlightedRowId === row.id ? 'bg-yellow-100' : ''}`}
+                  >
+                    <td className="px-4 py-3 text-sm text-gray-900">{row.id}</td>
+                    {editRowId === row.id ? (
                       <>
-                        <td>
-                          <input
-                            type="text"
-                            defaultValue={TamTruTamVang.id}
-                            onChange={e => TamTruTamVang.id = e.target.value}
-                            className="border px-2 py-1 w-full"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            defaultValue={TamTruTamVang.personId}
-                            onChange={e => TamTruTamVang.personId = e.target.value}
-                            className="border px-2 py-1 w-full"
-                          />
-                        </td>
-                        <td>
-                          <select
-                            defaultValue={TamTruTamVang.type}
-                            onChange={e => TamTruTamVang.type = e.target.value as "tamtru" | "tamvang"}
-                            className="border px-2 py-1 w-full"
+                        <td className="px-4 py-3">
+                          <select 
+                            name="loai" 
+                            value={editFormData.loai || ''} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded"
                           >
-                            <option value="tamtru">Tạm trú</option>
-                            <option value="tamvang">Tạm vắng</option>
+                            {loaiOptions.map(option => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
                           </select>
                         </td>
-                        <td>
-                          <input
-                            type="text"
-                            defaultValue={TamTruTamVang.fromDate}
-                            onChange={e => TamTruTamVang.fromDate = e.target.value}
-                            className="border px-2 py-1 w-full"
+                        <td className="px-4 py-3">
+                          <input 
+                            type="date" 
+                            name="ngayBatDau" 
+                            value={editFormData.ngayBatDau || ''} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded" 
                           />
                         </td>
-                        <td>
-                          <input
-                            type="text"
-                            defaultValue={TamTruTamVang.toDate}
-                            onChange={e => TamTruTamVang.toDate = e.target.value}
-                            className="border px-2 py-1 w-full"
+                        <td className="px-4 py-3">
+                          <input 
+                            type="date" 
+                            name="ngayKetThuc" 
+                            value={editFormData.ngayKetThuc || ''} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded" 
                           />
                         </td>
-                        <td>
-                          <input
-                            type="text"
-                            defaultValue={TamTruTamVang.location}
-                            onChange={e => TamTruTamVang.location = e.target.value}
-                            className="border px-2 py-1 w-full"
+                        <td className="px-4 py-3">
+                          <textarea 
+                            name="lyDo" 
+                            value={editFormData.lyDo || ''} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded"
                           />
                         </td>
-                        <td className="text-center space-x-2">
-                          <button onClick={() => handleSaveEdit(TamTruTamVang.id!, TamTruTamVang)} className="text-green-600">
-                            <FaSave />
-                          </button>
-                          <button onClick={() => handleEdit(TamTruTamVang.id!)} className="text-red-600">
-                            <FaTimes />
-                          </button>
+                        <td className="px-4 py-3">
+                          <input 
+                            type="number" 
+                            name="nhanKhau.maNhanKhau" 
+                            value={editFormData.nhanKhau.maNhanKhau || ''} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded" 
+                          />
                         </td>
                       </>
                     ) : (
                       <>
-                        <td>{TamTruTamVang.id}</td>
-                        <td>{TamTruTamVang.personId}</td>
-                        <td>{TamTruTamVang.type === "tamtru" ? "Tạm trú" : "Tạm vắng"}</td>
-                        <td>{TamTruTamVang.fromDate}</td>
-                        <td>{TamTruTamVang.toDate}</td>
-                        <td>{TamTruTamVang.location}</td>
-                        <td className="text-center space-x-2">
-                          <button onClick={() => handleEdit(TamTruTamVang.id!)} className="text-blue-600">
-                            <FaPen />
-                          </button>
-                          <button onClick={() => handleDelete(TamTruTamVang.id!)} className="text-red-600">
-                            <FaTrashAlt />
-                          </button>
+                        <td className="px-4 py-3 text-sm">
+                          <span className={`px-2 py-1 rounded ${getLoaiColor(row.loai)}`}>
+                            {row.loai || '-'}
+                          </span>
                         </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.ngayBatDau || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.ngayKetThuc || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.lyDo || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.nhanKhau.maNhanKhau}</td>
                       </>
                     )}
+                    <td className="px-4 py-3">
+                      <div className="flex space-x-2">
+                        <button 
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          onClick={() => handleEditClick(row)}
+                          title={editRowId === row.id ? "Lưu" : "Chỉnh sửa"}
+                        >
+                          {editRowId === row.id ? <FaSave /> : <FaPen />}
+                        </button>
+                        <button 
+                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                          onClick={() => handleDeleteClick(row.id!)}
+                          title="Xóa"
+                        >
+                          <FaTrashAlt />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
-
-                {!loading && TamTruTamVangs.length === 0 && !isAdding && (
-                  <tr><td colSpan={7} className="text-center py-4">Không có dữ liệu</td></tr>
+                {addingNew && (
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm text-gray-900">-</td>
+                    <td className="px-4 py-3">
+                      <select 
+                        name="loai" 
+                        value={newRowData.loai || ''} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded"
+                      >
+                        {loaiOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-4 py-3">
+                      <input 
+                        type="date" 
+                        name="ngayBatDau" 
+                        value={newRowData.ngayBatDau || ''} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded" 
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input 
+                        type="date" 
+                        name="ngayKetThuc" 
+                        value={newRowData.ngayKetThuc || ''} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded" 
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <textarea 
+                        name="lyDo" 
+                        value={newRowData.lyDo || ''} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input 
+                        type="number" 
+                        name="nhanKhau.maNhanKhau" 
+                        value={newRowData.nhanKhau.maNhanKhau || ''} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded" 
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex space-x-2">
+                        <button 
+                          className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
+                          onClick={handleSaveNewRow}
+                          title="Lưu"
+                        >
+                          <FaSave />
+                        </button>
+                        <button 
+                          className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                          onClick={handleCancelNewRow}
+                          title="Hủy"
+                        >
+                          <FaTimes />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
-        </div>
+
+          {/* Pagination */}
+          <div className="mt-4 flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-700">Hiển thị</span>
+              <select
+                className="border border-gray-300 rounded px-2 py-1 text-sm"
+                value={itemsPerPage}
+                onChange={e => setItemsPerPage(Number(e.target.value))}
+              >
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              <span className="text-sm text-gray-700">mục</span>
+            </div>
+            <div className="text-sm text-gray-700">
+              Tổng cộng: {data.length} bản ghi
+            </div>
+          </div>
+        </main>
       </div>
     </MainLayout>
   );
-}
+};
+
+export default QLTamTruTamVang;

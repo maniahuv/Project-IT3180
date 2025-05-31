@@ -13,15 +13,15 @@ axios.interceptors.request.use(
     (error) => Promise.reject(error)
   );
 
-export interface NopPhi {
-  id?: number;
-  ngayThu?: string; // LocalDate serialized as string (e.g., "YYYY-MM-DD")
-  soTien?: number; // Using number for Float in TypeScript
-  nguoiNop?: string; // Optional, as it may be null
-  nguoiThu: { id: number }; // Simplified reference to TaiKhoan entity
-  hoKhau: { maHoKhau: number }; // Simplified reference to HoKhau entity
-  khoanThuDotThu: { idKhoanThuDotThu: number }; // Simplified reference to KhoanThuDotThu entity
-}
+  export interface NopPhi {
+    id?: number;
+    ngayThu?: string;
+    soTien?: number;
+    nguoiNop?: string;
+    nguoiThu?: { id: number };
+    hoKhau?: { maHoKhau: number };
+    khoanThu?: { maKhoanThu: number };
+  }
 
 export function fetchAllNopPhi() {
   return axios.get<NopPhi[]>(API_BASE_URL);
