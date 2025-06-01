@@ -8,10 +8,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import database.JDBCUtil;
 import model.KhoanThu;
 import model.ThongKeKhoanThu;
 import utils.DataAccessObject;
+import utils.JDBCUtil;
 
 public class KhoanThuDao extends DataAccessObject<KhoanThu> {
 

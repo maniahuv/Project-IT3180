@@ -5,10 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import database.JDBCUtil;
 import model.HoKhau;
 import model.ThongKeHoKhau;
 import utils.DataAccessObject;
+import utils.JDBCUtil;
 
 public class HoKhauDao extends DataAccessObject<HoKhau> {
 

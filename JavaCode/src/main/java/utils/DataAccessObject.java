@@ -8,8 +8,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import database.JDBCUtil;
-
 public abstract class DataAccessObject<T> {
 
 	protected String prefix;
@@ -182,15 +180,19 @@ public abstract class DataAccessObject<T> {
 	}
 
 	public T queryFirst(String[] names, Object[] matches) {
-		return query(names, matches).get(0);
+		List<T> queryResult = query(names, matches);
+		if (queryResult.isEmpty()) {
+			return null;
+		}
+		return queryResult.get(0);
 	}
 
 	public List<T> query(String[] names, Object[] matches) {
 		List<T> list = new ArrayList<>();
-		StringBuilder sql = new StringBuilder("SELECT * FROM KhoanThu WHERE 1=1");
+		StringBuilder sql = new StringBuilder(String.format("SELECT * FROM %s WHERE 1=1", name));
 
-		for (String name : names) {
-			sql.append(String.format(" AND %s = ?", name));
+		for (int i = 0; i < names.length; i++) {
+			sql.append(String.format(" AND %s=?", names[i]));
 		}
 
 		try (Connection conn = JDBCUtil.getConnection();

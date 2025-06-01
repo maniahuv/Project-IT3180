@@ -5,9 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import database.JDBCUtil;
 import model.Role;
 import utils.DataAccessObject;
+import utils.JDBCUtil;
 
 public class RoleDao extends DataAccessObject<Role> {
 
