@@ -157,7 +157,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 </li>
                     
                 )}
-                  {vaiTro === "2" && (   
+                  {vaiTro === "3" && (   
                   <li>
                     <Link
                       to="/management/qlnopphi"

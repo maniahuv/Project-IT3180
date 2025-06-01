@@ -23,31 +23,11 @@ interface EditFormData {
   vaiTro?: number;
 }
 
-// Utility functions
-const formatDateISO = (dateStr: string): string => {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  const parts = dateStr.split('/');
-  if (parts.length === 3) {
-    const [dd, mm, yyyy] = parts;
-    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-  }
-  return '';
-};
-
-const formatDateDisplay = (dateStr: string): string => {
-  const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    const [yyyy, mm, dd] = parts;
-    return `${dd}/${mm}/${yyyy}`;
-  }
-  return dateStr;
-};
-
 // Vai trò mapping
 const vaiTroOptions = [
-  { value: 1, label: 'TO_TRUONG' },
-  { value: 2, label: 'TO_PHO' },
-  { value: 3, label: 'KE_TOAN' }
+  { value: 1, label: 'Tổ trưởng' },
+  { value: 2, label: 'Tổ phó' },
+  { value: 3, label: 'Kế toán' }
 ];
 
 const getVaiTroLabel = (vaiTro?: number): string => {
@@ -57,6 +37,7 @@ const getVaiTroLabel = (vaiTro?: number): string => {
 
 const QLTaiKhoan: React.FC = () => {
   const [data, setData] = useState<TaiKhoan[]>([]);
+  const [filteredData, setFilteredData] = useState<TaiKhoan[]>([]); // New state for filtered data
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -73,7 +54,6 @@ const QLTaiKhoan: React.FC = () => {
     hoTen: '',
     vaiTro: 1
   });
-
   const [searchCriteria, setSearchCriteria] = useState<string>('0');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
@@ -84,16 +64,24 @@ const QLTaiKhoan: React.FC = () => {
     loadTaiKhoan();
   }, []);
 
+  // Update filteredData when data changes
+  useEffect(() => {
+    setFilteredData(data); // Reset filteredData to original data when data changes
+  }, [data]);
+
   const loadTaiKhoan = async () => {
     try {
       setLoading(true);
       const response = await fetchAllTaiKhoan();
       console.log('Tai khoan data loaded:', response.data);
       setData(response.data);
+      setFilteredData(response.data); // Initialize filteredData
       setError('');
     } catch (err: any) {
       setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
       console.error('Error loading tai khoan:', err);
+      setData([]);
+      setFilteredData([]);
     } finally {
       setLoading(false);
     }
@@ -110,7 +98,7 @@ const QLTaiKhoan: React.FC = () => {
         };
         
         await updateTaiKhoan(row.id!, updateData);
-        await loadTaiKhoan(); // Reload data after update
+        await loadTaiKhoan();
         setEditRowId(null);
         setEditFormData({
           username: '',
@@ -118,7 +106,6 @@ const QLTaiKhoan: React.FC = () => {
           hoTen: '',
           vaiTro: 1
         });
-        // alert('Cập nhật tài khoản thành công!');
       } catch (err: any) {
         alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
         console.error('Error updating tai khoan:', err);
@@ -128,7 +115,7 @@ const QLTaiKhoan: React.FC = () => {
       setEditRowId(row.id!);
       setEditFormData({
         username: row.username,
-        password: '', // Don't show existing password
+        password: '',
         hoTen: row.hoTen,
         vaiTro: row.vaiTro
       });
@@ -140,7 +127,7 @@ const QLTaiKhoan: React.FC = () => {
     if (window.confirm('Bạn có chắc muốn xóa tài khoản này?')) {
       try {
         await deleteTaiKhoan(id);
-        await loadTaiKhoan(); // Reload data after delete
+        await loadTaiKhoan();
         if (editRowId === id) {
           setEditRowId(null);
           setEditFormData({
@@ -150,7 +137,6 @@ const QLTaiKhoan: React.FC = () => {
             vaiTro: 1
           });
         }
-        // alert('Xóa tài khoản thành công!');
       } catch (err: any) {
         alert('Có lỗi xảy ra khi xóa: ' + (err.response?.data?.message || err.message));
         console.error('Error deleting tai khoan:', err);
@@ -211,7 +197,7 @@ const QLTaiKhoan: React.FC = () => {
       };
       
       await createTaiKhoan(newTaiKhoan);
-      await loadTaiKhoan(); // Reload data after create
+      await loadTaiKhoan();
       setAddingNew(false);
       setNewRowData({
         username: '',
@@ -219,7 +205,6 @@ const QLTaiKhoan: React.FC = () => {
         hoTen: '',
         vaiTro: 1
       });
-      // alert('Tạo tài khoản thành công!');
     } catch (err: any) {
       alert('Có lỗi xảy ra khi tạo tài khoản: ' + (err.response?.data?.message || err.message));
       console.error('Error creating tai khoan:', err);
@@ -240,11 +225,12 @@ const QLTaiKhoan: React.FC = () => {
   // Handle search
   const handleSearch = (): void => {
     if (!searchKeyword.trim()) {
+      setFilteredData(data); // Reset to full data if search keyword is empty
       alert('Vui lòng nhập từ khóa tìm kiếm.');
       return;
     }
     const crit = parseInt(searchCriteria, 10);
-    const found = data.find(item => {
+    const filtered = data.filter(item => {
       const fields = [
         item.id?.toString() || '',
         item.username,
@@ -253,13 +239,24 @@ const QLTaiKhoan: React.FC = () => {
       ];
       return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
     });
-    
-    if (found) {
-      setHighlightedRowId(found.id!);
+
+    if (filtered.length > 0) {
+      setFilteredData(filtered);
+      setHighlightedRowId(filtered[0].id!);
       setTimeout(() => setHighlightedRowId(null), 3000);
-      document.getElementById(`row-${found.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById(`row-${filtered[0].id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
+      setFilteredData([]);
       alert('Không tìm thấy tài khoản phù hợp.');
+    }
+  };
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+    if (!value.trim()) {
+      setFilteredData(data); // Reset to full data when search input is cleared
     }
   };
 
@@ -305,13 +302,10 @@ const QLTaiKhoan: React.FC = () => {
 
   return (
     <MainLayout>
-      {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Content */}
         <main className="flex-1 p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý tài khoản</h2>
 
-          {/* Actions */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center space-x-2">
               <select
@@ -329,7 +323,7 @@ const QLTaiKhoan: React.FC = () => {
                 placeholder="Nhập từ khóa tìm kiếm"
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchKeyword}
-                onChange={e => setSearchKeyword(e.target.value)}
+                onChange={handleSearchChange} // Updated to handle input change
                 onKeyDown={handleSearchKeyDown}
               />
               <button 
@@ -350,7 +344,6 @@ const QLTaiKhoan: React.FC = () => {
             </button>
           </div>
 
-          {/* Table */}
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
@@ -364,7 +357,7 @@ const QLTaiKhoan: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {data.map(row => (
+                {filteredData.map(row => ( // Use filteredData instead of data
                   <tr
                     key={row.id}
                     id={`row-${row.id}`}
@@ -452,7 +445,6 @@ const QLTaiKhoan: React.FC = () => {
                     </td>
                   </tr>
                 ))}
-
                 {addingNew && (
                   <tr className="bg-blue-50">
                     <td className="px-4 py-3 text-sm text-gray-900">-</td>
@@ -524,7 +516,6 @@ const QLTaiKhoan: React.FC = () => {
             </table>
           </div>
 
-          {/* Pagination */}
           <div className="mt-4 flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-700">Hiển thị</span>
@@ -533,14 +524,14 @@ const QLTaiKhoan: React.FC = () => {
                 value={itemsPerPage}
                 onChange={e => setItemsPerPage(Number(e.target.value))}
               >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
               </select>
               <span className="text-sm text-gray-700">mục</span>
             </div>
             <div className="text-sm text-gray-700">
-              Tổng cộng: {data.length} tài khoản
+              Tổng cộng: {filteredData.length} tài khoản {/* Updated to use filteredData.length */}
             </div>
           </div>
         </main>

@@ -62,6 +62,7 @@ const formatDateDisplay = (dateStr?: string): string => {
 
 const QLDotThu: React.FC = () => {
   const [data, setData] = useState<DotThu[]>([]);
+  const [filteredData, setFilteredData] = useState<DotThu[]>([]); // New state for filtered data
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -83,9 +84,15 @@ const QLDotThu: React.FC = () => {
   const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
+  // Fetch data from API
   useEffect(() => {
     loadDotThu();
   }, []);
+
+  // Update filteredData when data changes
+  useEffect(() => {
+    setFilteredData(data); // Reset filteredData to original data when data changes
+  }, [data]);
 
   const loadDotThu = async () => {
     try {
@@ -108,17 +115,20 @@ const QLDotThu: React.FC = () => {
         dataArray = response.data;
       }
       setData(dataArray);
+      setFilteredData(dataArray); // Initialize filteredData
       setError('');
     } catch (err: any) {
       setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
       console.error('Error loading dot thu:', err);
       console.error('Error response:', err.response);
       setData([]);
+      setFilteredData([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle edit click
   const handleEditClick = async (row: DotThu): Promise<void> => {
     if (editRowId === row.maDotThu) {
       try {
@@ -153,6 +163,7 @@ const QLDotThu: React.FC = () => {
     }
   };
 
+  // Handle delete click
   const handleDeleteClick = async (id: number): Promise<void> => {
     if (window.confirm('Bạn có chắc muốn xóa đợt thu này?')) {
       try {
@@ -174,6 +185,7 @@ const QLDotThu: React.FC = () => {
     }
   };
 
+  // Handle add new click
   const handleAddNewClick = (): void => {
     setAddingNew(true);
     setNewRowData({
@@ -184,6 +196,7 @@ const QLDotThu: React.FC = () => {
     });
   };
 
+  // Handle edit input change
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setEditFormData(prev => ({
@@ -192,6 +205,7 @@ const QLDotThu: React.FC = () => {
     }));
   };
 
+  // Handle new row input change
   const handleNewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setNewRowData(prev => ({
@@ -200,6 +214,7 @@ const QLDotThu: React.FC = () => {
     }));
   };
 
+  // Save new row
   const handleSaveNewRow = async (): Promise<void> => {
     if (!newRowData.tenDotThu.trim()) {
       alert('Vui lòng nhập tên đợt thu.');
@@ -236,6 +251,7 @@ const QLDotThu: React.FC = () => {
     }
   };
 
+  // Cancel new row
   const handleCancelNewRow = (): void => {
     setAddingNew(false);
     setNewRowData({
@@ -246,13 +262,15 @@ const QLDotThu: React.FC = () => {
     });
   };
 
+  // Handle search
   const handleSearch = (): void => {
     if (!searchKeyword.trim()) {
+      setFilteredData(data); // Reset to full data if search keyword is empty
       alert('Vui lòng nhập từ khóa tìm kiếm.');
       return;
     }
     const crit = parseInt(searchCriteria, 10);
-    const found = data.find(item => {
+    const filtered = data.filter(item => {
       const fields = [
         item.maDotThu?.toString() || '',
         item.tenDotThu,
@@ -263,15 +281,27 @@ const QLDotThu: React.FC = () => {
       return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
     });
 
-    if (found) {
-      setHighlightedRowId(found.maDotThu!);
+    if (filtered.length > 0) {
+      setFilteredData(filtered);
+      setHighlightedRowId(filtered[0].maDotThu!);
       setTimeout(() => setHighlightedRowId(null), 3000);
-      document.getElementById(`row-${found.maDotThu}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById(`row-${filtered[0].maDotThu}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
+      setFilteredData([]);
       alert('Không tìm thấy đợt thu phù hợp.');
     }
   };
 
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+    if (!value.trim()) {
+      setFilteredData(data); // Reset to full data when search input is cleared
+    }
+  };
+
+  // Handle search on Enter key
   const handleSearchKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
       handleSearch();
@@ -317,11 +347,9 @@ const QLDotThu: React.FC = () => {
 
   return (
     <MainLayout>
-
+      <div className="flex-1 flex flex-col">
         <main className="flex-1 p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý đợt thu</h2>
-          {/* Add the rest of the content here */}
-        </main>
 
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center space-x-2">
@@ -341,7 +369,7 @@ const QLDotThu: React.FC = () => {
                 placeholder="Nhập từ khóa tìm kiếm"
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchKeyword}
-                onChange={e => setSearchKeyword(e.target.value)}
+                onChange={handleSearchChange} // Updated to handle input change
                 onKeyDown={handleSearchKeyDown}
               />
               <button 
@@ -376,7 +404,7 @@ const QLDotThu: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {data.map(row => (
+                {filteredData.map(row => ( // Use filteredData instead of data
                   <tr
                     key={row.maDotThu}
                     id={`row-${row.maDotThu}`}
@@ -550,11 +578,11 @@ const QLDotThu: React.FC = () => {
               <span className="text-sm text-gray-700">mục</span>
             </div>
             <div className="text-sm text-gray-700">
-              Tổng cộng: {data.length} đợt thu
+              Tổng cộng: {filteredData.length} đợt thu {/* Updated to use filteredData.length */}
             </div>
           </div>
-  
-
+        </main>
+      </div>
     </MainLayout>
   );
 };

@@ -15,7 +15,7 @@ import {
   updateKhoanThu, 
   deleteKhoanThu 
 } from '../../api/KhoanThuApi';
-import { DotThu, fetchAllDotThu } from '../../api/DotThuApi'; // Import DotThu API
+import { DotThu, fetchAllDotThu } from '../../api/DotThuApi';
 
 interface EditFormData {
   tenKhoanThu: string;
@@ -23,7 +23,7 @@ interface EditFormData {
   soTien?: number;
   batBuoc: boolean;
   ghiChu?: string;
-  maDotThu?: number; // Use maDotThu directly
+  maDotThu?: number;
 }
 
 const loaiKhoanThuOptions = [
@@ -39,7 +39,8 @@ const getLoaiKhoanThuLabel = (loai?: string): string => {
 
 const QLKhoanThu: React.FC = () => {
   const [data, setData] = useState<KhoanThu[]>([]);
-  const [dotThuData, setDotThuData] = useState<DotThu[]>([]); // Store DotThu data
+  const [filteredData, setFilteredData] = useState<KhoanThu[]>([]); // New state for filtered data
+  const [dotThuData, setDotThuData] = useState<DotThu[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -65,19 +66,24 @@ const QLKhoanThu: React.FC = () => {
   const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
+  // Fetch data from API
   useEffect(() => {
     loadData();
   }, []);
 
+  // Update filteredData when data changes
+  useEffect(() => {
+    setFilteredData(data); // Reset filteredData to original data when data changes
+  }, [data]);
+
   const loadData = async () => {
     try {
       setLoading(true);
-      // Load KhoanThu
       const khoanThuResponse = await fetchAllKhoanThu();
       console.log('Khoan thu data loaded:', khoanThuResponse.data);
       setData(khoanThuResponse.data);
+      setFilteredData(khoanThuResponse.data); // Initialize filteredData
 
-      // Load DotThu for dropdown and display
       const dotThuResponse = await fetchAllDotThu();
       let dotThuArray: DotThu[] = [];
       if (typeof dotThuResponse.data === 'string') {
@@ -91,6 +97,8 @@ const QLKhoanThu: React.FC = () => {
     } catch (err: any) {
       setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
       console.error('Error loading data:', err);
+      setData([]);
+      setFilteredData([]);
     } finally {
       setLoading(false);
     }
@@ -251,28 +259,39 @@ const QLKhoanThu: React.FC = () => {
 
   const handleSearch = (): void => {
     if (!searchKeyword.trim()) {
+      setFilteredData(data); // Reset to full data if search keyword is empty
       alert('Vui lòng nhập từ khóa tìm kiếm.');
       return;
     }
     const crit = parseInt(searchCriteria, 10);
-    const found = data.find(item => {
+    const filtered = data.filter(item => {
       const fields = [
         item.maKhoanThu?.toString() || '',
         item.tenKhoanThu,
         getLoaiKhoanThuLabel(item.loaiKhoanThu),
         item.soTien?.toString() || '',
         item.batBuoc ? 'Có' : 'Không',
-        item.maDotThu?.toString() || ''
+        getTenDotThu(item.maDotThu) // Use getTenDotThu for Đợt thu
       ];
       return fields[crit]?.toString().toLowerCase().includes(searchKeyword.toLowerCase());
     });
-    
-    if (found) {
-      setHighlightedRowId(found.maKhoanThu!);
+
+    if (filtered.length > 0) {
+      setFilteredData(filtered);
+      setHighlightedRowId(filtered[0].maKhoanThu!);
       setTimeout(() => setHighlightedRowId(null), 3000);
-      document.getElementById(`row-${found.maKhoanThu}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById(`row-${filtered[0].maKhoanThu}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
+      setFilteredData([]);
       alert('Không tìm thấy khoản thu phù hợp.');
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+    if (!value.trim()) {
+      setFilteredData(data); // Reset to full data when search input is cleared
     }
   };
 
@@ -318,7 +337,7 @@ const QLKhoanThu: React.FC = () => {
   return (
     <MainLayout>
       <div className="flex-1 flex flex-col">
-       
+        <main className="flex-1 p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý khoản thu</h2>
 
           <div className="flex justify-between items-center mb-6">
@@ -340,7 +359,7 @@ const QLKhoanThu: React.FC = () => {
                 placeholder="Nhập từ khóa tìm kiếm"
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchKeyword}
-                onChange={e => setSearchKeyword(e.target.value)}
+                onChange={handleSearchChange} // Updated to handle input change
                 onKeyDown={handleSearchKeyDown}
               />
               <button 
@@ -376,7 +395,7 @@ const QLKhoanThu: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {data.map(row => (
+                {filteredData.map(row => ( // Use filteredData instead of data
                   <tr
                     key={row.maKhoanThu}
                     id={`row-${row.maKhoanThu}`}
@@ -597,12 +616,13 @@ const QLKhoanThu: React.FC = () => {
               <span className="text-sm text-gray-700">mục</span>
             </div>
             <div className="text-sm text-gray-700">
-              Tổng cộng: {data.length} khoản thu
+              Tổng cộng: {filteredData.length} khoản thu {/* Updated to use filteredData.length */}
             </div>
           </div>
-          </div>
+        </main>
+      </div>
     </MainLayout>
-  )
+  );
 };
 
 export default QLKhoanThu;

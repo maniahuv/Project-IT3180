@@ -51,6 +51,7 @@ const formatDateDisplay = (dateStr?: string): string => {
 const QLHoKhau: React.FC = () => {
   const vaiTro = localStorage.getItem("vaiTro");
   const [data, setData] = useState<HoKhau[]>([]);
+  const [filteredData, setFilteredData] = useState<HoKhau[]>([]); // New state for filtered data
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -82,11 +83,15 @@ const QLHoKhau: React.FC = () => {
     loadHoKhau();
   }, []);
 
+  // Update filteredData when data changes
+  useEffect(() => {
+    setFilteredData(data); // Reset filteredData to original data when data changes
+  }, [data]);
+
   const loadHoKhau = async () => {
     try {
       setLoading(true);
       const response = await fetchAllHoKhau();
-      // Handle stringified JSON response
       let fetchedData: HoKhau[] = response.data;
       if (typeof response.data === 'string') {
         try {
@@ -95,25 +100,28 @@ const QLHoKhau: React.FC = () => {
           console.error('Error parsing response data:', parseError);
           setError('Dữ liệu trả về từ API không thể phân tích.');
           setData([]);
+          setFilteredData([]);
           setLoading(false);
           return;
         }
       }
 
-      // Ensure fetchedData is an array
       if (Array.isArray(fetchedData)) {
         setData(fetchedData);
+        setFilteredData(fetchedData); // Initialize filteredData
         console.log('Fetched ho khau data:', fetchedData);
         setError('');
       } else {
         console.error('Response data is not an array:', fetchedData);
         setData([]);
+        setFilteredData([]);
         setError('Dữ liệu trả về từ API không đúng định dạng.');
       }
     } catch (err: any) {
       console.error('Error loading ho khau:', err);
       setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
       setData([]);
+      setFilteredData([]);
     } finally {
       setLoading(false);
     }
@@ -122,7 +130,6 @@ const QLHoKhau: React.FC = () => {
   // Handle edit click
   const handleEditClick = async (row: HoKhau): Promise<void> => {
     if (editRowId === row.maHoKhau) {
-      // Save changes
       try {
         const updateData: HoKhau = {
           chuHo: editFormData.chuHo,
@@ -148,7 +155,6 @@ const QLHoKhau: React.FC = () => {
         console.error('Error updating ho khau:', err);
       }
     } else {
-      // Start editing
       setEditRowId(row.maHoKhau!);
       setEditFormData({
         chuHo: row.chuHo,
@@ -156,7 +162,7 @@ const QLHoKhau: React.FC = () => {
         ngayLap: formatDateDisplay(row.ngayLap),
         ngayCapNhat: formatDateDisplay(row.ngayCapNhat),
         dienTich: row.dienTich,
-        loaiThayDoi: 2 // Assume update operation
+        loaiThayDoi: 2
       });
     }
   };
@@ -281,11 +287,12 @@ const QLHoKhau: React.FC = () => {
   // Handle search
   const handleSearch = (): void => {
     if (!searchKeyword.trim()) {
+      setFilteredData(data); // Reset to full data if search keyword is empty
       alert('Vui lòng nhập từ khóa tìm kiếm.');
       return;
     }
     const crit = parseInt(searchCriteria, 10);
-    const found = data.find(item => {
+    const filtered = data.filter(item => {
       const fields = [
         item.maHoKhau?.toString() || '',
         item.chuHo.toString(),
@@ -297,13 +304,24 @@ const QLHoKhau: React.FC = () => {
       ];
       return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
     });
-    
-    if (found) {
-      setHighlightedRowId(found.maHoKhau!);
+
+    if (filtered.length > 0) {
+      setFilteredData(filtered);
+      setHighlightedRowId(filtered[0].maHoKhau!);
       setTimeout(() => setHighlightedRowId(null), 3000);
-      document.getElementById(`row-${found.maHoKhau}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById(`row-${filtered[0].maHoKhau}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
+      setFilteredData([]);
       alert('Không tìm thấy hộ khẩu phù hợp.');
+    }
+  };
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+    if (!value.trim()) {
+      setFilteredData(data); // Reset to full data when search input is cleared
     }
   };
 
@@ -366,14 +384,13 @@ const QLHoKhau: React.FC = () => {
                 <option value="3">Ngày lập</option>
                 <option value="4">Ngày cập nhật</option>
                 <option value="5">Diện tích</option>
-                {/* <option value="6">Số nhân khẩu</option> */}
               </select>
               <input
                 type="text"
                 placeholder="Nhập từ khóa tìm kiếm"
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchKeyword}
-                onChange={e => setSearchKeyword(e.target.value)}
+                onChange={handleSearchChange} // Updated to handle input change
                 onKeyDown={handleSearchKeyDown}
               />
               <button 
@@ -386,18 +403,17 @@ const QLHoKhau: React.FC = () => {
             </div>
 
             <button
-  className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
-    vaiTro === "3"
-      ? "bg-green-400 text-gray-200 cursor-not-allowed"
-      : "bg-green-600 text-white hover:bg-green-700"
-  }`}
-  onClick={handleAddNewClick}
-  disabled={vaiTro === "3"}
->
-  <FaPlus />
-  <span>Thêm hộ khẩu</span>
-</button>
-
+              className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
+                vaiTro === "3"
+                  ? "bg-green-400 text-gray-200 cursor-not-allowed"
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }`}
+              onClick={handleAddNewClick}
+              disabled={vaiTro === "3"}
+            >
+              <FaPlus />
+              <span>Thêm hộ khẩu</span>
+            </button>
           </div>
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -410,12 +426,11 @@ const QLHoKhau: React.FC = () => {
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày lập</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày cập nhật</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Diện tích</th>
-                  {/* <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Số nhân khẩu</th> */}
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {data.map(row => (
+                {filteredData.map(row => ( // Use filteredData instead of data
                   <tr
                     key={row.maHoKhau}
                     id={`row-${row.maHoKhau}`}
@@ -471,17 +486,6 @@ const QLHoKhau: React.FC = () => {
                             className="w-full px-2 py-1 border rounded" 
                           />
                         </td>
-                        {/* <td className="px-4 py-3">
-                          <select
-                            name="loaiThayDoi"
-                            value={editFormData.loaiThayDoi}
-                            onChange={handleEditChange}
-                            className="w-full px-2 py-1 border rounded"
-                          >
-                            <option value={1}>Tạo mới</option>
-                            <option value={2}>Cập nhật</option>
-                          </select>
-                        </td> */}
                       </>
                     ) : (
                       <>
@@ -490,39 +494,36 @@ const QLHoKhau: React.FC = () => {
                         <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayLap)}</td>
                         <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayCapNhat)}</td>
                         <td className="px-4 py-3 text-sm text-gray-900">{row.dienTich}</td>
-                        {/* <td className="px-4 py-3 text-sm text-gray-900">{row.danhSachNhanKhau?.length || 0}</td> */}
                       </>
                     )}
-                  <td className="px-4 py-3">
-  <div className="flex space-x-2">
-    <button
-      className={`p-2 rounded transition-colors ${
-        vaiTro === "3"
-          ? "text-gray-400 cursor-not-allowed"
-          : "text-blue-600 hover:bg-blue-50"
-      }`}
-      onClick={() => handleEditClick(row)}
-      title={editRowId === row.maHoKhau ? "Lưu" : "Chỉnh sửa"}
-      disabled={vaiTro === "3"}
-    >
-      {editRowId === row.maHoKhau ? <FaSave /> : <FaPen />}
-    </button>
-
-    <button
-      className={`p-2 rounded transition-colors ${
-        vaiTro === "3"
-          ? "text-gray-400 cursor-not-allowed"
-          : "text-red-600 hover:bg-red-50"
-      }`}
-      onClick={() => handleDeleteClick(row.maHoKhau!)}
-      title="Xóa"
-      disabled={vaiTro === "3"}
-    >
-      <FaTrashAlt />
-    </button>
-  </div>
-</td>
-
+                    <td className="px-4 py-3">
+                      <div className="flex space-x-2">
+                        <button
+                          className={`p-2 rounded transition-colors ${
+                            vaiTro === "3"
+                              ? "text-gray-400 cursor-not-allowed"
+                              : "text-blue-600 hover:bg-blue-50"
+                          }`}
+                          onClick={() => handleEditClick(row)}
+                          title={editRowId === row.maHoKhau ? "Lưu" : "Chỉnh sửa"}
+                          disabled={vaiTro === "3"}
+                        >
+                          {editRowId === row.maHoKhau ? <FaSave /> : <FaPen />}
+                        </button>
+                        <button
+                          className={`p-2 rounded transition-colors ${
+                            vaiTro === "3"
+                              ? "text-gray-400 cursor-not-allowed"
+                              : "text-red-600 hover:bg-red-50"
+                          }`}
+                          onClick={() => handleDeleteClick(row.maHoKhau!)}
+                          title="Xóa"
+                          disabled={vaiTro === "3"}
+                        >
+                          <FaTrashAlt />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
 
@@ -579,17 +580,6 @@ const QLHoKhau: React.FC = () => {
                         className="w-full px-2 py-1 border rounded" 
                       />
                     </td>
-                    {/* <td className="px-4 py-3">
-                      <select
-                        name="loaiThayDoi"
-                        value={newRowData.loaiThayDoi}
-                        onChange={handleNewChange}
-                        className="w-full px-2 py-1 border rounded"
-                      >
-                        <option value={1}>Tạo mới</option>
-                        <option value={2}>Cập nhật</option>
-                      </select>
-                    </td> */}
                     <td className="px-4 py-3">
                       <div className="flex space-x-2">
                         <button 
@@ -629,7 +619,7 @@ const QLHoKhau: React.FC = () => {
               <span className="text-sm text-gray-700">mục</span>
             </div>
             <div className="text-sm text-gray-700">
-              Tổng cộng: {data.length} hộ khẩu
+              Tổng cộng: {filteredData.length} hộ khẩu
             </div>
           </div>
         </main>
