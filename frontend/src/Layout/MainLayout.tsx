@@ -111,6 +111,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                       Quản lí hộ khẩu
                     </Link>
                   </li>
+                  {vaiTro === "3" && ( 
                   <li>
                     <Link
                       to="/management/qldotthu"
@@ -119,6 +120,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
                       Quản lí đợt thu
                     </Link>
                   </li>
+                  )}
+                     {vaiTro === "3" && ( 
                   <li>
                     <Link
                       to="/management/qlkhoanthu"
@@ -127,8 +130,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
                       Quản lí khoản thu
                     </Link>
                   </li>
+                  )}
                   {vaiTro === "1" && ( /* Tổ trưởng */
-                   <div>
+                  
                     <li>
                       <Link
                         to="/management/qltaikhoan"
@@ -137,19 +141,23 @@ export default function MainLayout({ children }: MainLayoutProps) {
                         Quản lí tài khoản
                       </Link>
                     </li>
-                          <li>
-                          <Link
-                            to="/management/qltamtrutamvang"
-                            className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                          >
-                            Quản lí tạm trú tạm vắng
-                          </Link>
-                        </li>
-                       </div>
+                    
+             
                       
                   )}
+                     {vaiTro !== "3" && (
                   
-            
+                  <li>
+                  <Link
+                    to="/management/qltamtrutamvang"
+                    className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    Quản lí tạm trú tạm vắng
+                  </Link>
+                </li>
+                    
+                )}
+                  {vaiTro === "2" && (   
                   <li>
                     <Link
                       to="/management/qlnopphi"
@@ -157,7 +165,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     >
                       Xem phiếu thu
                     </Link>
-                  </li>
+                  </li>  
+                 )}
                   <li>
                     <Link
                       to="/management/xuatbaocao"
