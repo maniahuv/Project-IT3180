@@ -1,5 +1,5 @@
-# Project-IT3180
-Bài tập lớn Phát triển phần mềm chuẩn kĩ năng ITSS
+# Project-IT4082
+Bài tập lớn Kĩ thuật phần mềm
 
 # Cấu trúc thư mục
 - `docs/`: Chứa tài liệu dự án (phạm vi, kế hoạch).
