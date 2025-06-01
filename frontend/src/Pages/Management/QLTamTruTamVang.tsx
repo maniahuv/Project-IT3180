@@ -11,7 +11,6 @@ import MainLayout from '../../Layout/MainLayout';
 import {
   TamTruTamVang,
   fetchAllTamTruTamVang,
-  fetchTamTruTamVangById,
   createTamTruTamVang,
   updateTamTruTamVang,
   deleteTamTruTamVang
@@ -35,13 +34,25 @@ const getLoaiLabel = (loai?: string): string => {
   return option ? option.label : 'Không xác định';
 };
 
+// Utility function to format date for display
+const formatDateDisplay = (dateStr?: string): string => {
+  if (!dateStr) return '-';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const [yyyy, mm, dd] = parts;
+    return `${dd}/${mm}/${yyyy}`;
+  }
+  return dateStr;
+};
+
 const QLTamTruTamVang: React.FC = () => {
   const [data, setData] = useState<TamTruTamVang[]>([]);
+  const [filteredData, setFilteredData] = useState<TamTruTamVang[]>([]); // New state for filtered data
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editFormData, setEditFormData] = useState<EditFormData>({
-    loai: 'TAM_TRU',
+    loai: 'Tạm trú',
     ngayBatDau: '',
     ngayKetThuc: '',
     lyDo: '',
@@ -49,7 +60,7 @@ const QLTamTruTamVang: React.FC = () => {
   });
   const [addingNew, setAddingNew] = useState<boolean>(false);
   const [newRowData, setNewRowData] = useState<EditFormData>({
-    loai: 'TAM_TRU',
+    loai: 'Tạm trú',
     ngayBatDau: '',
     ngayKetThuc: '',
     lyDo: '',
@@ -60,9 +71,15 @@ const QLTamTruTamVang: React.FC = () => {
   const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
+  // Fetch data from API
   useEffect(() => {
     loadData();
   }, []);
+
+  // Update filteredData when data changes
+  useEffect(() => {
+    setFilteredData(data); // Reset filteredData to original data when data changes
+  }, [data]);
 
   const loadData = async () => {
     try {
@@ -70,17 +87,17 @@ const QLTamTruTamVang: React.FC = () => {
       const response = await fetchAllTamTruTamVang();
       console.log('TamTruTamVang data loaded:', response.data);
       setData(response.data);
+      setFilteredData(response.data); // Initialize filteredData
+      setError('');
     } catch (err: any) {
       setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
       console.error('Error loading data:', err);
+      setData([]);
+      setFilteredData([]);
     } finally {
       setLoading(false);
     }
   };
-
-  // const getMaNhanKhau = (nhanKhau?: { maNhanKhau: number }): string => {
-  //   return nhanKhau && nhanKhau.maNhanKhau ? nhanKhau.maNhanKhau.toString() : '-';
-  // };
 
   const handleEditClick = async (row: TamTruTamVang): Promise<void> => {
     if (editRowId === row.id) {
@@ -97,7 +114,7 @@ const QLTamTruTamVang: React.FC = () => {
         await loadData();
         setEditRowId(null);
         setEditFormData({
-          loai: 'TAM_TRU',
+          loai: 'Tạm trú',
           ngayBatDau: '',
           ngayKetThuc: '',
           lyDo: '',
@@ -110,7 +127,7 @@ const QLTamTruTamVang: React.FC = () => {
     } else {
       setEditRowId(row.id!);
       setEditFormData({
-        loai: row.loai || 'TAM_TRU',
+        loai: row.loai || 'Tạm trú',
         ngayBatDau: row.ngayBatDau || '',
         ngayKetThuc: row.ngayKetThuc || '',
         lyDo: row.lyDo || '',
@@ -127,7 +144,7 @@ const QLTamTruTamVang: React.FC = () => {
         if (editRowId === id) {
           setEditRowId(null);
           setEditFormData({
-            loai: 'TAM_TRU',
+            loai: 'Tạm trú',
             ngayBatDau: '',
             ngayKetThuc: '',
             lyDo: '',
@@ -152,7 +169,7 @@ const QLTamTruTamVang: React.FC = () => {
   const handleAddNewClick = (): void => {
     setAddingNew(true);
     setNewRowData({
-      loai: 'TAM_TRU',
+      loai: 'Tạm trú',
       ngayBatDau: '',
       ngayKetThuc: '',
       lyDo: '',
@@ -194,7 +211,7 @@ const QLTamTruTamVang: React.FC = () => {
       await loadData();
       setAddingNew(false);
       setNewRowData({
-        loai: 'TAM_TRU',
+        loai: 'Tạm trú',
         ngayBatDau: '',
         ngayKetThuc: '',
         lyDo: '',
@@ -209,7 +226,7 @@ const QLTamTruTamVang: React.FC = () => {
   const handleCancelNewRow = (): void => {
     setAddingNew(false);
     setNewRowData({
-      loai: 'TAM_TRU',
+      loai: 'Tạm trú',
       ngayBatDau: '',
       ngayKetThuc: '',
       lyDo: '',
@@ -219,28 +236,39 @@ const QLTamTruTamVang: React.FC = () => {
 
   const handleSearch = (): void => {
     if (!searchKeyword.trim()) {
+      setFilteredData(data); // Reset to full data if search keyword is empty
       alert('Vui lòng nhập từ khóa tìm kiếm.');
       return;
     }
     const crit = parseInt(searchCriteria, 10);
-    const found = data.find(item => {
+    const filtered = data.filter(item => {
       const fields = [
         item.id?.toString() || '',
         getLoaiLabel(item.loai),
-        item.ngayBatDau || '',
-        item.ngayKetThuc || '',
+        formatDateDisplay(item.ngayBatDau),
+        formatDateDisplay(item.ngayKetThuc),
         item.lyDo || '',
-        item.nhanKhau?.maNhanKhau?.toString() || '' // Safe access
+        item.nhanKhau?.maNhanKhau?.toString() || ''
       ];
       return fields[crit]?.toString().toLowerCase().includes(searchKeyword.toLowerCase());
     });
 
-    if (found) {
-      setHighlightedRowId(found.id!);
+    if (filtered.length > 0) {
+      setFilteredData(filtered);
+      setHighlightedRowId(filtered[0].id!);
       setTimeout(() => setHighlightedRowId(null), 3000);
-      document.getElementById(`row-${found.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById(`row-${filtered[0].id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
+      setFilteredData([]);
       alert('Không tìm thấy bản ghi phù hợp.');
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+    if (!value.trim()) {
+      setFilteredData(data); // Reset to full data when search input is cleared
     }
   };
 
@@ -286,254 +314,256 @@ const QLTamTruTamVang: React.FC = () => {
   return (
     <MainLayout>
       <div className="flex-1 flex flex-col">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý tạm trú tạm vắng</h2>
+        <main className="flex-1 p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý tạm trú tạm vắng</h2>
 
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-2">
-            <select
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={searchCriteria}
-              onChange={e => setSearchCriteria(e.target.value)}
-            >
-              <option value="0">Mã bản ghi</option>
-              <option value="1">Loại</option>
-              <option value="2">Ngày bắt đầu</option>
-              <option value="3">Ngày kết thúc</option>
-              <option value="4">Lý do</option>
-              <option value="5">Mã nhân khẩu</option>
-            </select>
-            <input
-              type="text"
-              placeholder="Nhập từ khóa tìm kiếm"
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={searchKeyword}
-              onChange={e => setSearchKeyword(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-            />
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center space-x-2">
+              <select
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={searchCriteria}
+                onChange={e => setSearchCriteria(e.target.value)}
+              >
+                <option value="0">Mã bản ghi</option>
+                <option value="1">Loại</option>
+                <option value="2">Ngày bắt đầu</option>
+                <option value="3">Ngày kết thúc</option>
+                <option value="4">Lý do</option>
+                <option value="5">Mã nhân khẩu</option>
+              </select>
+              <input
+                type="text"
+                placeholder="Nhập từ khóa tìm kiếm"
+                className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={searchKeyword}
+                onChange={handleSearchChange} // Updated to handle input change
+                onKeyDown={handleSearchKeyDown}
+              />
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                onClick={handleSearch}
+              >
+                <FaSearch />
+                <span>Tìm kiếm</span>
+              </button>
+            </div>
+
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-              onClick={handleSearch}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
+              onClick={handleAddNewClick}
             >
-              <FaSearch />
-              <span>Tìm kiếm</span>
+              <FaPlus />
+              <span>Tạo mới</span>
             </button>
           </div>
 
-          <button
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
-            onClick={handleAddNewClick}
-          >
-            <FaPlus />
-            <span>Tạo mới</span>
-          </button>
-        </div>
-
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã bản ghi</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Loại</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày bắt đầu</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày kết thúc</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Lý do</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã nhân khẩu</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hành động</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {data.map(row => (
-                <tr
-                  key={row.id}
-                  id={`row-${row.id}`}
-                  className={`hover:bg-gray-50 ${highlightedRowId === row.id ? 'bg-yellow-100' : ''}`}
-                >
-                  <td className="px-4 py-3 text-sm text-gray-900">{row.id}</td>
-                  {editRowId === row.id ? (
-                    <>
-                      <td className="px-4 py-3">
-                        <select
-                          name="loai"
-                          value={editFormData.loai}
-                          onChange={handleEditChange}
-                          className="w-full px-2 py-1 border rounded"
-                        >
-                          {loaiOptions.map(option => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="date"
-                          name="ngayBatDau"
-                          value={editFormData.ngayBatDau}
-                          onChange={handleEditChange}
-                          className="w-full px-2 py-1 border rounded"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="date"
-                          name="ngayKetThuc"
-                          value={editFormData.ngayKetThuc || ''}
-                          onChange={handleEditChange}
-                          className="w-full px-2 py-1 border rounded"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <textarea
-                          name="lyDo"
-                          value={editFormData.lyDo || ''}
-                          onChange={handleEditChange}
-                          className="w-full px-2 py-1 border rounded"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          name="maNhanKhau"
-                          value={editFormData.maNhanKhau || ''}
-                          onChange={handleEditChange}
-                          className="w-full px-2 py-1 border rounded"
-                        />
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            row.loai === 'TAM_TRU' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                          }`}
-                        >
-                          {getLoaiLabel(row.loai)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{row.ngayBatDau || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{row.ngayKetThuc || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{row.lyDo || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{(row.maNhanKhau)}</td>
-                    </>
-                  )}
-                  <td className="px-4 py-3">
-                    <div className="flex space-x-2">
-                      <button
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                        onClick={() => handleEditClick(row)}
-                        title={editRowId === row.id ? 'Lưu' : 'Chỉnh sửa'}
-                      >
-                        {editRowId === row.id ? <FaSave /> : <FaPen />}
-                      </button>
-                      <button
-                        className="p-2 text-red-600 hover:bg-red-50 rounded"
-                        onClick={() => handleDeleteClick(row.id!)}
-                        title="Xóa"
-                      >
-                        <FaTrashAlt />
-                      </button>
-                    </div>
-                  </td>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã bản ghi</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Loại</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày bắt đầu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày kết thúc</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Lý do</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã nhân khẩu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hành động</th>
                 </tr>
-              ))}
-              {addingNew && (
-                <tr className="bg-blue-50">
-                  <td className="px-4 py-3 text-sm text-gray-800">-</td>
-                  <td className="px-4 py-3">
-                    <select
-                      name="loai"
-                      value={newRowData.loai}
-                      onChange={handleNewChange}
-                      className="w-full px-2 py-1 border rounded"
-                    >
-                      {loaiOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-4 py-3">
-                    <input
-                      type="date"
-                      name="ngayBatDau"
-                      value={newRowData.ngayBatDau}
-                      onChange={handleNewChange}
-                      className="w-full px-2 py-1 border rounded"
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <input
-                      type="date"
-                      name="ngayKetThuc"
-                      value={newRowData.ngayKetThuc || ''}
-                      onChange={handleNewChange}
-                      className="w-full px-2 py-1 border rounded"
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <textarea
-                      name="lyDo"
-                      placeholder="Lý do"
-                      value={newRowData.lyDo || ''}
-                      onChange={handleNewChange}
-                      className="w-full px-2 py-1 border rounded"
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <input
-                      type="number"
-                      name="maNhanKhau"
-                      placeholder="Mã nhân khẩu"
-                      value={newRowData.maNhanKhau || ''}
-                      onChange={handleNewChange}
-                      className="w-full px-2 py-1 border rounded"
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex space-x-2">
-                      <button
-                        className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
-                        onClick={handleSaveNewRow}
-                        title="Lưu"
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredData.map(row => ( // Use filteredData instead of data
+                  <tr
+                    key={row.id}
+                    id={`row-${row.id}`}
+                    className={`hover:bg-gray-50 ${highlightedRowId === row.id ? 'bg-yellow-100' : ''}`}
+                  >
+                    <td className="px-4 py-3 text-sm text-gray-900">{row.id}</td>
+                    {editRowId === row.id ? (
+                      <>
+                        <td className="px-4 py-3">
+                          <select
+                            name="loai"
+                            value={editFormData.loai}
+                            onChange={handleEditChange}
+                            className="w-full px-2 py-1 border rounded"
+                          >
+                            {loaiOptions.map(option => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-4 py-3">
+                          <input
+                            type="date"
+                            name="ngayBatDau"
+                            value={editFormData.ngayBatDau}
+                            onChange={handleEditChange}
+                            className="w-full px-2 py-1 border rounded"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input
+                            type="date"
+                            name="ngayKetThuc"
+                            value={editFormData.ngayKetThuc || ''}
+                            onChange={handleEditChange}
+                            className="w-full px-2 py-1 border rounded"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <textarea
+                            name="lyDo"
+                            value={editFormData.lyDo || ''}
+                            onChange={handleEditChange}
+                            className="w-full px-2 py-1 border rounded"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input
+                            type="number"
+                            name="maNhanKhau"
+                            value={editFormData.maNhanKhau || row.maNhanKhau}
+                            onChange={handleEditChange}
+                            className="w-full px-2 py-1 border rounded"
+                          />
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`px-2 py-1 text-xs rounded-full ${
+                              row.loai === 'Tạm trú' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                            }`}
+                          >
+                            {getLoaiLabel(row.loai)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayBatDau)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayKetThuc)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.lyDo || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.maNhanKhau || '-'}</td>
+                      </>
+                    )}
+                    <td className="px-4 py-3">
+                      <div className="flex space-x-2">
+                        <button
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          onClick={() => handleEditClick(row)}
+                          title={editRowId === row.id ? 'Lưu' : 'Chỉnh sửa'}
+                        >
+                          {editRowId === row.id ? <FaSave /> : <FaPen />}
+                        </button>
+                        <button
+                          className="p-2 text-red-600 hover:bg-red-50 rounded"
+                          onClick={() => handleDeleteClick(row.id!)}
+                          title="Xóa"
+                        >
+                          <FaTrashAlt />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {addingNew && (
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm text-gray-800">-</td>
+                    <td className="px-4 py-3">
+                      <select
+                        name="loai"
+                        value={newRowData.loai}
+                        onChange={handleNewChange}
+                        className="w-full px-2 py-1 border rounded"
                       >
-                        <FaSave />
-                      </button>
-                      <button
-                        className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-                        onClick={handleCancelNewRow}
-                        title="Hủy"
-                      >
-                        <FaTimes />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                        {loaiOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="date"
+                        name="ngayBatDau"
+                        value={newRowData.ngayBatDau}
+                        onChange={handleNewChange}
+                        className="w-full px-2 py-1 border rounded"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="date"
+                        name="ngayKetThuc"
+                        value={newRowData.ngayKetThuc || ''}
+                        onChange={handleNewChange}
+                        className="w-full px-2 py-1 border rounded"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <textarea
+                        name="lyDo"
+                        placeholder="Lý do"
+                        value={newRowData.lyDo || ''}
+                        onChange={handleNewChange}
+                        className="w-full px-2 py-1 border rounded"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        name="maNhanKhau"
+                        placeholder="Mã nhân khẩu"
+                        value={newRowData.maNhanKhau || ''}
+                        onChange={handleNewChange}
+                        className="w-full px-2 py-1 border rounded"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex space-x-2">
+                        <button
+                          className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
+                          onClick={handleSaveNewRow}
+                          title="Lưu"
+                        >
+                          <FaSave />
+                        </button>
+                        <button
+                          className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                          onClick={handleCancelNewRow}
+                          title="Hủy"
+                        >
+                          <FaTimes />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-        <div className="mt-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-700">Hiển thị</span>
-            <select
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
-              value={itemsPerPage}
-              onChange={e => setItemsPerPage(Number(e.target.value))}
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-            <span className="text-sm text-gray-700">mục</span>
+          <div className="mt-4 flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-700">Hiển thị</span>
+              <select
+                className="border border-gray-300 rounded px-2 py-1 text-sm"
+                value={itemsPerPage}
+                onChange={e => setItemsPerPage(Number(e.target.value))}
+              >
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              <span className="text-sm text-gray-700">mục</span>
+            </div>
+            <div className="text-sm text-gray-700">
+              Tổng cộng: {filteredData.length} bản ghi {/* Updated to use filteredData.length */}
+            </div>
           </div>
-          <div className="text-sm text-gray-700">
-            Tổng cộng: {data.length} bản ghi
-          </div>
-        </div>
+        </main>
       </div>
     </MainLayout>
   );
