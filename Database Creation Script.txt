@@ -1,94 +1,110 @@
-drop database it3180;
+-- Drop and recreate the database
+DROP DATABASE IF EXISTS it3180;
+CREATE DATABASE it3180;
+USE it3180;
 
-create database it3180;
-
-use it3180;
-
-CREATE TABLE taikhoan (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(100) NOT NULL,
-    vaiTro INT,
-    hoTen VARCHAR(100)
+-- Table structure for table `dotthu`
+DROP TABLE IF EXISTS `dotthu`;
+CREATE TABLE `dotthu` (
+  `ma_dot_thu` int NOT NULL AUTO_INCREMENT,
+  `ngay_bat_dau` date DEFAULT NULL,
+  `ngay_ket_thuc` date DEFAULT NULL,
+  `ten_dot_thu` varchar(100) NOT NULL,
+  `trang_thai` enum('DANG_DIEN_RA','DA_HOAN_THANH','TAM_HOAN') DEFAULT NULL,
+  PRIMARY KEY (`ma_dot_thu`)
 );
 
-CREATE TABLE khoanthu (
-    maKhoanThu INT AUTO_INCREMENT PRIMARY KEY,
-    tenKhoanThu VARCHAR(100) NOT NULL,
-    loaiKhoanThu VARCHAR(50),
-    soTien FLOAT,
-    batBuoc boolean,
-    ghiChu VARCHAR(1000),
-    idNguoiTao INT,
-    FOREIGN KEY (idNguoiTao) REFERENCES taikhoan(id)
+-- Table structure for table `hokhau`
+DROP TABLE IF EXISTS `hokhau`;
+CREATE TABLE `hokhau` (
+  `chu_ho` int NOT NULL,
+  `dien_tich` float NOT NULL,
+  `ma_ho_khau` int NOT NULL AUTO_INCREMENT,
+  `ngay_cap_nhat` date DEFAULT NULL,
+  `ngay_lap` date DEFAULT NULL,
+  `so_nha` varchar(25) NOT NULL,
+  PRIMARY KEY (`ma_ho_khau`)
 );
 
-CREATE TABLE dotthu (
-    maDotThu INT AUTO_INCREMENT PRIMARY KEY,
-    tenDotThu VARCHAR(100) NOT NULL,
-    ngayBatDau DATE,
-    ngayKetThuc DATE,
-    trangThai VARCHAR(50)
+-- Table structure for table `khoanthu`
+DROP TABLE IF EXISTS `khoanthu`;
+CREATE TABLE `khoanthu` (
+  `bat_buoc` bit(1) NOT NULL,
+  `ma_dot_thu` int DEFAULT NULL,
+  `ma_khoan_thu` int NOT NULL AUTO_INCREMENT,
+  `so_tien` float DEFAULT NULL,
+  `loai_khoan_thu` varchar(50) DEFAULT NULL,
+  `ten_khoan_thu` varchar(100) NOT NULL,
+  `ghi_chu` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`ma_khoan_thu`),
+  FOREIGN KEY (`ma_dot_thu`) REFERENCES `dotthu` (`ma_dot_thu`)
 );
 
-CREATE TABLE khoanthu_has_dotthu (
-    idKhoanThuDotThu INT AUTO_INCREMENT PRIMARY KEY,
-    maKhoanThu INT,
-    maDotThu INT,
-    FOREIGN KEY (maKhoanThu) REFERENCES khoanthu(maKhoanThu),
-    FOREIGN KEY (maDotThu) REFERENCES dotthu(maDotThu)
+-- Table structure for table `nhankhau`
+DROP TABLE IF EXISTS `nhankhau`;
+CREATE TABLE `nhankhau` (
+  `gioi_tinh` bit(1) DEFAULT NULL,
+  `ma_ho_khau` int DEFAULT NULL,
+  `ma_nhan_khau` int NOT NULL AUTO_INCREMENT,
+  `ngay_sinh` date DEFAULT NULL,
+  `cmnd` varchar(255) DEFAULT NULL,
+  `ho_ten` varchar(255) DEFAULT NULL,
+  `qh_voi_chu_ho` varchar(255) DEFAULT NULL,
+  `trang_thai` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ma_nhan_khau`),
+  FOREIGN KEY (`ma_ho_khau`) REFERENCES `hokhau` (`ma_ho_khau`)
 );
 
-CREATE TABLE hokhau (
-    maHoKhau INT AUTO_INCREMENT PRIMARY KEY,
-    chuHo INT NOT NULL,
-    soNha VARCHAR(25) NOT NULL,
-    ngayLap DATE,
-    ngayCapNhat DATE,
-    dienTich FLOAT NOT NULL
+-- Table structure for table `lichsu_hokhau`
+DROP TABLE IF EXISTS `lichsu_hokhau`;
+CREATE TABLE `lichsu_hokhau` (
+  `loai_thay_doi` int DEFAULT NULL,
+  `ma_ho_khau` int DEFAULT NULL,
+  `ma_lich_su` int NOT NULL AUTO_INCREMENT,
+  `ma_nhan_khau` int DEFAULT NULL,
+  `thoi_gian` datetime(6) DEFAULT NULL,
+  PRIMARY KEY (`ma_lich_su`),
+  FOREIGN KEY (`ma_ho_khau`) REFERENCES `hokhau` (`ma_ho_khau`),
+  FOREIGN KEY (`ma_nhan_khau`) REFERENCES `nhankhau` (`ma_nhan_khau`)
 );
 
-CREATE TABLE nhankhau (
-    maNhanKhau INT AUTO_INCREMENT PRIMARY KEY,
-    hoTen VARCHAR(100) NOT NULL,
-    ngaySinh DATE,
-    gioiTinh boolean,
-    cmnd VARCHAR(25),
-    qhVoiChuHo VARCHAR(50),
-    trangThai VARCHAR(50),
-    maHoKhau INT,
-    FOREIGN KEY (maHoKhau) REFERENCES hokhau(maHoKhau)
+-- Table structure for table `taikhoan`
+DROP TABLE IF EXISTS `taikhoan`;
+CREATE TABLE `taikhoan` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `vai_tro` int NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `ho_ten` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE (`username`)
 );
 
-CREATE TABLE lichsuhokhau (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    loaiThayDoi INT,
-    thoiGian DATETIME,
-    maHoKhau INT,
-    maNhanKhau INT,
-    FOREIGN KEY (maHoKhau) REFERENCES hokhau(maHoKhau),
-    FOREIGN KEY (maNhanKhau) REFERENCES nhankhau(maNhanKhau)
+-- Table structure for table `nopphi`
+DROP TABLE IF EXISTS `nopphi`;
+CREATE TABLE `nopphi` (
+  `id_nguoi_thu` int DEFAULT NULL,
+  `idnop_tien` int NOT NULL AUTO_INCREMENT,
+  `ma_ho_khau` int DEFAULT NULL,
+  `ma_khoan_thu` int DEFAULT NULL,
+  `ngay_thu` date DEFAULT NULL,
+  `so_tien` float DEFAULT NULL,
+  `nguoi_nop` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`idnop_tien`),
+  FOREIGN KEY (`ma_ho_khau`) REFERENCES `hokhau` (`ma_ho_khau`),
+  FOREIGN KEY (`ma_khoan_thu`) REFERENCES `khoanthu` (`ma_khoan_thu`),
+  FOREIGN KEY (`id_nguoi_thu`) REFERENCES `taikhoan` (`id`)
 );
 
-CREATE TABLE tamtrutamvang (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    loai VARCHAR(50),
-    ngayBatDau DATE,
-    ngayKetThuc DATE,
-    lyDo VARCHAR(1000),
-    maNhanKhau INT,
-    FOREIGN KEY (maNhanKhau) REFERENCES nhankhau(maNhanKhau)
-);
-
-CREATE TABLE nopphi (
-    IDNopTien INT AUTO_INCREMENT PRIMARY KEY,
-    ngayThu DATE,
-    soTien FLOAT,
-    nguoiNop VARCHAR(100),
-    idNguoiThu INT,
-    maHoKhau INT NOT NULL,
-    idKhoanThuDotThu INT NOT NULL,
-    FOREIGN KEY (idNguoiThu) REFERENCES taikhoan(id),
-    FOREIGN KEY (maHoKhau) REFERENCES hokhau(maHoKhau),
-    FOREIGN KEY (idKhoanThuDotThu) REFERENCES khoanthu_has_dotthu(idKhoanThuDotThu)
+-- Table structure for table `tamtrutamvang`
+DROP TABLE IF EXISTS `tamtrutamvang`;
+CREATE TABLE `tamtrutamvang` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ma_nhan_khau` int NOT NULL,
+  `ngay_bat_dau` date DEFAULT NULL,
+  `ngay_ket_thuc` date DEFAULT NULL,
+  `loai` varchar(50) DEFAULT NULL,
+  `ly_do` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`ma_nhan_khau`) REFERENCES `nhankhau` (`ma_nhan_khau`)
 );
