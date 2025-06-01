@@ -57,6 +57,7 @@ const getGioiTinhLabel = (gioiTinh?: boolean): string => {
 };
 
 const QLNhanKhau: React.FC = () => {
+  const vaiTro = localStorage.getItem("vaiTro");
   const [data, setData] = useState<NhanKhau[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -389,13 +390,19 @@ const QLNhanKhau: React.FC = () => {
               </button>
             </div>
 
-            <button 
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
-              onClick={handleAddNewClick}
-            >
-              <FaPlus />
-              <span>Thêm nhân khẩu</span>
-            </button>
+            <button
+  className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
+    vaiTro === "3"
+      ? "bg-green-400 text-gray-200 cursor-not-allowed"
+      : "bg-green-600 text-white hover:bg-green-700"
+  }`}
+  onClick={handleAddNewClick}
+  disabled={vaiTro === "3"}
+>
+  <FaPlus />
+  <span>Thêm nhân khẩu</span>
+</button>
+
           </div>
 
           {/* Table */}
@@ -504,24 +511,36 @@ const QLNhanKhau: React.FC = () => {
                         <td className="px-4 py-3 text-sm text-gray-900">{row.maHoKhau || '-'}</td>
                       </>
                     )}
-                    <td className="px-4 py-3">
-                      <div className="flex space-x-2">
-                        <button 
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                          onClick={() => handleEditClick(row)}
-                          title={editRowId === row.maNhanKhau ? "Lưu" : "Chỉnh sửa"}
-                        >
-                          {editRowId === row.maNhanKhau ? <FaSave /> : <FaPen />}
-                        </button>
-                        <button 
-                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
-                          onClick={() => handleDeleteClick(row.maNhanKhau!)}
-                          title="Xóa"
-                        >
-                          <FaTrashAlt />
-                        </button>
-                      </div>
-                    </td>
+                <td className="px-4 py-3">
+  <div className="flex space-x-2">
+    <button
+      className={`p-2 rounded transition-colors ${
+        vaiTro === "3"
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-blue-600 hover:bg-blue-50"
+      }`}
+      onClick={() => handleEditClick(row)}
+      title={editRowId === row.maNhanKhau ? "Lưu" : "Chỉnh sửa"}
+      disabled={vaiTro === "3"}
+    >
+      {editRowId === row.maNhanKhau ? <FaSave /> : <FaPen />}
+    </button>
+
+    <button
+      className={`p-2 rounded transition-colors ${
+        vaiTro === "3"
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-red-600 hover:bg-red-50"
+      }`}
+      onClick={() => handleDeleteClick(row.maNhanKhau!)}
+      title="Xóa"
+      disabled={vaiTro === "3"}
+    >
+      <FaTrashAlt />
+    </button>
+  </div>
+</td>
+
                   </tr>
                 ))}
 
