@@ -32,6 +32,7 @@ CREATE TABLE TaiKhoan (
     SoDienThoai VARCHAR(15),
     VaiTro INT,
     MaNhanKhau VARCHAR(20),
+    TrangThai BOOLEAN,
     FOREIGN KEY (MaNhanKhau) REFERENCES NhanKhau(ID)
 );
 

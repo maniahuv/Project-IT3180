@@ -21,8 +21,8 @@ public class QuanLiTaiKhoanController {
 			System.out.printf("%s - ", x);
 		}
 		System.out.println("CREATE");
-		if (TaiKhoanService.taoTaiKhoanMoi(new TaiKhoan(TaiKhoanDao.instance.generateID(), newTr.get(4), newTr.get(2),
-				newTr.get(1), newTr.get(3), VaiTro.TO_TRUONG, newTr.get(6), true))) {
+		if (TaiKhoanService.taoTaiKhoanMoi(new TaiKhoan(TaiKhoanDao.instance.generateID(), newTr.get(1), newTr.get(2),
+				newTr.get(3), newTr.get(4), VaiTro.TO_TRUONG, newTr.get(6), true))) {
 			System.out.println("Tao tai khoan thanh cong");
 		} else {
 			System.out.println("Tao tai khoan that bai");
@@ -36,8 +36,8 @@ public class QuanLiTaiKhoanController {
 			System.out.printf("%s - ", x);
 		}
 		System.out.println("SAVE");
-		if (TaiKhoanService.capNhatThongTin(new TaiKhoan(newTr.get(0), newTr.get(4), "111111", newTr.get(1),
-				newTr.get(3), VaiTro.TO_TRUONG, newTr.get(6), true))) {
+		if (TaiKhoanService.capNhatThongTin(new TaiKhoan(newTr.get(0), newTr.get(1), "111111", newTr.get(3),
+				newTr.get(4), VaiTro.TO_TRUONG, newTr.get(6), true))) {
 			System.out.println("Luu tai khoan thanh cong");
 		} else {
 			System.out.println("Luu tai khoan that bai");

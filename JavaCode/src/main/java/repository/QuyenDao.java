@@ -5,9 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import database.JDBCUtil;
 import model.Quyen;
 import utils.DataAccessObject;
+import utils.JDBCUtil;
 
 public class QuyenDao extends DataAccessObject<Quyen> {
 

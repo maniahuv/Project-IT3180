@@ -296,9 +296,7 @@
         btnEdit.innerHTML = '<i class="fa fa-pen"></i>';
 
         cells[1].textContent = email;
-        // Nếu mật khẩu trống thì giữ nguyên dấu sao cũ, nếu có thì hiển thị dấu sao (hoặc có thể thông báo)
-        cells[2].textContent = password ? '*********' : cells[2].textContent;
-
+        cells[2].textContent = password;
         cells[3].textContent = username;
         cells[4].textContent = phone;
         cells[5].textContent = role;
@@ -307,6 +305,8 @@
 		// Luu tai khoan backend
 		postAction('/save-tai-khoan',
 		  		Array.from(cells).slice(0, -1).map(cell => cell.textContent.trim()));
+		// Nếu mật khẩu trống thì giữ nguyên dấu sao cũ, nếu có thì hiển thị dấu sao (hoặc có thể thông báo)
+		cells[2].textContent = password ? '*********' : cells[2].textContent;
       }
     });
 
@@ -375,7 +375,7 @@
 
         // Cập nhật dòng mới thành dạng text
         newTr.cells[1].textContent = email;
-        newTr.cells[2].textContent = '*********'; // Không hiển thị mật khẩu thật
+        newTr.cells[2].textContent = password;
         newTr.cells[3].textContent = username;
         newTr.cells[4].textContent = phone;
         newTr.cells[5].textContent = role;
@@ -390,6 +390,7 @@
 		// Tao tai khoan backend
 		postAction('/tao-tai-khoan',
 					Array.from(newTr.cells).slice(0, -1).map(cell => cell.textContent.trim()));
+		newTr.cells[2].textContent = '*********'; // Không hiển thị mật khẩu thật
       });
 
       newTr.querySelector('.btn.cancel').addEventListener('click', () => {

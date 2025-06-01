@@ -1,5 +1,9 @@
 package service;
 
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,6 +14,7 @@ import model.TaiKhoan;
 import model.TaiKhoan.VaiTro;
 import repository.NhanKhauDao;
 import repository.TaiKhoanDao;
+import utils.TaiKhoanDetails;
 import utils.Validator;
 
 @Service
@@ -20,13 +25,17 @@ public class TaiKhoanService implements UserDetailsService {
 		System.out.println("Authorizing user");
 		if ("admin@example.com".equals(email)) {
 			System.out.println("Returning admin user");
-			return User.withUsername("admin@example.com").password("{noop}password").roles("ADMIN").build();
+			return User.withUsername("admin@example.com").password("{noop}password").roles("TO_TRUONG").build();
 		}
 		TaiKhoan taiKhoan = timTaiKhoan(email);
 		if (taiKhoan != null) {
-			return User.withUsername(taiKhoan.getEmail()).password(taiKhoan.getMatKhau())
-					.roles(VaiTro.toString(taiKhoan.getVaiTro()).isEmpty() ? "USER" : "ADMIN").build();
+			System.out.println("Tai khoan found");
+			List<GrantedAuthority> authorities = List
+					.of(new SimpleGrantedAuthority(VaiTro.toString(taiKhoan.getVaiTro())));
+			return new TaiKhoanDetails(taiKhoan.getMaTaiKhoan(), taiKhoan.getEmail(),
+					String.format("{noop}%s", taiKhoan.getMatKhau()), authorities);
 		}
+		System.out.println("Tai khoan not found");
 		throw new UsernameNotFoundException("Khong tim dc tai khoan");
 	}
 
@@ -43,10 +52,31 @@ public class TaiKhoanService implements UserDetailsService {
 	}
 
 	public static boolean kiemTraThongTin(TaiKhoan t) {
-		return Validator.validEmail(t.getEmail()) && Validator.validLength(t.getMatKhau(), 100, false)
-				&& Validator.validLength(t.getTenNguoiDung(), 100, true)
-				&& Validator.validLength(t.getSoDienThoai(), 15, true) && VaiTro.toString(t.getVaiTro()).length() > 0
-				&& NhanKhauDao.instance.selectByID(t.getMaNhanKhau()) != null;
+		if (!Validator.validEmail(t.getEmail())) {
+			System.out.println("Email ko hop le");
+			return false;
+		}
+		if (!Validator.validLength(t.getMatKhau(), 100, false)) {
+			System.out.println("Mat khau ko hop le");
+			return false;
+		}
+		if (!Validator.validLength(t.getTenNguoiDung(), 100, true)) {
+			System.out.println("Ten nguoi dung ko hop le");
+			return false;
+		}
+		if (!Validator.validLength(t.getSoDienThoai(), 15, true)) {
+			System.out.println("So dien thoai ko hop le");
+			return false;
+		}
+		if (VaiTro.toString(t.getVaiTro()).length() <= 0) {
+			System.out.println("Vai tro ko hop le");
+			return false;
+		}
+		if (NhanKhauDao.instance.selectByID(t.getMaNhanKhau()) == null) {
+			System.out.println("Ma nhan khau ko ton tai");
+			return false;
+		}
+		return true;
 	}
 
 	public static boolean xoaTaiKhoan(String userId) {

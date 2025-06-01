@@ -5,9 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import database.JDBCUtil;
 import model.LoaiKhoanThu;
 import utils.DataAccessObject;
+import utils.JDBCUtil;
 
 public class LoaiKhoanThuDao extends DataAccessObject<LoaiKhoanThu> {
 
