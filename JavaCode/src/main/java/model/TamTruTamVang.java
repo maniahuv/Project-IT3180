@@ -33,7 +33,6 @@ public class TamTruTamVang {
     @JsonProperty("maNhanKhau")
     private Integer maNhanKhauTransient;
 
-    // ✅ Một và chỉ một @PostLoad để xử lý field transient
     @PostLoad
     private void populateTransientFields() {
         this.maNhanKhauTransient = (nhanKhau != null) ? nhanKhau.getMaNhanKhau() : null;

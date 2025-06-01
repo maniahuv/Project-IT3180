@@ -52,7 +52,7 @@ public class NopPhi {
     @JsonProperty("idNguoiThu")
     private Integer idNguoiThuTransient;
 
-    // ✅ Chỉ một phương thức @PostLoad, gộp cả 3 trường hợp
+  
     @PostLoad
     private void populateTransientFields() {
         this.maHoKhauTransient = (hoKhau != null) ? hoKhau.getMaHoKhau() : null;
