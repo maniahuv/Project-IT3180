@@ -1,284 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import {
-  FaPlus,
-  FaSearch,
-  FaPen,
-  FaTrashAlt,
-  FaSave,
-  FaTimes
-} from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 import MainLayout from '../../Layout/MainLayout';
-import { 
-  LichSuHoKhau, 
-  fetchAllLichSuHoKhau, 
-  createLichSuHoKhau, 
-  updateLichSuHoKhau, 
-  deleteLichSuHoKhau 
-} from '../../api/LichSuHoKhauApi';
-import { HoKhau, fetchAllHoKhau } from '../../api/HoKhauApi';
-import { NhanKhau, fetchAllNhanKhau } from '../../api/NhanKhauApi';
+import { LichSuHoKhau, fetchAllLichSuHoKhau } from '../../api/LichSuHoKhauApi';
 
-// Interface for form data
-interface EditFormData {
-  loaiThayDoi: number;
-  thoiGian: string;
-  maHoKhau: number;
-  maNhanKhau?: number;
-}
+// Loại thay đổi mapping
+const loaiThayDoiOptions = [
+  { value: 1, label: 'Tạo mới nhân khẩu' },
+  { value: 2, label: 'Chuyển nhân khẩu' },
+  { value: 3, label: 'Xóa khỏi hộ khẩu' },
+];
 
-// Utility functions
-const formatDateISO = (dateStr: string): string => {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  const parts = dateStr.split('/');
-  if (parts.length === 3) {
-    const [dd, mm, yyyy] = parts;
-    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-  }
-  return '';
-};
-
-const formatDateDisplay = (dateStr?: string): string => {
-  if (!dateStr) return '-';
-  const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    const [yyyy, mm, dd] = parts;
-    return `${dd}/${mm}/${yyyy}`;
-  }
-  return dateStr;
+const getLoaiThayDoiLabel = (loaiThayDoi: number): string => {
+  const option = loaiThayDoiOptions.find(opt => opt.value === loaiThayDoi);
+  return option ? option.label : 'Không xác định';
 };
 
 const QLLichSuHoKhau: React.FC = () => {
-  const vaiTro = localStorage.getItem("vaiTro");
   const [data, setData] = useState<LichSuHoKhau[]>([]);
   const [filteredData, setFilteredData] = useState<LichSuHoKhau[]>([]);
-  const [hoKhauData, setHoKhauData] = useState<HoKhau[]>([]);
-  const [nhanKhauData, setNhanKhauData] = useState<NhanKhau[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [editFormData, setEditFormData] = useState<EditFormData>({
-    loaiThayDoi: 1,
-    thoiGian: '',
-    maHoKhau: 0,
-    maNhanKhau: undefined
-  });
-  const [addingNew, setAddingNew] = useState<boolean>(false);
-  const [newRowData, setNewRowData] = useState<EditFormData>({
-    loaiThayDoi: 1,
-    thoiGian: '',
-    maHoKhau: 0,
-    maNhanKhau: undefined
-  });
   const [searchCriteria, setSearchCriteria] = useState<string>('0');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
+  // Fetch data from API
   useEffect(() => {
     loadLichSuHoKhau();
   }, []);
 
+  // Update filteredData when data changes
   useEffect(() => {
     setFilteredData(data);
+    setCurrentPage(1); // Reset to first page when data changes
   }, [data]);
-  
 
   const loadLichSuHoKhau = async () => {
     try {
       setLoading(true);
       const response = await fetchAllLichSuHoKhau();
-      let fetchedData: LichSuHoKhau[] = response.data;
-      console.log('Response data:', fetchedData);
-      
-      if (typeof response.data === 'string') {
-        try {
-          fetchedData = JSON.parse(response.data);
-        } catch (parseError) {
-          // console.error('Error parsing response data:', parseError);
-          // setError('Dữ liệu trả về từ API không thể phân tích.');
-          setData([]);
-          setFilteredData([]);
-          setLoading(false);
-          return;
-        }
-      }
-
-      if (Array.isArray(fetchedData)) {
-        setData(fetchedData);
-        setFilteredData(fetchedData);
-        console.log('Fetched lich su ho khau data:', fetchedData);
-        setError('');
-      } else {
-        console.error('Response data is not an array:', fetchedData);
-        setData([]);
-        setFilteredData([]);
-        setError('Dữ liệu trả về từ API không đúng định dạng.');
-      }
-
-      const hoKhauResponse = await fetchAllHoKhau();
-      console.log();
-      
-      let hoKhauArray: HoKhau[] = [];
-      if (typeof hoKhauResponse.data === 'string') {
-        hoKhauArray = JSON.parse(hoKhauResponse.data);
-      } else if (Array.isArray(hoKhauResponse.data)) {
-        hoKhauArray = hoKhauResponse.data;
-      }
-      setHoKhauData(hoKhauArray);
-
-      const nhanKhauResponse = await fetchAllNhanKhau();
-      let nhanKhauArray: NhanKhau[] = [];
-      if (typeof nhanKhauResponse.data === 'string') {
-        nhanKhauArray = JSON.parse(nhanKhauResponse.data);
-      } else if (Array.isArray(nhanKhauResponse.data)) {
-        nhanKhauArray = nhanKhauResponse.data;
-      }
-      setNhanKhauData(nhanKhauArray);
+      console.log('LichSuHoKhau data loaded:', response.data);
+      setData(response.data);
+      setFilteredData(response.data);
+      setError('');
     } catch (err: any) {
-      // console.error('Error loading lich su ho khau:', err);
-      // setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
-      // setData([]);
-      // setFilteredData([]);
+      setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
+      console.error('Error loading lich su ho khau:', err);
+      setData([]);
+      setFilteredData([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const getTenHoKhau = (maHoKhau?: number): string => {
-    if (!maHoKhau) return '-';
-    const hoKhau = hoKhauData.find(hk => hk.maHoKhau === maHoKhau);
-    return hoKhau ? `${hoKhau.maHoKhau} - ${hoKhau.soNha}` : `${maHoKhau}`;
-  };
-
-  const getTenNhanKhau = (maNhanKhau?: number): string => {
-    if (!maNhanKhau) return '-';
-    const nhanKhau = nhanKhauData.find(nk => nk.maNhanKhau === maNhanKhau);
-    return nhanKhau ? `${nhanKhau.maNhanKhau} - ${nhanKhau.hoTen}` : `${maNhanKhau}`;
-  };
-
-  const handleEditClick = async (row: LichSuHoKhau): Promise<void> => {
-    if (editRowId === row.id) {
-      try {
-        const updateData: LichSuHoKhau = {
-          id: row.id,
-          loaiThayDoi: editFormData.loaiThayDoi,
-          thoiGian: formatDateISO(editFormData.thoiGian),
-          hoKhau: { maHoKhau: editFormData.maHoKhau },
-          nhanKhau: editFormData.maNhanKhau ? { maNhanKhau: editFormData.maNhanKhau } : undefined
-        };
-        await updateLichSuHoKhau(row.id!, updateData);
-        await loadLichSuHoKhau();
-        setEditRowId(null);
-        setEditFormData({
-          loaiThayDoi: 1,
-          thoiGian: '',
-          maHoKhau: 0,
-          maNhanKhau: undefined
-        });
-      } catch (err: any) {
-        alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
-        console.error('Error updating lich su ho khau:', err);
-      }
-    } else {
-      setEditRowId(row.id!);
-      setEditFormData({
-        loaiThayDoi: row.loaiThayDoi,
-        thoiGian: formatDateDisplay(row.thoiGian),
-        maHoKhau: row.hoKhau.maHoKhau,
-        maNhanKhau: row.nhanKhau?.maNhanKhau
-      });
-    }
-  };
-
-  const handleDeleteClick = async (id: number): Promise<void> => {
-    if (window.confirm('Bạn có chắc muốn xóa lịch sử này?')) {
-      try {
-        await deleteLichSuHoKhau(id);
-        await loadLichSuHoKhau();
-        if (editRowId === id) {
-          setEditRowId(null);
-          setEditFormData({
-            loaiThayDoi: 1,
-            thoiGian: '',
-            maHoKhau: 0,
-            maNhanKhau: undefined
-          });
-        }
-      } catch (err: any) {
-        alert('Có lỗi xảy ra khi xóa: ' + (err.response?.data?.message || err.message));
-        console.error('Error deleting lich su ho khau:', err);
-      }
-    }
-  };
-
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
-    const { name, value } = e.target;
-    setEditFormData(prev => ({ 
-      ...prev, 
-      [name]: name === 'loaiThayDoi' || name === 'maHoKhau' || name === 'maNhanKhau' ? Number(value) : value 
-    }));
-  };
-
-  const handleAddNewClick = (): void => {
-    setAddingNew(true);
-    setNewRowData({
-      loaiThayDoi: 1,
-      thoiGian: '',
-      maHoKhau: 0,
-      maNhanKhau: undefined
-    });
-  };
-
-  const handleNewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
-    const { name, value } = e.target;
-    setNewRowData(prev => ({ 
-      ...prev, 
-      [name]: name === 'loaiThayDoi' || name === 'maHoKhau' || name === 'maNhanKhau' ? Number(value) : value 
-    }));
-  };
-
-  const handleSaveNewRow = async (): Promise<void> => {
-    if (!newRowData.thoiGian.trim()) {
-      alert('Vui lòng nhập thời gian.');
-      return;
-    }
-    if (!newRowData.maHoKhau) {
-      alert('Vui lòng chọn mã hộ khẩu.');
-      return;
-    }
-
-    try {
-      const newLichSu: LichSuHoKhau = {
-        loaiThayDoi: newRowData.loaiThayDoi,
-        thoiGian: formatDateISO(newRowData.thoiGian),
-        hoKhau: { maHoKhau: newRowData.maHoKhau },
-        nhanKhau: newRowData.maNhanKhau ? { maNhanKhau: newRowData.maNhanKhau } : undefined
-      };
-      await createLichSuHoKhau(newLichSu);
-      await loadLichSuHoKhau();
-      setAddingNew(false);
-      setNewRowData({
-        loaiThayDoi: 1,
-        thoiGian: '',
-        maHoKhau: 0,
-        maNhanKhau: undefined
-      });
-    } catch (err: any) {
-      alert('Có lỗi xảy ra khi tạo lịch sử: ' + (err.response?.data?.message || err.message));
-      console.error('Error creating lich su ho khau:', err);
-    }
-  };
-
-  const handleCancelNewRow = (): void => {
-    setAddingNew(false);
-    setNewRowData({
-      loaiThayDoi: 1,
-      thoiGian: '',
-      maHoKhau: 0,
-      maNhanKhau: undefined
-    });
-  };
-
+  // Handle search
   const handleSearch = (): void => {
     if (!searchKeyword.trim()) {
       setFilteredData(data);
@@ -288,37 +65,50 @@ const QLLichSuHoKhau: React.FC = () => {
     const crit = parseInt(searchCriteria, 10);
     const filtered = data.filter(item => {
       const fields = [
-        item.id?.toString() || '',
-        item.loaiThayDoi.toString(),
-        formatDateDisplay(item.thoiGian),
-        getTenHoKhau(item.hoKhau?.maHoKhau),
-        getTenNhanKhau(item.nhanKhau?.maNhanKhau)
+        item.maLichSu?.toString() || '',
+        item.maHoKhau?.toString() || '',
+        item.maNhanKhau?.toString() || '',
+        getLoaiThayDoiLabel(item.loaiThayDoi),
       ];
       return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
     });
 
     if (filtered.length > 0) {
       setFilteredData(filtered);
-      setHighlightedRowId(filtered[0].id!);
+      setCurrentPage(1);
+      setHighlightedRowId(filtered[0].maLichSu!);
       setTimeout(() => setHighlightedRowId(null), 3000);
-      document.getElementById(`row-${filtered[0].id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById(`row-${filtered[0].maLichSu}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
       setFilteredData([]);
-      alert('Không tìm thấy lịch sử phù hợp.');
+      alert('Không tìm thấy lịch sử hộ khẩu phù hợp.');
     }
   };
 
+  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     setSearchKeyword(value);
     if (!value.trim()) {
       setFilteredData(data);
+      setCurrentPage(1);
     }
   };
 
+  // Handle search on Enter key
   const handleSearchKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
       handleSearch();
+    }
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
     }
   };
 
@@ -369,10 +159,9 @@ const QLLichSuHoKhau: React.FC = () => {
                 onChange={e => setSearchCriteria(e.target.value)}
               >
                 <option value="0">Mã lịch sử</option>
-                <option value="1">Loại thay đổi</option>
-                <option value="2">Thời gian</option>
-                <option value="3">Hộ khẩu</option>
-                <option value="4">Nhân khẩu</option>
+                <option value="1">Mã hộ khẩu</option>
+                <option value="2">Mã nhân khẩu</option>
+                <option value="3">Loại thay đổi</option>
               </select>
               <input
                 type="text"
@@ -390,19 +179,6 @@ const QLLichSuHoKhau: React.FC = () => {
                 <span>Tìm kiếm</span>
               </button>
             </div>
-
-            <button
-              className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
-                vaiTro === "3"
-                  ? "bg-green-400 text-gray-200 cursor-not-allowed"
-                  : "bg-green-600 text-white hover:bg-green-700"
-              }`}
-              onClick={handleAddNewClick}
-              disabled={vaiTro === "3"}
-            >
-              <FaPlus />
-              <span>Thêm lịch sử</span>
-            </button>
           </div>
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -410,163 +186,35 @@ const QLLichSuHoKhau: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã lịch sử</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã hộ khẩu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã nhân khẩu</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Loại thay đổi</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Thời gian</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hộ khẩu</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Nhân khẩu</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredData.map(row => (
+                {paginatedData.map(row => (
                   <tr
-                    key={row.id}
-                    id={`row-${row.id}`}
-                    className={`hover:bg-gray-50 ${highlightedRowId === row.id ? 'bg-yellow-100' : ''}`}
+                    key={row.maLichSu}
+                    id={`row-${row.maLichSu}`}
+                    className={`hover:bg-gray-50 ${highlightedRowId === row.maLichSu ? 'bg-yellow-100' : ''}`}
                   >
-                    <td className="px-4 py-3 text-sm text-gray-900">{row.id}</td>
-                    {editRowId === row.id ? (
-                      <>
-                        <td className="px-4 py-3">
-                          <input 
-                            type="number" 
-                            name="loaiThayDoi" 
-                            value={editFormData.loaiThayDoi} 
-                            onChange={handleEditChange} 
-                            className="w-full px-2 py-1 border rounded" 
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input 
-                            type="text" 
-                            name="thoiGian" 
-                            value={editFormData.thoiGian} 
-                            onChange={handleEditChange} 
-                            placeholder="DD/MM/YYYY"
-                            className="w-full px-2 py-1 border rounded" 
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input 
-                            type="number" 
-                            name="maHoKhau" 
-                            value={editFormData.maHoKhau} 
-                            onChange={handleEditChange} 
-                            className="w-full px-2 py-1 border rounded" 
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input 
-                            type="number" 
-                            name="maNhanKhau" 
-                            value={editFormData.maNhanKhau || ''} 
-                            onChange={handleEditChange} 
-                            className="w-full px-2 py-1 border rounded" 
-                          />
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.loaiThayDoi}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.thoiGian)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{getTenHoKhau(row.hoKhau?.maHoKhau)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{getTenNhanKhau(row.nhanKhau?.maNhanKhau)}</td>
-                      </>
-                    )}
+                    <td className="px-4 py-3 text-sm text-gray-900">{row.maLichSu}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{row.maHoKhau}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{row.maNhanKhau || 'N/A'}</td>
                     <td className="px-4 py-3">
-                      <div className="flex space-x-2">
-                        <button
-                          className={`p-2 rounded transition-colors ${
-                            vaiTro === "3"
-                              ? "text-gray-400 cursor-not-allowed"
-                              : "text-blue-600 hover:bg-blue-50"
-                          }`}
-                          onClick={() => handleEditClick(row)}
-                          title={editRowId === row.id ? "Lưu" : "Chỉnh sửa"}
-                          disabled={vaiTro === "3"}
-                        >
-                          {editRowId === row.id ? <FaSave /> : <FaPen />}
-                        </button>
-                        <button
-                          className={`p-2 rounded transition-colors ${
-                            vaiTro === "3"
-                              ? "text-gray-400 cursor-not-allowed"
-                              : "text-red-600 hover:bg-red-50"
-                          }`}
-                          onClick={() => handleDeleteClick(row.id!)}
-                          title="Xóa"
-                          disabled={vaiTro === "3"}
-                        >
-                          <FaTrashAlt />
-                        </button>
-                      </div>
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        row.loaiThayDoi === 1 ? 'bg-green-100 text-green-800' : 
+                        row.loaiThayDoi === 2 ? 'bg-yellow-100 text-yellow-800' : 
+                        row.loaiThayDoi === 3 ? 'bg-red-100 text-red-800' : 
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {getLoaiThayDoiLabel(row.loaiThayDoi)}
+                      </span>
                     </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{new Date(row.thoiGian).toLocaleString('vi-VN')}</td>
                   </tr>
                 ))}
-
-                {addingNew && (
-                  <tr className="bg-blue-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">-</td>
-                    <td className="px-4 py-3">
-                      <input 
-                        type="number" 
-                        name="loaiThayDoi" 
-                        placeholder="Loại thay đổi" 
-                        value={newRowData.loaiThayDoi} 
-                        onChange={handleNewChange} 
-                        className="w-full px-2 py-1 border rounded" 
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <input 
-                        type="text" 
-                        name="thoiGian" 
-                        placeholder="DD/MM/YYYY" 
-                        value={newRowData.thoiGian} 
-                        onChange={handleNewChange} 
-                        className="w-full px-2 py-1 border rounded" 
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <input 
-                        type="number" 
-                        name="maHoKhau" 
-                        placeholder="Mã hộ khẩu" 
-                        value={newRowData.maHoKhau} 
-                        onChange={handleNewChange} 
-                        className="w-full px-2 py-1 border rounded" 
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <input 
-                        type="number" 
-                        name="maNhanKhau" 
-                        placeholder="Mã nhân khẩu" 
-                        value={newRowData.maNhanKhau || ''} 
-                        onChange={handleNewChange} 
-                        className="w-full px-2 py-1 border rounded" 
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex space-x-2">
-                        <button 
-                          className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
-                          onClick={handleSaveNewRow}
-                          title="Lưu"
-                        >
-                          <FaSave />
-                        </button>
-                        <button 
-                          className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-                          onClick={handleCancelNewRow}
-                          title="Hủy"
-                        >
-                          <FaTimes />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
@@ -577,13 +225,35 @@ const QLLichSuHoKhau: React.FC = () => {
               <select
                 className="border border-gray-300 rounded px-2 py-1 text-sm"
                 value={itemsPerPage}
-                onChange={e => setItemsPerPage(Number(e.target.value))}
+                onChange={e => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
               >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
               </select>
               <span className="text-sm text-gray-700">mục</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Trước
+              </button>
+              <span className="text-sm text-gray-700">
+                Trang {currentPage} / {totalPages}
+              </span>
+              <button
+                className={`px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+              </button>
             </div>
             <div className="text-sm text-gray-700">
               Tổng cộng: {filteredData.length} lịch sử

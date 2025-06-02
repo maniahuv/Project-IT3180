@@ -33,7 +33,7 @@ public class NhanKhau {
     @Column(name = "maHoKhau", insertable = false, updatable = false)
     private Integer maHoKhau; // Direct reference to the foreign key
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "maHoKhau")
     @JsonBackReference(value = "hokhau-nhankhau")
     private HoKhau hoKhau;

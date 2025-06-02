@@ -26,11 +26,11 @@ public class HoKhau {
     @Column(nullable = false)
     private Float dienTich;
 
-    @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference(value = "hokhau-nhankhau")
     private List<NhanKhau> danhSachNhanKhau;
 
-    @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference(value = "hokhau-lichsu")
     private List<LichSuHoKhau> lichSuHoKhau;
 

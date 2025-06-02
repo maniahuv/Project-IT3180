@@ -21,15 +21,15 @@ public class LichSuHoKhauController {
     }
 
     // Lấy toàn bộ lịch sử hộ khẩu
-    // @GetMapping
-    // public ResponseEntity<List<LichSuHoKhau>> getAll() {
-    //     return ResponseEntity.ok(lichSuHoKhauService.getAll());
-    // }
-
-  @GetMapping
-    public List<LichSuHoKhau> getAll() {
-        return lichSuHoKhauService.findAll();
+    @GetMapping
+    public ResponseEntity<List<LichSuHoKhau>> getAll() {
+        return ResponseEntity.ok(lichSuHoKhauService.findAll());
     }
+
+//   @GetMapping
+//     public List<LichSuHoKhau> getAll() {
+//         return lichSuHoKhauService.findAll();
+//     }
 
     @GetMapping("/{id}")
     public ResponseEntity<LichSuHoKhau> getById(@PathVariable Integer id) {

@@ -24,7 +24,7 @@ public class DotThu {
     @Column(length = 50)
     private TrangThai trangThai;
 
-    @OneToMany(mappedBy = "dotThu", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "dotThu", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<KhoanThu> khoanThus;
 

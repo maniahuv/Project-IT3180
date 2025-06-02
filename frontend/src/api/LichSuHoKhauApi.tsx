@@ -14,9 +14,11 @@ axios.interceptors.request.use(
   );
 
 export interface LichSuHoKhau {
-  id?: number;
+  maLichSu?: number;
   loaiThayDoi: number; // 1 = add to household, 2 = remove from household
   thoiGian: string; // LocalDateTime serialized as string (e.g., "YYYY-MM-DDTHH:mm:ss")
+  maHoKhau?: number; // Reference to HoKhau entity
+  maNhanKhau?: number; // Optional, as it may be null
   hoKhau: { maHoKhau: number }; // Simplified reference to HoKhau entity
   nhanKhau?: { maNhanKhau: number }; // Optional, as it may be null
 }
