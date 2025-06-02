@@ -8,12 +8,23 @@ axios.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    config.headers['Content-Type'] = 'application/json';
-    config.headers['Accept'] = 'application/json';
     return config;
   },
   (error) => Promise.reject(error)
 );
+
+// axios.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem('token');
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//     }
+//     config.headers['Content-Type'] = 'application/json';
+//     config.headers['Accept'] = 'application/json';
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
 
 export interface HoKhau {
   maHoKhau?: number;

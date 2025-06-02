@@ -36,7 +36,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const vaiTro = localStorage.getItem("vaiTro");
   const hoTen = localStorage.getItem("hoTen");
   const vaiTroLabel = vaiTro ? getVaiTroLabel(parseInt(vaiTro)) : "Người dùng";
-  console.log(localStorage);
+  // console.log(localStorage.getItem("token"));
   if (!localStorage.getItem("token")) {
     // Nếu không có token, chuyển hướng về trang đăng nhập
     navigate("/login");
@@ -109,6 +109,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
                       className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
                     >
                       Quản lí hộ khẩu
+                    </Link>
+                  </li>
+
+                  <li>
+                    <Link
+                      to="/management/qllichsuhokhau"
+                      className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                    >
+                      Quản lí lịch sử hộ khẩu
                     </Link>
                   </li>
                   {vaiTro === "3" && ( 

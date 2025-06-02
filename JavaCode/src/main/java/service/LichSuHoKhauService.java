@@ -16,7 +16,7 @@ public class LichSuHoKhauService {
         this.lichSuHoKhauRepository = lichSuHoKhauRepository;
     }
 
-    public List<LichSuHoKhau> getAll() {
+    public List<LichSuHoKhau> findAll() {
         return lichSuHoKhauRepository.findAll();
     }
 

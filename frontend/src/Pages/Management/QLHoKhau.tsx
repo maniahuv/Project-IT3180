@@ -11,7 +11,7 @@ import MainLayout from '../../Layout/MainLayout';
 import { 
   HoKhau, 
   fetchAllHoKhau, 
-  fetchHoKhauById, 
+  // fetchHoKhauById, 
   createHoKhau, 
   updateHoKhau, 
   deleteHoKhau 

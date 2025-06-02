@@ -3,6 +3,10 @@ package controller;
 import model.TaiKhoan;
 import service.TaiKhoanService;
 import config.JwtTokenProvider;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,8 +14,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.crypto.SecretKey;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,10 +29,27 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
+      private final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(
+        "MyVerySecureAndLongSecretKeyThatIsAtLeast64CharactersLongForHS512Algorithm2024".getBytes(StandardCharsets.UTF_8)
+    );
+
     public AuthController(TaiKhoanService taiKhoanService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.taiKhoanService = taiKhoanService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
+    }
+    
+    public String generateToken(UserDetails userDetails, Integer vaiTro, String hoTen) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("vaiTro", vaiTro);
+        claims.put("hoTen", hoTen);
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
+                .compact();
     }
 
     @PostMapping("/signup")

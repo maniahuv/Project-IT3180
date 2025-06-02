@@ -14,7 +14,6 @@ import java.util.Map;
 @Component
 public class JwtTokenProvider {
     
-    // Key cố định trong code - phải có ít nhất 64 ký tự cho HS512
     private final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(
         "MyVerySecureAndLongSecretKeyThatIsAtLeast64CharactersLongForHS512Algorithm2024".getBytes(StandardCharsets.UTF_8)
     );

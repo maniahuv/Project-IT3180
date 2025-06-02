@@ -23,9 +23,9 @@ public class KhoanThuController {
 
     @GetMapping
     public ResponseEntity<List<KhoanThu>> getAll() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("GET /api/khoanthu - User: " + auth.getName() +
-                ", Roles: " + auth.getAuthorities());
+        // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // System.out.println("GET /api/khoanthu - User: " + auth.getName() +
+        //         ", Roles: " + auth.getAuthorities());
         return ResponseEntity.ok(service.getAll());
     }
 

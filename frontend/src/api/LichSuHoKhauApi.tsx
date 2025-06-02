@@ -29,14 +29,14 @@ export function fetchLichSuHoKhauById(id: number) {
   return axios.get<LichSuHoKhau>(`${API_BASE_URL}/${id}`);
 }
 
-export function createLichSuHoKhau(data: LichSuHoKhau) {
-  return axios.post<LichSuHoKhau>(API_BASE_URL, data);
-}
+// export function createLichSuHoKhau(data: LichSuHoKhau) {
+//   return axios.post<LichSuHoKhau>(API_BASE_URL, data);
+// }
 
-export function updateLichSuHoKhau(id: number, data: LichSuHoKhau) {
-  return axios.put<LichSuHoKhau>(`${API_BASE_URL}/${id}`, data);
-}
+// export function updateLichSuHoKhau(id: number, data: LichSuHoKhau) {
+//   return axios.put<LichSuHoKhau>(`${API_BASE_URL}/${id}`, data);
+// }
 
-export function deleteLichSuHoKhau(id: number) {
-  return axios.delete(`${API_BASE_URL}/${id}`);
-}
+// export function deleteLichSuHoKhau(id: number) {
+//   return axios.delete(`${API_BASE_URL}/${id}`);
+// }

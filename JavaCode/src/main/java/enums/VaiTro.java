@@ -1,4 +1,4 @@
-package model;
+package enums;
 
 public enum VaiTro {
     TO_TRUONG(1, "TO_TRUONG"),

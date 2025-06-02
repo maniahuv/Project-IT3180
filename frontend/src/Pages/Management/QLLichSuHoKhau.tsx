@@ -14,7 +14,7 @@ import {
   createLichSuHoKhau, 
   updateLichSuHoKhau, 
   deleteLichSuHoKhau 
-} from '../../api/LichSuHoKhai';
+} from '../../api/LichSuHoKhauApi';
 import { HoKhau, fetchAllHoKhau } from '../../api/HoKhauApi';
 import { NhanKhau, fetchAllNhanKhau } from '../../api/NhanKhauApi';
 
@@ -81,18 +81,21 @@ const QLLichSuHoKhau: React.FC = () => {
   useEffect(() => {
     setFilteredData(data);
   }, [data]);
+  
 
   const loadLichSuHoKhau = async () => {
     try {
       setLoading(true);
       const response = await fetchAllLichSuHoKhau();
       let fetchedData: LichSuHoKhau[] = response.data;
+      console.log('Response data:', fetchedData);
+      
       if (typeof response.data === 'string') {
         try {
           fetchedData = JSON.parse(response.data);
         } catch (parseError) {
-          console.error('Error parsing response data:', parseError);
-          setError('Dữ liệu trả về từ API không thể phân tích.');
+          // console.error('Error parsing response data:', parseError);
+          // setError('Dữ liệu trả về từ API không thể phân tích.');
           setData([]);
           setFilteredData([]);
           setLoading(false);
@@ -113,6 +116,8 @@ const QLLichSuHoKhau: React.FC = () => {
       }
 
       const hoKhauResponse = await fetchAllHoKhau();
+      console.log();
+      
       let hoKhauArray: HoKhau[] = [];
       if (typeof hoKhauResponse.data === 'string') {
         hoKhauArray = JSON.parse(hoKhauResponse.data);
@@ -130,10 +135,10 @@ const QLLichSuHoKhau: React.FC = () => {
       }
       setNhanKhauData(nhanKhauArray);
     } catch (err: any) {
-      console.error('Error loading lich su ho khau:', err);
-      setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
-      setData([]);
-      setFilteredData([]);
+      // console.error('Error loading lich su ho khau:', err);
+      // setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
+      // setData([]);
+      // setFilteredData([]);
     } finally {
       setLoading(false);
     }
