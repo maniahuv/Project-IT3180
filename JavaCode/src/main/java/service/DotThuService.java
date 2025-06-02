@@ -1,68 +1,77 @@
 package service;
 
-import java.sql.Date;
-import java.util.List;
-
 import model.DotThu;
-import model.ThongKeDotThu;
-import repository.DotThuDao;
+import repository.DotThuRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+@Service
 public class DotThuService {
+    private final DotThuRepository repository;
 
-	public static boolean themMoi(String taiKhoan, DotThu duLieu) {
-		if (duLieu == null || duLieu.getMaDotThu() == null || duLieu.getTenDotThu() == null || duLieu.getMoTa() == null
-				|| duLieu.getThoiGianBatDau() == null || duLieu.getThoiGianKetThuc() == null) {
-			return false;
-		}
-		if (DotThuDao.instance.insert(duLieu) > 0) {
-			LichSuService.ghiNhanLichSu(taiKhoan, "Them dot thu", "", "");
-			return true;
-		}
-		return false;
-	}
+    public DotThuService(DotThuRepository repository) {
+        this.repository = repository;
+    }
 
-	public static boolean xoa(String taiKhoan, String maDotThu) {
-		if (maDotThu == null)
-			return false;
-		if (DotThuDao.instance.delete(maDotThu) > 0) {
-			LichSuService.ghiNhanLichSu(taiKhoan, "Xoa dot thu", "", "");
-			return true;
-		}
-		return false;
-	}
+    @Transactional(readOnly = true)
+    public List<DotThu> findAll() {
+        List<DotThu> dotThus = repository.findAll();
+        System.out.println("Fetched DotThu count: " + dotThus.size());
+        return dotThus;
+    }
 
-	public static boolean capNhat(String taiKhoan, DotThu duLieu) {
-		if (duLieu == null || duLieu.getMaDotThu() == null) {
-			return false;
-		}
+    @Transactional(readOnly = true)
+    public Optional<DotThu> getById(Integer id) {
+        return repository.findById(id);
+    }
 
-		String[] fields = { "TenDotThu", "ThoiGianBatDau", "ThoiGianKetThuc", "MoTa", "TrangThai" };
-		Object[] values = { duLieu.getTenDotThu(), duLieu.getThoiGianBatDau(), duLieu.getThoiGianKetThuc(),
-				duLieu.getMoTa(), (Integer) duLieu.getTrangThai() };
+    @Transactional
+    public DotThu create(DotThu dt) {
+        validateDotThu(dt);
+        System.out.println("Creating DotThu: " + dt.getTenDotThu());
+        return repository.save(dt);
+    }
 
-		if (DotThuDao.instance.update(duLieu.getMaDotThu(), fields, values) > 0) {
-			LichSuService.ghiNhanLichSu(taiKhoan, "Cap nhat dot thu", "", "");
-			return true;
-		}
-		return false;
-	}
+    @Transactional
+    public DotThu update(Integer id, DotThu updated) {
+        return repository.findById(id).map(existing -> {
+            validateDotThu(updated);
+            existing.setTenDotThu(updated.getTenDotThu());
+            existing.setNgayBatDau(updated.getNgayBatDau());
+            existing.setNgayKetThuc(updated.getNgayKetThuc());
+            existing.setTrangThai(updated.getTrangThai());
+            System.out.println("Updating DotThu ID: " + id);
+            return repository.save(existing);
+        }).orElseThrow(() -> new RuntimeException("Không tìm thấy đợt thu với ID: " + id));
+    }
 
-	public static DotThu layThongTin(String maDotThu) {
-		return DotThuDao.instance.selectByID(maDotThu);
-	}
+    @Transactional
+    public void delete(Integer id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Không tìm thấy đợt thu với ID: " + id);
+        }
+        System.out.println("Deleting DotThu ID: " + id);
+        repository.deleteById(id);
+    }
 
-	// tim dot thu theo tieu chi
-	public static List<DotThu> timTheoTieuChi(String tenDotThu, String moTa, Date tuNgay, Date denNgay,
-			String trangThai, String orderBy, boolean asc, int limit, int offset) {
-		List<DotThu> result = DotThuDao.instance.timDotThuTheoTieuChi(tenDotThu, moTa, tuNgay, denNgay, trangThai,
-				orderBy, asc, limit, offset);
-		return result;
-
-	}
-
-	// Thong ke dot = tao bao cao
-	public static ThongKeDotThu thongKeDotThu() {
-		return DotThuDao.instance.thongKeDotThu();
-	}
-
+    private void validateDotThu(DotThu dt) {
+        if (dt.getTenDotThu() == null || dt.getTenDotThu().trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên đợt thu không được để trống");
+        }
+        if (dt.getNgayBatDau() != null && dt.getNgayKetThuc() != null &&
+                dt.getNgayBatDau().isAfter(dt.getNgayKetThuc())) {
+            throw new IllegalArgumentException("Ngày bắt đầu không được sau ngày kết thúc");
+        }
+        if (dt.getTrangThai() != null) {
+            try {
+                DotThu.TrangThai.valueOf(dt.getTrangThai().replace(" ", "_").toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Trạng thái không hợp lệ: " + dt.getTrangThai());
+            }
+        }
+    }
 }

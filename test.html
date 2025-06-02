@@ -1,0 +1,1058 @@
+{% extends "base.html" %}
+{% block title %}Trang chủ - BlueMoon Apartment{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/home.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f8f9fa;
+        color: #2d3436;
+        line-height: 1.6;
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 30px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        font-weight: 300;
+        color: #2d3436;
+        margin-bottom: 10px;
+    }
+
+    .user-role {
+        color: #636e72;
+        font-size: 1.1rem;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+        min-width: 1400px; /* Ensure enough width for 5 cards */
+        overflow-x: auto; /* Allow horizontal scrolling on small screens */
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border-left: 4px solid #74b9ff;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        min-width: 260px; /* Prevent cards from becoming too narrow */
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(45deg, #74b9ff20, transparent);
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+    }
+
+    .stat-card h3 {
+        font-size: 0.9rem;
+        color: #636e72;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2d3436;
+        margin-bottom: 10px;
+    }
+
+    .stat-change {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .stat-change.positive {
+        color: #00b894;
+    }
+
+    .stat-change.negative {
+        color: #e17055;
+    }
+
+    .stat-change.neutral {
+        color: #636e72;
+    }
+
+    /* Main Content Grid */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .chart-card, .activity-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .chart-card h3, .activity-card h3 {
+        font-size: 1.2rem;
+        color: #2d3436;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    /* Chart Container */
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 20px;
+    }
+
+    /* Activity List */
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f2f6;
+        transition: all 0.2s ease;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-item:hover {
+        background: #f8f9fa;
+        margin: 0 -15px;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-weight: 600;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .activity-icon.add { background: #00b894; }
+    .activity-icon.edit { background: #fdcb6e; }
+    .activity-icon.delete { background: #e17055; }
+    .activity-icon.view { background: #74b9ff; }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: #2d3436;
+        margin-bottom: 5px;
+    }
+
+    .activity-time {
+        font-size: 0.85rem;
+        color: #636e72;
+    }
+
+    /* Bottom Grid */
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .summary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .summary-card h3 {
+        font-size: 1.2rem;
+        color: #2d3436;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f2f6;
+    }
+
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-label {
+        color: #636e72;
+        font-size: 0.95rem;
+    }
+
+    .summary-value {
+        font-weight: 600;
+        color: #2d3436;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #f1f2f6;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #74b9ff, #0984e3);
+        transition: width 1s ease;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .content-grid,
+        .bottom-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 2rem;
+        }
+    }
+
+    /* Custom scrollbar for stats-grid */
+    .stats-grid::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .stats-grid::-webkit-scrollbar-track {
+        background: #f1f2f6;
+        border-radius: 3px;
+    }
+
+    .stats-grid::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 3px;
+    }
+
+    .stats-grid::-webkit-scrollbar-thumb:hover {
+        background: #bbb;
+    }
+
+    /* Custom scrollbar for activity-card */
+    .activity-card {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .activity-card::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .activity-card::-webkit-scrollbar-track {
+        background: #f1f2f6;
+        border-radius: 3px;
+    }
+
+    .activity-card::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 3px;
+    }
+
+    .activity-card::-webkit-scrollbar-thumb:hover {
+        background: #bbb;
+    }
+
+    /* Kế toán Dashboard Styles */
+    .ke-toan-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .ke-toan-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border-left: 4px solid #fdcb6e;
+        max-width: 350px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .ke-toan-card h3 {
+        font-size: 1.2rem;
+        color: #2d3436;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    .ke-toan-card ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .ke-toan-card li {
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f2f6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ke-toan-card li:last-child {
+        border-bottom: none;
+    }
+
+    .ke-toan-label {
+        color: #636e72;
+    }
+
+    .ke-toan-value {
+        font-weight: 600;
+        color: #2d3436;
+    }   
+    .ke-toan-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .ke-toan-list li {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .separator {
+        border-bottom: 2px dashed #ccc; /* Đường phân cách giữa các đợt thu */
+        margin: 10px 0;
+    }
+    h3 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+    p {
+        color: #777;
+        font-style: italic;
+        padding: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>Trang chủ</h1>
+        <div class="user-role">
+            Chào mừng, 
+            {% if current_user.vaiTro == 'admin' %}Tổ trưởng{% endif %}
+            {% if current_user.vaiTro == 'Tổ phó' %}Tổ phó{% endif %}
+            {% if current_user.vaiTro == 'Kế toán' %}Kế toán{% endif %}
+            - {{ current_user.hoTen }}
+        </div>
+    </div>
+
+    {% if current_user.vaiTro == 'admin' %}
+        <!-- Admin Dashboard -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Tổng tài khoản</h3>
+                <div class="stat-number">{{ stats.total_accounts }}</div>
+                <div class="stat-change positive">+{{ stats.new_accounts_this_month }} tháng này</div>
+                <div style="font-size: 0.8rem; color: #636e72; margin-top: 10px;">
+                    Tổ trưởng: {{ stats.totruong_count }}, Tổ phó: {{ stats.topho_count }}, Kế toán: {{ stats.ketoan_count }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Tổng hộ khẩu</h3>
+                <div class="stat-number">{{ stats.total_hokhau }}</div>
+                <div class="stat-change positive">+{{ stats.new_hokhau_this_month }} hộ mới</div>
+                <div style="font-size: 0.8rem; color: #636e72; margin-top: 10px;">
+                    Hoạt động: {{ stats.active_hokhau }}, Tạm ngưng: {{ stats.inactive_hokhau }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Tổng nhân khẩu</h3>
+                <div class="stat-number">{{ stats.total_nhankhau }}</div>
+                <div class="stat-change positive">+{{ stats.new_nhankhau_this_month }} người</div>
+                <div style="font-size: 0.8rem; color: #636e72; margin-top: 10px;">
+                    Nam: {{ stats.male_nhankhau }}, Nữ: {{ stats.female_nhankhau }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Tạm trú/vắng</h3>
+                <div class="stat-number">{{ stats.total_tamtrutamvang }}</div>
+                <div class="stat-change positive">+{{ stats.new_tamtrutamvang_this_month }} trường hợp</div>
+                <div style="font-size: 0.8rem; color: #636e72; margin-top: 10px;">
+                    Tạm trú: {{ stats.tamtru_count }}, Tạm vắng: {{ stats.tamvang_count }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Hoạt động hôm nay</h3>
+                <div class="stat-number">{{ stats.total_activities_today }}</div>
+                <div class="stat-change neutral">Bình thường</div>
+                <div style="font-size: 0.8rem; color: #636e72; margin-top: 10px;">
+                    Cập nhật: {{ stats.update_activities }}, Xem: {{ stats.view_activities }}
+                </div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="chart-card">
+                <h3>Thống kê hộ khẩu, nhân khẩu và tạm trú/vắng</h3>
+                <div class="chart-container">
+                    <canvas id="adminChart"></canvas>
+                </div>
+            </div>
+
+            <div class="activity-card">
+                <h3>Lịch sử hoạt động</h3>
+                <div id="adminActivityList">
+                    <div class="activity-item">
+                        <div class="activity-icon add">TH</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Thêm hộ khẩu mới</div>
+                            <div class="activity-time">2 phút trước</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon edit">CN</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Cập nhật thông tin nhân khẩu</div>
+                            <div class="activity-time">15 phút trước</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon view">XL</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Xem lịch sử hộ khẩu</div>
+                            <div class="activity-time">30 phút trước</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon add">TT</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Đăng ký tạm trú mới</div>
+                            <div class="activity-time">1 giờ trước</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon edit">TV</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Sửa thông tin tạm vắng</div>
+                            <div class="activity-time">2 giờ trước</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-grid">
+            <div class="summary-card">
+                <h3>Tóm tắt hệ thống</h3>
+                <div class="summary-item">
+                    <span class="summary-label">Tài khoản hoạt động</span>
+                    <span class="summary-value">10/10</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Hộ khẩu đã xác minh</span>
+                    <span class="summary-value">98%</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Dữ liệu cập nhật</span>
+                    <span class="summary-value">99.2%</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Hiệu suất hệ thống</span>
+                    <span class="summary-value">95%</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <h3>Thống kê nhanh</h3>
+                <div class="summary-item">
+                    <div>
+                        <div class="summary-label">Truy cập hôm nay</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <span class="summary-value">156</span>
+                </div>
+                <div class="summary-item">
+                    <div>
+                        <div class="summary-label">Lỗi hệ thống</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <span class="summary-value">0</span>
+                </div>
+                <div class="summary-item">
+                    <div>
+                        <div class="summary-label">Thời gian hoạt động</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 99%"></div>
+                        </div>
+                    </div>
+                    <span class="summary-value">99.9%</span>
+                </div>
+                <div class="summary-item">
+                    <div>
+                        <div class="summary-label">Dung lượng sử dụng</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 67%"></div>
+                        </div>
+                    </div>
+                    <span class="summary-value">67%</span>
+                </div>
+            </div>
+        </div>
+
+    {% elif current_user.vaiTro == 'Tổ phó' %}
+        <!-- Tổ phó Dashboard -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Tổng hộ khẩu</h3>
+                <div class="stat-number">{{ stats.total_hokhau }}</div>
+                <div class="stat-change positive">+{{ stats.new_hokhau_this_month }} hộ mới</div>
+                <div style="font-size: 0.8rem; color: #636e72; margin-top: 10px;">
+                    Hoạt động: {{ stats.active_hokhau }}, Tạm ngưng: {{ stats.inactive_hokhau }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Tổng nhân khẩu</h3>
+                <div class="stat-number">{{ stats.total_nhankhau }}</div>
+                <div class="stat-change positive">+{{ stats.new_nhankhau_this_month }} người</div>
+                <div style="font-size: 0.8rem; color: #636e72; margin-top: 10px;">
+                    Nam: {{ stats.male_nhankhau }}, Nữ: {{ stats.female_nhankhau }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Tạm trú/vắng</h3>
+                <div class="stat-number">{{ stats.total_tamtrutamvang }}</div>
+                <div class="stat-change positive">+{{ stats.new_tamtrutamvang_this_month }} trường hợp</div>
+                <div style="font-size: 0.8rem; color: #636e72; margin-top: 10px;">
+                    Tạm trú: {{ stats.tamtru_count }}, Tạm vắng: {{ stats.tamvang_count }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Hoạt động hôm nay</h3>
+                <div class="stat-number">{{ stats.total_activities_today }}</div>
+                <div class="stat-change neutral">Hoạt động tốt</div>
+                <div style="font-size: 0.8rem; color: #636e72; margin-top: 10px;">
+                    Hộ khẩu: {{ stats.update_activities }}, Nhân khẩu: {{ stats.view_activities }}
+                </div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="chart-card">
+                <h3>Thống kê hộ khẩu, nhân khẩu và tạm trú/vắng</h3>
+                <div class="chart-container">
+                    <canvas id="toPhoChart"></canvas>
+                </div>
+            </div>
+
+            <div class="activity-card">
+                <h3>Lịch sử hoạt động</h3>
+                <div>
+                    <div class="activity-item">
+                        <div class="activity-icon edit">CH</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Cập nhật thông tin hộ khẩu</div>
+                            <div class="activity-time">5 phút trước</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon add">TT</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Đăng ký tạm trú mới</div>
+                            <div class="activity-time">20 phút trước</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon view">XL</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Xem lịch sử hộ khẩu</div>
+                            <div class="activity-time">45 phút trước</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon edit">TV</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Sửa thông tin tạm vắng</div>
+                            <div class="activity-time">1 giờ trước</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon add">TT</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Thêm thành viên hộ khẩu</div>
+                            <div class="activity-time">2 giờ trước</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-grid">
+            <div class="summary-card">
+                <h3>Tóm tắt hệ thống</h3>
+                <div class="summary-item">
+                    <span class="summary-label">Hộ khẩu được quản lý</span>
+                    <span class="summary-value">120</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Tỷ lệ cập nhật</span>
+                    <span class="summary-value">94%</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Thông tin chính xác</span>
+                    <span class="summary-value">98%</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Phản hồi trung bình</span>
+                    <span class="summary-value">2.1s</span>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <h3>Thống kê nhanh</h3>
+                <div class="summary-item">
+                    <div>
+                        <div class="summary-label">Hộ khẩu xem hôm nay</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <span class="summary-value">45</span>
+                </div>
+                <div class="summary-item">
+                    <div>
+                        <div class="summary-label">Cập nhật thành công</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <span class="summary-value">12</span>
+                </div>
+                <div class="summary-item">
+                    <div>
+                        <div class="summary-label">Lỗi dữ liệu</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 5%"></div>
+                        </div>
+                    </div>
+                    <span class="summary-value">1</span>
+                </div>
+                <div class="summary-item">
+                    <div>
+                        <div class="summary-label">Phản hồi tích cực</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 98%"></div>
+                        </div>
+                    </div>
+                    <span class="summary-value">98%</span>
+                </div>
+            </div>
+        </div>
+
+    {% elif current_user.vaiTro == 'Kế toán' %}
+        <!-- Kế toán Dashboard -->
+        <div class="ke-toan-grid">
+
+            <div class="ke-toan-card">
+                <h3>Số đợt thu theo 4 tháng gần nhất</h3>
+                <ul>
+                    <li>
+                        <span class="ke-toan-label">{{stats.nam_thang1}}:</span>
+                        <span class="ke-toan-value">{{stats.thang1}} đợt</span>
+                    </li>
+                    <li>
+                        <span class="ke-toan-label">{{stats.nam_thang2}}:</span>
+                        <span class="ke-toan-value">{{stats.thang2}} đợt</span>
+                    </li>
+                    <li>
+                        <span class="ke-toan-label">{{stats.nam_thang3}}:</span>
+                        <span class="ke-toan-value">{{stats.thang3}} đợt</span>
+                    </li>
+                    <li>
+                        <span class="ke-toan-label">{{stats.nam_thang4}}:</span>
+                        <span class="ke-toan-value">{{stats.thang4}} đợt</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="ke-toan-card">
+                <h3>Doanh thu theo 4 tháng gần nhất</h3>
+                <ul>
+                    <li>
+                        <span class="ke-toan-label">{{stats.nam_thang1}}:</span>
+                        <span class="ke-toan-value">{{stats.dt1}}VND</span>
+                    </li>
+                    <li>
+                        <span class="ke-toan-label">{{stats.nam_thang2}}:</span>
+                        <span class="ke-toan-value">{{stats.dt2}}VND</span>
+                    </li>
+                    <li>
+                        <span class="ke-toan-label">{{stats.nam_thang3}}:</span>
+                        <span class="ke-toan-value">{{stats.dt3}}VND</span>
+                    </li>
+                    <li>
+                        <span class="ke-toan-label">{{stats.nam_thang4}}:</span>
+                        <span class="ke-toan-value">{{stats.dt4}}VND</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="ke-toan-card">
+                <h3>Thống kê tài chính tháng này</h3>
+                <ul>
+                    <li>
+                        <span class="ke-toan-label">Doanh thu dự kiến:</span>
+                        <span class="ke-toan-value">{{stats.Tong_doanh_thu_du_kien}} VND</span>
+                    </li>
+                    <li>
+                        <span class="ke-toan-label">Đã thu:</span>
+                        <span class="ke-toan-value">{{stats.So_tien_da_thu_hien_tai}} VND</span>
+                    </li>                    
+                    <li>
+                        <span class="ke-toan-label">Tỷ lệ thu:</span>
+                        <span class="ke-toan-value">{{stats.Ty_le_thu}}%</span>
+                    </li>
+                    <li>
+                        <span class="ke-toan-label">Hộ chưa đóng:</span>
+                        <span class="ke-toan-value">{{stats.ho_chua_dong}} hộ</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="ke-toan-card">
+                <h3>Các đợt thu đang thực hiện</h3>
+                    {% for item in stats.cac_dot_dang_thu %}
+                        <ul class="ke-toan-list">
+                            <li>
+                                <span class="ke-toan-label">Tên đợt thu:</span>
+                                <span class="ke-toan-value">{{item.tenDotThu}}</span>
+                            </li> 
+                            <li>
+                                <span class="ke-toan-label">Ngày bắt đầu:</span>
+                                <span class="ke-toan-value">{{item.ngayBatDau}}</span>
+                            </li> 
+                            <li>
+                                <span class="ke-toan-label">Ngày kết thúc:</span>
+                                <span class="ke-toan-value">{{item.ngayKetThuc}}</span>
+                            </li>      
+                        </ul>                            
+                    {% endfor %}
+            </div>
+        </div>
+
+        <!-- Additional chart for Kế toán -->
+        <div class="chart-card" style="margin-bottom: 30px;">
+            <h3>Biểu đồ thu chi theo tháng</h3>
+            <div class="chart-container">
+                <canvas id="keToanChart"></canvas>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // Khởi tạo charts cho các vai trò khác nhau
+    document.addEventListener('DOMContentLoaded', function() {
+        const userRole = '{{ current_user.vaiTro }}';
+        
+        if (userRole === 'admin') {
+            // Admin Chart
+            const adminCtx = document.getElementById('adminChart');
+            if (adminCtx) {
+                new Chart(adminCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                        datasets: [
+                            {
+                                label: 'Hộ khẩu',
+                                data: [110, 112, 115, 118, 120, 118, 119, 120, 122, 120, 118, 120],
+                                borderColor: '#74b9ff',
+                                backgroundColor: '#74b9ff20',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Nhân khẩu',
+                                data: [420, 425, 430, 435, 440, 445, 448, 450, 452, 450, 448, 450],
+                                borderColor: '#00b894',
+                                backgroundColor: '#00b89420',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Tạm trú',
+                                data: [6, 7, 8, 9, 8, 7, 8, 9, 10, 8, 7, 8],
+                                borderColor: '#fdcb6e',
+                                backgroundColor: '#fdcb6e20',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Tạm vắng',
+                                data: [5, 6, 7, 6, 7, 8, 7, 6, 7, 8, 6, 7],
+                                borderColor: '#e17055',
+                                backgroundColor: '#e1705520',
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: {
+                                    color: '#ddd'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: '#ddd'
+                                }
+                            }
+                        },
+                        elements: {
+                            point: {
+                                radius: 4,
+                                hoverRadius: 6
+                            }
+                        }
+                    }
+                });
+            }
+        } else if (userRole === 'Tổ phó') {
+            // Tổ phó Chart
+            const toPhoCtx = document.getElementById('toPhoChart');
+            if (toPhoCtx) {
+                new Chart(toPhoCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                        datasets: [
+                            {
+                                label: 'Hộ khẩu',
+                                data: [110, 112, 115, 118, 120, 118, 119, 120, 122, 120, 118, 120],
+                                borderColor: '#74b9ff',
+                                backgroundColor: '#74b9ff20',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Nhân khẩu',
+                                data: [420, 425, 430, 435, 440, 445, 448, 450, 452, 450, 448, 450],
+                                borderColor: '#00b894',
+                                backgroundColor: '#00b89420',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Tạm trú',
+                                data: [6, 7, 8, 9, 8, 7, 8, 9, 10, 8, 7, 8],
+                                borderColor: '#fdcb6e',
+                                backgroundColor: '#fdcb6e20',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Tạm vắng',
+                                data: [5, 6, 7, 6, 7, 8, 7, 6, 7, 8, 6, 7],
+                                borderColor: '#e17055',
+                                backgroundColor: '#e1705520',
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: {
+                                    color: '#ddd'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: '#ddd'
+                                }
+                            }
+                        },
+                        elements: {
+                            point: {
+                                radius: 4,
+                                hoverRadius: 6
+                            }
+                        }
+                    }
+                });
+            }
+        } else if (userRole === 'Kế toán') {
+            // Kế toán Chart
+            const keToanCtx = document.getElementById('keToanChart');
+            if (keToanCtx) {
+                new Chart(keToanCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['T1', 'T2', 'T3', 'T4'],
+                        datasets: [
+                            {
+                                label: 'Thu nhập (triệu VND)',
+                                data: [28,26,29,27],
+                                backgroundColor: '#00b894',
+                                borderColor: '#00b894',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Chi phí (triệu VND)',
+                                data: [5, 8, 3, 6],
+                                backgroundColor: '#e17055',
+                                borderColor: '#e17055',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#ddd'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + 'M';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: '#ddd'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Animation for progress bars
+        setTimeout(function() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }, 100);
+        
+        // Auto-refresh activity list every 30 seconds (simulate real-time updates)
+        if (userRole === 'admin' || userRole === 'Tổ phó') {
+            setInterval(function() {
+                // This would typically fetch new data from server
+                console.log(`Refreshing ${userRole} activity data...`);
+            }, 30000);
+        }
+    });
+    
+    // Utility function to format numbers
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    
+    // Utility function to format currency
+    function formatCurrency(num) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(num);
+    }
+</script>
+{% endblock %}

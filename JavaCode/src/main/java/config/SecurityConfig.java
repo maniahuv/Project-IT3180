@@ -1,62 +1,105 @@
 package config;
 
-import java.util.Arrays;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
 
-import service.TaiKhoanService;
+import org.springframework.security.config.http.SessionCreationPolicy;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-	@Autowired
-	private TaiKhoanService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(
-						auth -> auth.requestMatchers("/", "/login", "/register", "*.css", "*.js", "*.png", "/dang-ki")
-								.permitAll().anyRequest().authenticated())
-				.formLogin(form -> form.loginPage("/login").usernameParameter("email").passwordParameter("password")
-						.defaultSuccessUrl("/", true).permitAll())
-				.logout(logout -> logout.logoutSuccessUrl("/").permitAll());
-		return http.build();
-	}
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-	}
+    // Custom AuthenticationEntryPoint nhúng luôn ở đây
+    private static class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-	@Bean
-	public CommandLineRunner checkBeans(ApplicationContext ctx) {
-		return args -> {
-			String[] beans = ctx.getBeanNamesForType(TaiKhoanService.class);
-			System.out.println("TaiKhoanService beans: " + Arrays.toString(beans));
-		};
-	}
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response,
+                             org.springframework.security.core.AuthenticationException authException) throws IOException, ServletException {
+            String accept = request.getHeader("Accept");
+            if (accept != null && accept.contains("text/html")) {
+                // Nếu là trình duyệt, redirect về login page
+                response.sendRedirect("/login");
+            } else {
+                // Nếu là API client, trả về lỗi 401
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            }
+        }
+    }
 
-	@Bean
-	public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-		System.out.println("User details service");
-		AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-		authBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-		return authBuilder.build();
-	}
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new CustomAuthenticationEntryPoint();
+    }
 
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .cors().and().csrf().disable()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .exceptionHandling()
+                .authenticationEntryPoint(authenticationEntryPoint())  // Dùng custom entry point này
+            .and()
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/taikhoan/**").hasAnyRole("TOTRUONG", "TOPHO")
+                .requestMatchers("/api/dotthu/**").authenticated()
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }

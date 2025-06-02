@@ -1,0 +1,36 @@
+USE it3180;
+
+-- 3. Insert dữ liệu cho bảng dotthu
+INSERT INTO dotthu (ten_dot_thu, ngay_bat_dau, ngay_ket_thuc, trang_thai) VALUES
+('Đợt thu tháng 5/2025', '2025-05-01', '2025-05-31', '1'),
+('Đợt thu tháng 6/2025', '2025-06-01', '2025-06-30', '2');
+
+-- 2. Insert dữ liệu cho bảng khoanthu
+INSERT INTO khoanthu (ten_khoan_thu, loai_khoan_thu, so_tien, bat_buoc, ghi_chu, ma_dot_thu) VALUES
+('Phí vệ sinh', 'Phí dịch vụ', 50000, TRUE, 'Phí vệ sinh hàng tháng', 2),
+('Phí điện nước', 'Phí dịch vụ', 150000, TRUE, 'Phí điện nước theo tiêu thụ', 1),
+('Phí giữ xe', 'Phí dịch vụ', 20000, FALSE, 'Phí giữ xe tháng', 2);
+
+
+
+-- 5. Insert dữ liệu cho bảng hokhau
+INSERT INTO hokhau (chu_ho, so_nha, ngay_lap, ngay_cap_nhat, dien_tich) VALUES
+(1, '12A Nguyen Trai', '2020-01-01', '2025-05-01', 75.5),
+(3, '45B Le Loi', '2021-06-15', '2025-05-10', 60.0);
+
+-- 6. Insert dữ liệu cho bảng nhankhau
+INSERT INTO nhankhau (ho_ten, ngay_sinh, gioi_tinh, cmnd, qh_voi_chu_ho, trang_thai, ma_ho_khau) VALUES
+('Nguyen Van A', '1980-04-20', TRUE, '123456789', 'Chủ hộ', 'Đang sống', 1),
+('Nguyen Thi D', '1985-11-15', FALSE, '987654321', 'Vợ', 'Đang sống', 1),
+('Tran Van C', '1990-07-10', TRUE, '112233445', 'Chủ hộ', 'Đang sống', 2);
+
+-- 7. Insert dữ liệu cho bảng tamtrutamvang
+INSERT INTO tamtrutamvang (loai, ngay_bat_dau, ngay_ket_thuc, ly_do, ma_nhan_khau) VALUES
+('Tạm trú', '2025-04-01', '2025-04-30', 'Đi công tác', 2),
+('Tạm vắng', '2025-05-01', '2025-05-15', 'Đi du lịch', 3);
+
+-- 8. Insert dữ liệu cho bảng nopphi
+INSERT INTO nopphi (ngay_thu, so_tien, nguoi_nop, id_nguoi_thu, ma_ho_khau) VALUES
+('2025-05-05', 50000, 'Nguyen Van A', 2, 1),
+('2025-05-06', 150000, 'Nguyen Van A', 2, 1),
+('2025-05-07', 20000, 'Tran Van C', 2, 2);

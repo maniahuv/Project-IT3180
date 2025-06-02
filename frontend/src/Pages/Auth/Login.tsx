@@ -1,15 +1,17 @@
 import React, { useState, FormEvent } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { login, LoginCredentials } from '../../api/AuthApi';
 
 export default function Login() {
-  const [data, setData] = useState({
-    email: '',
+  const [data, setData] = useState<LoginCredentials & { remember: boolean }>({
+    username: '',
     password: '',
     remember: false,
   });
-  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+  const [errors, setErrors] = useState<{ username?: string; password?: string; general?: string }>({});
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -26,19 +28,21 @@ export default function Login() {
     setStatus(null);
 
     try {
-      const response = await axios.post('/api/login', data);
+      const response = await login({ username: data.username, password: data.password });
 
       if (response.status === 200) {
-        setStatus('Đăng nhập thành công!');
-        // TODO: lưu token, chuyển trang ...
+        setStatus(response.data.message);
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('vaiTro', response.data.vaiTro.toString());
+        localStorage.setItem('hoTen', response.data.hoTen); // 👈 lưu họ tên
+
+        navigate('/homepage');
       } else {
         setErrors({ general: 'Đăng nhập thất bại' });
       }
     } catch (error: any) {
       if (error.response && error.response.data) {
-        const respData = error.response.data;
-        // Giả sử backend trả lỗi dạng { errors: { email: "...", password: "..." }, message: "..." }
-        setErrors(respData.errors || { general: respData.message || 'Đăng nhập thất bại' });
+        setErrors({ general: error.response.data || 'Đăng nhập thất bại' });
       } else {
         setErrors({ general: 'Lỗi kết nối đến server' });
       }
@@ -57,28 +61,28 @@ export default function Login() {
 
         <form onSubmit={submit} noValidate>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              Tên đăng nhập
             </label>
             <input
-              id="email"
-              type="email"
-              name="email"
-              value={data.email}
+              id="username"
+              type="text"
+              name="username"
+              value={data.username}
               onChange={handleChange}
               className={`mt-1 block w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500 ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
+                errors.username ? 'border-red-500' : 'border-gray-300'
               }`}
               autoComplete="username"
               required
               autoFocus
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+            {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
           </div>
 
           <div className="mb-4">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+              Mật khẩu
             </label>
             <input
               id="password"
@@ -105,7 +109,7 @@ export default function Login() {
               className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
             />
             <label htmlFor="remember" className="ml-2 block text-sm text-gray-600">
-              Remember me
+              Ghi nhớ đăng nhập
             </label>
           </div>
 
@@ -114,21 +118,14 @@ export default function Login() {
             disabled={loading}
             className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded transition"
           >
-            {loading ? 'Đang đăng nhập...' : 'Log in'}
+            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
         </form>
 
         <div className="mt-4 flex justify-between text-sm text-gray-600">
           <a href="/password-reset" className="underline hover:text-pink-600">
-            Forgot your password?
+            Quên mật khẩu?
           </a>
-          {/* <Route path="/register" element={<Login />} /> */}
-          <a href="/auth/register" className="underline hover:text-pink-600">
-            Register
-          </a>
-          {/* <a href="/management/accountmanagement" className="underline hover:text-pink-600">
-            Register
-          </a> */}
         </div>
       </div>
     </div>

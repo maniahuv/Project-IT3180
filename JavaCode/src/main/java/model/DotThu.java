@@ -1,90 +1,64 @@
+// DotThu.java
 package model;
 
-import java.sql.Date;
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.time.LocalDate;
+import java.util.List;
 
+@Entity
+@Table(name = "dotthu")
 public class DotThu {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer maDotThu;
 
-	public static class TrangThaiDotThu {
-		public static final int DANG_DIEN_RA = 0;
-		public static final int DA_KET_THUC = 1;
+    @Column(nullable = false, length = 100)
+    private String tenDotThu;
 
-		public static String toString(int vaiTro) {
-			switch (vaiTro) {
-			case DANG_DIEN_RA:
-				return "Đang diễn ra";
-			case DA_KET_THUC:
-				return "Đã kết thúc";
-			default:
-				return "";
-			}
-		}
+    private LocalDate ngayBatDau;
 
-	}
+    private LocalDate ngayKetThuc;
 
-	private String maDotThu;
-	private String tenDotThu;
-	private Date thoiGianBatDau;
-	private Date thoiGianKetThuc;
-	private String moTa;
-	private int trangThai;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    private TrangThai trangThai;
 
-	// Constructor đầy đủ
-	public DotThu(String maDotThu, String tenDotThu, Date thoiGianBatDau, Date thoiGianKetThuc, String moTa,
-			int trangThai) {
-		this.maDotThu = maDotThu;
-		this.tenDotThu = tenDotThu;
-		this.thoiGianBatDau = thoiGianBatDau;
-		this.thoiGianKetThuc = thoiGianKetThuc;
-		this.moTa = moTa;
-		this.trangThai = trangThai;
-	}
+    @OneToMany(mappedBy = "dotThu", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<KhoanThu> khoanThus;
 
-	// Getter và Setter
-	public String getMaDotThu() {
-		return maDotThu;
-	}
+    public enum TrangThai {
+        DANG_DIEN_RA("Đang diễn ra"),
+        DA_HOAN_THANH("Đã hoàn thành"),
+        TAM_HOAN("Tạm hoãn");
 
-	public void setMaDotThu(String maDotThu) {
-		this.maDotThu = maDotThu;
-	}
+        private final String value;
+        TrangThai(String value) { this.value = value; }
+        public String getValue() { return value; }
+    }
 
-	public String getTenDotThu() {
-		return tenDotThu;
-	}
-
-	public void setTenDotThu(String tenDotThu) {
-		this.tenDotThu = tenDotThu;
-	}
-
-	public Date getThoiGianBatDau() {
-		return thoiGianBatDau;
-	}
-
-	public void setThoiGianBatDau(Date thoiGianBatDau) {
-		this.thoiGianBatDau = thoiGianBatDau;
-	}
-
-	public Date getThoiGianKetThuc() {
-		return thoiGianKetThuc;
-	}
-
-	public void setThoiGianKetThuc(Date thoiGianKetThuc) {
-		this.thoiGianKetThuc = thoiGianKetThuc;
-	}
-
-	public String getMoTa() {
-		return moTa;
-	}
-
-	public void setMoTa(String moTa) {
-		this.moTa = moTa;
-	}
-
-	public int getTrangThai() {
-		return trangThai;
-	}
-
-	public void setTrangThai(int trangThai) {
-		this.trangThai = trangThai;
-	}
+    // Getters and Setters
+    public Integer getMaDotThu() { return maDotThu; }
+    public void setMaDotThu(Integer maDotThu) { this.maDotThu = maDotThu; }
+    public String getTenDotThu() { return tenDotThu; }
+    public void setTenDotThu(String tenDotThu) { this.tenDotThu = tenDotThu; }
+    public LocalDate getNgayBatDau() { return ngayBatDau; }
+    public void setNgayBatDau(LocalDate ngayBatDau) { this.ngayBatDau = ngayBatDau; }
+    public LocalDate getNgayKetThuc() { return ngayKetThuc; }
+    public void setNgayKetThuc(LocalDate ngayKetThuc) { this.ngayKetThuc = ngayKetThuc; }
+    public String getTrangThai() { return trangThai != null ? trangThai.name() : null; } // Return enum name
+    public void setTrangThai(String trangThai) {
+        if (trangThai != null) {
+            try {
+                this.trangThai = TrangThai.valueOf(trangThai.replace(" ", "_").toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Trạng thái không hợp lệ: " + trangThai);
+            }
+        } else {
+            this.trangThai = null;
+        }
+    }
+    public List<KhoanThu> getKhoanThus() { return khoanThus; }
+    public void setKhoanThus(List<KhoanThu> khoanThus) { this.khoanThus = khoanThus; }
 }

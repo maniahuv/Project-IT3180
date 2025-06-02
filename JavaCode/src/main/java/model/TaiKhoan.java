@@ -1,144 +1,59 @@
 package model;
 
-import java.util.Objects;
+import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import java.util.Collection;
+import java.util.Collections;
+import enums.VaiTro;
 
-public class TaiKhoan {
+@Entity
+@Table(name = "taikhoan")
+public class TaiKhoan implements UserDetails {
 
-	private String maTaiKhoan;
-	private String email;
-	private String matKhau;
-	private String tenNguoiDung;
-	private String soDienThoai;
-	private int vaiTro;
-	private String maNhanKhau;
-	private boolean trangThai;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-	public TaiKhoan() {
-		vaiTro = VaiTro.NGUOI_DUNG;
-		trangThai = true;
-	}
+    @Column(nullable = false, unique = true, length = 50)
+    private String username;
 
-	public TaiKhoan(String maTaiKhoan, String email, String matKhau, String tenNguoiDung, String soDienThoai,
-			int vaiTro, String maNhanKhau, boolean trangThai) {
-		this.maTaiKhoan = maTaiKhoan;
-		this.email = email;
-		this.matKhau = matKhau;
-		this.tenNguoiDung = tenNguoiDung;
-		this.soDienThoai = soDienThoai;
-		this.vaiTro = vaiTro;
-		this.maNhanKhau = maNhanKhau;
-		this.trangThai = trangThai;
-	}
+    @Column(nullable = false, length = 100)
+    private String password;
 
-	public String getMaTaiKhoan() {
-		return maTaiKhoan;
-	}
+    @Column(nullable = false, name = "vaiTro")
+    private int vaiTro;  // 1: TO_TRUONG, 2: TO_PHO, 3: KE_TOAN
 
-	public void setMaTaiKhoan(String maTaiKhoan) {
-		this.maTaiKhoan = maTaiKhoan;
-	}
+    @Column(name = "hoTen")
+    private String hoTen;
 
-	public String getEmail() {
-		return email;
-	}
+    // Constructors
+    public TaiKhoan() {}
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public TaiKhoan(String username, String password, int vaiTro, String hoTen) {
+        this.username = username;
+        this.password = password;
+        this.vaiTro = vaiTro;
+        this.hoTen = hoTen;
+    }
 
-	public String getMatKhau() {
-		return matKhau;
-	}
+    // Getters and setters
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public int getVaiTro() { return vaiTro; }
+    public void setVaiTro(int vaiTro) { this.vaiTro = vaiTro; }
+    public String getHoTen() { return hoTen; }
+    public void setHoTen(String hoTen) { this.hoTen = hoTen; }
 
-	public void setMatKhau(String matKhau) {
-		this.matKhau = matKhau;
-	}
+    // UserDetails interface
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        VaiTro role = VaiTro.fromValue(this.vaiTro);
+        return Collections.singletonList(() -> "ROLE_" + role.getRoleName());
+    }
 
-	public String getTenNguoiDung() {
-		return tenNguoiDung;
-	}
-
-	public void setTenNguoiDung(String tenNguoiDung) {
-		this.tenNguoiDung = tenNguoiDung;
-	}
-
-	public String getSoDienThoai() {
-		return soDienThoai;
-	}
-
-	public void setSoDienThoai(String soDienThoai) {
-		this.soDienThoai = soDienThoai;
-	}
-
-	public int getVaiTro() {
-		return vaiTro;
-	}
-
-	public void setVaiTro(int vaiTro) {
-		this.vaiTro = vaiTro;
-	}
-
-	public String getMaNhanKhau() {
-		return maNhanKhau;
-	}
-
-	public void setMaNhanKhau(String maNhanKhau) {
-		this.maNhanKhau = maNhanKhau;
-	}
-
-	public boolean isTrangThai() {
-		return trangThai;
-	}
-
-	public void setTrangThai(boolean trangThai) {
-		this.trangThai = trangThai;
-	}
-
-	@Override
-	public String toString() {
-		return "TaiKhoan [maTaiKhoan=" + maTaiKhoan + ", email=" + email + ", matKhau=" + matKhau + ", tenNguoiDung="
-				+ tenNguoiDung + ", soDienThoai=" + soDienThoai + ", vaiTro=" + vaiTro + ", maNhanKhau=" + maNhanKhau
-				+ ", trangThai=" + trangThai + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(email, maNhanKhau, maTaiKhoan, matKhau, soDienThoai, tenNguoiDung, trangThai, vaiTro);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TaiKhoan other = (TaiKhoan) obj;
-		return Objects.equals(email, other.email) && Objects.equals(maNhanKhau, other.maNhanKhau)
-				&& Objects.equals(maTaiKhoan, other.maTaiKhoan) && Objects.equals(matKhau, other.matKhau)
-				&& Objects.equals(soDienThoai, other.soDienThoai) && Objects.equals(tenNguoiDung, other.tenNguoiDung)
-				&& trangThai == other.trangThai && Objects.equals(vaiTro, other.vaiTro);
-	}
-
-	public static class VaiTro {
-
-		public static final int KE_TOAN = 0;
-		public static final int TO_TRUONG = 1;
-		public static final int NGUOI_DUNG = 2;
-
-		public static String toString(int vaiTro) {
-			switch (vaiTro) {
-			case KE_TOAN:
-				return "KE_TOAN";
-			case TO_TRUONG:
-				return "TO_TRUONG";
-			case NGUOI_DUNG:
-				return "USER";
-			default:
-				return "";
-			}
-		}
-
-	}
 }
