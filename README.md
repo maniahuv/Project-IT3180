@@ -1,6 +1,6 @@
 # 🏢 Hệ Thống Quản Lý Chung Cư
 
-Dự án bài tập lớn môn **Kĩ thuật phần mềm** (IT3180). Hệ thống quản lý chung cư hỗ trợ quản lý nhân khẩu, tài khoản, khoản thu, tạm trú/tạm vắng, và các chức năng liên quan với giao diện thân thiện và API mạnh mẽ.
+Dự án bài tập lớn môn **Kĩ thuật phần mềm** (IT4082). Hệ thống quản lý chung cư hỗ trợ quản lý nhân khẩu, tài khoản, khoản thu, tạm trú/tạm vắng, và các chức năng liên quan với giao diện thân thiện và API mạnh mẽ.
 
 ## 📑 Mô tả dự án
 
