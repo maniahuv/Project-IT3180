@@ -1,65 +1,55 @@
 package service;
 
 import model.HoKhau;
-import model.ThongKeHoKhau;
-import repository.HoKhauDao;
-import repository.NhanKhauDao;
-import utils.Validator;
+import model.LichSuHoKhau;
+import model.NhanKhau;
+import repository.HoKhauRepository;
+import repository.LichSuHoKhauRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
 public class HoKhauService {
 
-	public static boolean taoHoKhauMoi(String taiKhoan, HoKhau t) {
-		if (kiemTraThongTin(t)) {
-			if (HoKhauDao.instance.insert(t) > 0) {
-				LichSuService.ghiNhanLichSu(taiKhoan, "Them ho khau", "", "");
-				return true;
-			}
-		}
-		return false;
-	}
+    private final HoKhauRepository hoKhauRepository;
+    private final LichSuHoKhauRepository lichSuHoKhauRepository;
 
-	public static boolean xoaHoKhau(String taiKhoan, String id) {
-		if (HoKhauDao.instance.delete(id) > 0) {
-			LichSuService.ghiNhanLichSu(taiKhoan, "Xoa ho khau", "", "");
-			return true;
-		}
-		return false;
-	}
+    public HoKhauService(HoKhauRepository hoKhauRepository, LichSuHoKhauRepository lichSuHoKhauRepository) {
+        this.hoKhauRepository = hoKhauRepository;
+        this.lichSuHoKhauRepository = lichSuHoKhauRepository;
+    }
 
-	public static boolean luuBienDong(String taiKhoan, HoKhau t) {
-		if (kiemTraThongTin(t)) {
-			if (HoKhauDao.instance.update(t.getMaHoKhau(), new String[] { "SoCanHo", "DienTich", "SoNguoi", "ChuHo" },
-					new Object[] { t.getSoCanHo(), (Double) t.getDienTich(), (Integer) t.getSoNguoi(),
-							t.getChuHo() }) > 0) {
-				LichSuService.ghiNhanLichSu(taiKhoan, "Cap nhat thong tin ho khau", "", "");
-				return true;
-			}
-		}
-		return false;
-	}
+    public List<HoKhau> findAll() {
+        return hoKhauRepository.findAll();
+    }
 
-	public static boolean kiemTraTonTai(String id) {
-		if (HoKhauDao.instance.selectByID(id) != null) {
-			return true;
-		}
-		return false;
-	}
+    public Optional<HoKhau> findById(Integer id) {
+        return hoKhauRepository.findById(id);
+    }
 
-	public static HoKhau layThongTinHoKhau(String id) {
-		return HoKhauDao.instance.selectByID(id);
-	}
+    public HoKhau save(HoKhau hoKhau, int loaiThayDoi, NhanKhau nhanKhau) {
+        HoKhau savedHoKhau = hoKhauRepository.save(hoKhau);
 
-	public static boolean kiemTraThongTin(HoKhau t) {
-		return Validator.validLength(t.getSoCanHo(), 20, false)
-				&& NhanKhauDao.instance.selectByID(t.getChuHo()) != null;
-	}
+        // Tạo lịch sử thay đổi
+        LichSuHoKhau lichSu = new LichSuHoKhau();
+        lichSu.setHoKhau(savedHoKhau);
+        lichSu.setNhanKhau(nhanKhau);
+        lichSu.setLoaiThayDoi(loaiThayDoi);
+        lichSu.setThoiGian(LocalDateTime.now());
+        // lichSu.setNoiDung(noiDung);
 
-	public static HoKhau traCuuThongTin(String userId) {
-		return HoKhauDao.instance.selectByID(userId);
-	}
+        lichSuHoKhauRepository.save(lichSu);
 
-	public static ThongKeHoKhau thongKeHoKhau() {
-		return HoKhauDao.instance.thongKe();
-	}
+        return savedHoKhau;
+    }
 
+    @Transactional
+    public void deleteById(Integer id) {
+        hoKhauRepository.deleteById(id);
+        // Có thể thêm logic xóa lịch sử liên quan nếu cần
+    }
 }

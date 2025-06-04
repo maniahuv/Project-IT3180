@@ -1,187 +1,63 @@
 package model;
 
-import java.sql.Date;
-import java.util.Objects;
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.time.LocalDate;
 
+@Entity
+@Table(name = "nhankhau")
 public class NhanKhau {
 
-	private String maNhanKhau;
-	private String hoTen;
-	private String soCCCD;
-	private Date ngaySinh;
-	private int gioiTinh;
-	private String ngheNghiep;
-	private int quanHeVoiChuHo;
-	private int tinhTrangCuTru;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer maNhanKhau;
 
-	// Constructor
-	public NhanKhau(String maNhanKhau, String hoTen, String soCCCD, Date ngaySinh, int gioiTinh, String ngheNghiep,
-			int quanHeVoiChuHo, int tinhTrangCuTru) {
-		this.maNhanKhau = maNhanKhau;
-		this.hoTen = hoTen;
-		this.soCCCD = soCCCD;
-		this.ngaySinh = ngaySinh;
-		this.gioiTinh = gioiTinh;
-		this.ngheNghiep = ngheNghiep;
-		this.quanHeVoiChuHo = quanHeVoiChuHo;
-		this.tinhTrangCuTru = tinhTrangCuTru;
-	}
+    @Column
+    private String hoTen;
 
-	// Getters và Setters
-	public String getMaNhanKhau() {
-		return maNhanKhau;
-	}
+    @Column
+    private LocalDate ngaySinh;
 
-	public void setMaNhanKhau(String maNhanKhau) {
-		this.maNhanKhau = maNhanKhau;
-	}
+    @Column
+    private Boolean gioiTinh;
 
-	public String getHoTen() {
-		return hoTen;
-	}
+    @Column
+    private String cmnd;
 
-	public void setHoTen(String hoTen) {
-		this.hoTen = hoTen;
-	}
+    @Column
+    private String qhVoiChuHo;
 
-	public String getSoCCCD() {
-		return soCCCD;
-	}
+    @Column
+    private String trangThai;
 
-	public void setSoCCCD(String soCCCD) {
-		this.soCCCD = soCCCD;
-	}
+    @Column(name = "maHoKhau", insertable = false, updatable = false)
+    private Integer maHoKhau; // Direct reference to the foreign key
 
-	public Date getNgaySinh() {
-		return ngaySinh;
-	}
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "maHoKhau")
+    @JsonBackReference(value = "hokhau-nhankhau")
+    private HoKhau hoKhau;
 
-	public void setNgaySinh(Date ngaySinh) {
-		this.ngaySinh = ngaySinh;
-	}
+    // Constructors
+    public NhanKhau() {}
 
-	public int getGioiTinh() {
-		return gioiTinh;
-	}
-
-	public void setGioiTinh(int gioiTinh) {
-		this.gioiTinh = gioiTinh;
-	}
-
-	public String getNgheNghiep() {
-		return ngheNghiep;
-	}
-
-	public void setNgheNghiep(String ngheNghiep) {
-		this.ngheNghiep = ngheNghiep;
-	}
-
-	public int getQuanHeVoiChuHo() {
-		return quanHeVoiChuHo;
-	}
-
-	public void setQuanHeVoiChuHo(int quanHeVoiChuHo) {
-		this.quanHeVoiChuHo = quanHeVoiChuHo;
-	}
-
-	public int getTinhTrangCuTru() {
-		return tinhTrangCuTru;
-	}
-
-	public void setTinhTrangCuTru(int tinhTrangCuTru) {
-		this.tinhTrangCuTru = tinhTrangCuTru;
-	}
-
-	@Override
-	public String toString() {
-		return "NhanKhau [maNhanKhau=" + maNhanKhau + ", hoTen=" + hoTen + ", soCCCD=" + soCCCD + ", ngaySinh="
-				+ ngaySinh + ", gioiTinh=" + gioiTinh + ", ngheNghiep=" + ngheNghiep + ", quanHeVoiChuHo="
-				+ quanHeVoiChuHo + ", tinhTrangCuTru=" + tinhTrangCuTru;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(maNhanKhau, hoTen, soCCCD, ngaySinh, gioiTinh, ngheNghiep, quanHeVoiChuHo, tinhTrangCuTru);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null || getClass() != obj.getClass())
-			return false;
-		NhanKhau other = (NhanKhau) obj;
-		return Objects.equals(maNhanKhau, other.maNhanKhau) && Objects.equals(hoTen, other.hoTen)
-				&& Objects.equals(soCCCD, other.soCCCD) && Objects.equals(ngaySinh, other.ngaySinh)
-				&& gioiTinh == other.gioiTinh && Objects.equals(ngheNghiep, other.ngheNghiep)
-				&& quanHeVoiChuHo == other.quanHeVoiChuHo && tinhTrangCuTru == other.tinhTrangCuTru;
-	}
-
-	// Enums
-	public static class GioiTinh {
-		public static final int NAM = 0;
-		public static final int NU = 1;
-		public static final int KHAC = 2;
-
-		public static String toString(int vaiTro) {
-			switch (vaiTro) {
-			case NAM:
-				return "Nam";
-			case NU:
-				return "Nữ";
-			case KHAC:
-				return "Khác";
-			default:
-				return "";
-			}
-		}
-
-	}
-
-	public static class QuanHeVoiChuHo {
-		public static final int CHU_HO = 0;
-		public static final int VO_CHONG = 1;
-		public static final int CON = 2;
-		public static final int CHA_ME = 3;
-		public static final int ANH_CHI_EM = 4;
-		public static final int KHAC = 5;
-
-		public static String toString(int vaiTro) {
-			switch (vaiTro) {
-			case CHU_HO:
-				return "Chủ hộ";
-			case VO_CHONG:
-				return "Vợ/Chồng";
-			case CON:
-				return "Con";
-			case CHA_ME:
-				return "Cha/Mẹ";
-			case ANH_CHI_EM:
-				return "Anh/Chị/Em";
-			case KHAC:
-				return "Khác";
-			default:
-				return "";
-			}
-		}
-
-	}
-
-	public static class TinhTrangCuTru {
-		public static final int DANG_O = 0;
-		public static final int TAM_VANG = 1;
-
-		public static String toString(int vaiTro) {
-			switch (vaiTro) {
-			case DANG_O:
-				return "Đang ở";
-			case TAM_VANG:
-				return "Tạm vắng";
-			default:
-				return "";
-			}
-		}
-
-	}
-
+    // Getters and Setters
+    public Integer getMaNhanKhau() { return maNhanKhau; }
+    public void setMaNhanKhau(Integer maNhanKhau) { this.maNhanKhau = maNhanKhau; }
+    public String getHoTen() { return hoTen; }
+    public void setHoTen(String hoTen) { this.hoTen = hoTen; }
+    public LocalDate getNgaySinh() { return ngaySinh; }
+    public void setNgaySinh(LocalDate ngaySinh) { this.ngaySinh = ngaySinh; }
+    public Boolean getGioiTinh() { return gioiTinh; }
+    public void setGioiTinh(Boolean gioiTinh) { this.gioiTinh = gioiTinh; }
+    public String getCmnd() { return cmnd; }
+    public void setCmnd(String cmnd) { this.cmnd = cmnd; }
+    public String getQhVoiChuHo() { return qhVoiChuHo; }
+    public void setQhVoiChuHo(String qhVoiChuHo) { this.qhVoiChuHo = qhVoiChuHo; }
+    public String getTrangThai() { return trangThai; }
+    public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
+    public Integer getMaHoKhau() { return maHoKhau; }
+    public void setMaHoKhau(Integer maHoKhau) { this.maHoKhau = maHoKhau; }
+    public HoKhau getHoKhau() { return hoKhau; }
+    public void setHoKhau(HoKhau hoKhau) { this.hoKhau = hoKhau; }
 }

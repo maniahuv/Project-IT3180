@@ -1,14 +1,15 @@
 package utils;
 
+import java.util.regex.Pattern;
+
 public class Validator {
 
 	public static boolean validEmail(String email) {
 		if (!validLength(email, 100, false)) {
 			return false;
 		}
-		//String regexPattern = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-		//return Pattern.compile(regexPattern).matcher(email).matches();
-		return true;
+		String regexPattern = "^(.+)@(\\S+)$";
+		return Pattern.compile(regexPattern).matcher(email).matches();
 	}
 
 	public static boolean validLength(String string, int maxLength, boolean nullable) {

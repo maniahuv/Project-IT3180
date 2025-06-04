@@ -1,332 +1,488 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import {
+  FaPlus,
+  FaSearch,
+  FaPen,
+  FaTrashAlt,
+  FaSave,
+  FaTimes
+} from 'react-icons/fa';
 import MainLayout from '../../Layout/MainLayout';
-import { FaSearch, FaPlus, FaPen, FaTrashAlt, FaSave, FaTimes } from "react-icons/fa";
+import { 
+  DotThu, 
+  fetchAllDotThu, 
+  createDotThu, 
+  updateDotThu, 
+  deleteDotThu 
+} from '../../api/DotThuApi';
+import { KhoanThu } from '../../api/KhoanThuApi';
 
-interface DotThu {
-  id: string;
-  maDotThu: string;
-  thoiGianBatDau: string;
-  thoiGianKetThuc: string;
-  moTa: string;
-  trangThai: "Đã hoàn thành" | "Chưa hoàn thành";
+interface EditFormData {
+  tenDotThu: string;
+  ngayBatDau?: string;
+  ngayKetThuc?: string;
+  trangThai?: string;
 }
 
-interface NewDotThu {
-  id: string;
-  maDotThu: string;
-  thoiGianBatDau: string;
-  thoiGianKetThuc: string;
-  moTa: string;
-  trangThai:"Đã hoàn thành" | "Chưa hoàn thành";
-}
+const trangThaiOptions = [
+  { value: 'DANG_DIEN_RA', label: 'Đang diễn ra', color: 'bg-green-100 text-green-800' },
+  { value: 'DA_HOAN_THANH', label: 'Đã hoàn thành', color: 'bg-blue-100 text-blue-800' },
+  { value: 'TAM_HOAN', label: 'Tạm hoãn', color: 'bg-yellow-100 text-yellow-800' }
+];
+
+const getTrangThaiLabel = (trangThai?: string): string => {
+  const option = trangThaiOptions.find(opt => opt.value === trangThai);
+  return option ? option.label : 'Không xác định';
+};
+
+const getTrangThaiColor = (trangThai?: string): string => {
+  const option = trangThaiOptions.find(opt => opt.value === trangThai);
+  return option ? option.color : 'bg-gray-100 text-gray-800';
+};
+
+const formatDateISO = (dateStr: string): string => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  const parts = dateStr.split('/');
+  if (parts.length === 3) {
+    const [dd, mm, yyyy] = parts;
+    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+  }
+  return '';
+};
+
+const formatDateDisplay = (dateStr?: string): string => {
+  if (!dateStr) return '-';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const [yyyy, mm, dd] = parts;
+    return `${dd}/${mm}/${yyyy}`;
+  }
+  return dateStr;
+};
 
 const QLDotThu: React.FC = () => {
-  const [searchCriteria, setSearchCriteria] = useState("madotthu");
-  const [searchInput, setSearchInput] = useState("");
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-
-  const [dotThuList, setDotThuList] = useState<DotThu[]>([
-    {
-      id: "1",
-      maDotThu: "DT2025-01",
-      thoiGianBatDau: "2025-01-01",
-      thoiGianKetThuc: "2025-01-31",
-      moTa: "Đợt thu học phí học kỳ 1 năm 2025",
-      trangThai: "Đã hoàn thành"
-    }
-  ]);
-  const [newDotThu, setNewDotThu] = useState<NewDotThu>({
-    id: "",
-    maDotThu: "",
-    thoiGianBatDau: "",
-    thoiGianKetThuc: "",
-    moTa: "",
-    trangThai: "Chưa hoàn thành",
+  const [data, setData] = useState<DotThu[]>([]);
+  const [filteredData, setFilteredData] = useState<DotThu[]>([]); // New state for filtered data
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const [editRowId, setEditRowId] = useState<number | null>(null);
+  const [editFormData, setEditFormData] = useState<EditFormData>({
+    tenDotThu: '',
+    ngayBatDau: '',
+    ngayKetThuc: '',
+    trangThai: 'DANG_DIEN_RA'
   });
-  const [editingData, setEditingData] = useState<DotThu | null>(null);
-  
-  const handleSearch = () => {
-    // Implement search functionality here
-    console.log("Searching with criteria:", searchCriteria, "and input:", searchInput);
-  };
-  
-  const handleAddNew = () => {
-    if (isAdding) return;
-  
-    // Lấy id lớn nhất hiện tại và tự động tăng
-    const nextId =
-      dotThuList.length > 0
-        ? (Math.max(...dotThuList.map(item => parseInt(item.id))) + 1).toString()
-        : "1";
-  
-    setIsAdding(true);
-    setNewDotThu({
-      id: nextId, // ID được tự động gán, không cho phép chỉnh sửa
-      maDotThu: "",
-      thoiGianBatDau: "",
-      thoiGianKetThuc: "",
-      moTa: "",
-      trangThai: "Chưa hoàn thành"
-    });
-  };
-  
-  const handleSaveNew = () => {
-    // Bỏ validation cho ID vì ID đã được tự động gán
-    if (!newDotThu.maDotThu.trim()) {
-      alert("Vui lòng nhập Mã đợt thu.");
-      return;
-    }
-    
-    // Kiểm tra trùng lặp mã đợt thu
-    if (dotThuList.some(item => item.maDotThu === newDotThu.maDotThu.trim())) {
-      alert("Mã đợt thu đã tồn tại. Vui lòng nhập mã khác.");
-      return;
-    }
-    
-    if (newDotThu.thoiGianBatDau && newDotThu.thoiGianKetThuc && 
-        newDotThu.thoiGianBatDau > newDotThu.thoiGianKetThuc) {
-      alert("Thời gian bắt đầu phải nhỏ hơn hoặc bằng thời gian kết thúc.");
-      return;
-    }
-    
-    setDotThuList([...dotThuList, { ...newDotThu }]);
-    setIsAdding(false);
-    // Reset form
-    setNewDotThu({
-      id: "",
-      maDotThu: "",
-      thoiGianBatDau: "",
-      thoiGianKetThuc: "",
-      moTa: "",
-      trangThai: "Chưa hoàn thành"
-    });
-  };
-  
-  const handleCancelAdd = () => {
-    setIsAdding(false);
-    setNewDotThu({
-      id: "",
-      maDotThu: "",
-      thoiGianBatDau: "",
-      thoiGianKetThuc: "",
-      moTa: "",
-      trangThai: "Chưa hoàn thành"
-    });
-  };
-  
-  const handleEdit = (item: DotThu) => {
-    if (editingId === item.id) {
-      // Save changes - kiểm tra validation trước khi lưu
-      if (editingData) {
-        if (!editingData.maDotThu.trim()) {
-          alert("Vui lòng nhập Mã đợt thu.");
-          return;
-        }
-        
-        // Kiểm tra trùng lặp mã đợt thu (trừ chính nó)
-        if (dotThuList.some(dt => dt.id !== item.id && dt.maDotThu === editingData.maDotThu.trim())) {
-          alert("Mã đợt thu đã tồn tại. Vui lòng nhập mã khác.");
-          return;
-        }
-        
-        if (editingData.thoiGianBatDau && editingData.thoiGianKetThuc && 
-            editingData.thoiGianBatDau > editingData.thoiGianKetThuc) {
-          alert("Thời gian bắt đầu phải nhỏ hơn hoặc bằng thời gian kết thúc.");
-          return;
-        }
-        
-        setDotThuList(dotThuList.map(dt => 
-          dt.id === item.id ? editingData : dt
-        ));
+  const [addingNew, setAddingNew] = useState<boolean>(false);
+  const [newRowData, setNewRowData] = useState<EditFormData>({
+    tenDotThu: '',
+    ngayBatDau: '',
+    ngayKetThuc: '',
+    trangThai: 'DANG_DIEN_RA'
+  });
+  const [searchCriteria, setSearchCriteria] = useState<string>('0');
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+
+  // Fetch data from API
+  useEffect(() => {
+    loadDotThu();
+  }, []);
+
+  // Update filteredData when data changes
+  useEffect(() => {
+    setFilteredData(data); // Reset filteredData to original data when data changes
+  }, [data]);
+
+  const loadDotThu = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.');
       }
-      setEditingId(null);
-      setEditingData(null);
+      setLoading(true);
+      const response = await fetchAllDotThu();
+      console.log('Raw API response:', JSON.stringify(response, null, 2));
+      console.log('Response data type:', typeof response.data, Array.isArray(response.data));
+      let dataArray: DotThu[] = [];
+      if (typeof response.data === 'string') {
+        try {
+          dataArray = JSON.parse(response.data);
+        } catch (parseError) {
+          console.error('Failed to parse response.data:', parseError);
+        }
+      } else if (Array.isArray(response.data)) {
+        dataArray = response.data;
+      }
+      setData(dataArray);
+      setFilteredData(dataArray); // Initialize filteredData
+      setError('');
+    } catch (err: any) {
+      setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
+      console.error('Error loading dot thu:', err);
+      console.error('Error response:', err.response);
+      setData([]);
+      setFilteredData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle edit click
+  const handleEditClick = async (row: DotThu): Promise<void> => {
+    if (editRowId === row.maDotThu) {
+      try {
+        const updateData: DotThu = {
+          maDotThu: row.maDotThu,
+          tenDotThu: editFormData.tenDotThu,
+          ngayBatDau: editFormData.ngayBatDau ? formatDateISO(editFormData.ngayBatDau) : undefined,
+          ngayKetThuc: editFormData.ngayKetThuc ? formatDateISO(editFormData.ngayKetThuc) : undefined,
+          trangThai: editFormData.trangThai
+        };
+        await updateDotThu(row.maDotThu!, updateData);
+        await loadDotThu();
+        setEditRowId(null);
+        setEditFormData({
+          tenDotThu: '',
+          ngayBatDau: '',
+          ngayKetThuc: '',
+          trangThai: 'DANG_DIEN_RA'
+        });
+      } catch (err: any) {
+        alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
+        console.error('Error updating dot thu:', err);
+      }
     } else {
-      // Start editing
-      setEditingId(item.id);
-      setEditingData({ ...item });
-    }
-  };
-  
-  const handleDelete = (id: string) => {
-    if (window.confirm("Bạn có chắc muốn xóa đợt thu này?")) {
-      setDotThuList(dotThuList.filter(item => item.id !== id));
-    }
-  };
-  
-  const updateEditingData = (field: keyof DotThu, value: string) => {
-    if (editingData) {
-      // Không cho phép chỉnh sửa ID
-      if (field === 'id') {
-        return;
-      }
-      
-      setEditingData({
-        ...editingData,
-        [field]: value
+      setEditRowId(row.maDotThu!);
+      setEditFormData({
+        tenDotThu: row.tenDotThu,
+        ngayBatDau: row.ngayBatDau ? formatDateDisplay(row.ngayBatDau) : '',
+        ngayKetThuc: row.ngayKetThuc ? formatDateDisplay(row.ngayKetThuc) : '',
+        trangThai: row.trangThai || 'DANG_DIEN_RA'
       });
     }
   };
 
+  // Handle delete click
+  const handleDeleteClick = async (id: number): Promise<void> => {
+    if (window.confirm('Bạn có chắc muốn xóa đợt thu này?')) {
+      try {
+        await deleteDotThu(id);
+        await loadDotThu();
+        if (editRowId === id) {
+          setEditRowId(null);
+          setEditFormData({
+            tenDotThu: '',
+            ngayBatDau: '',
+            ngayKetThuc: '',
+            trangThai: 'DANG_DIEN_RA'
+          });
+        }
+      } catch (err: any) {
+        alert('Có lỗi xảy ra khi xóa: ' + (err.response?.data?.message || err.message));
+        console.error('Error deleting dot thu:', err);
+      }
+    }
+  };
 
+  // Handle add new click
+  const handleAddNewClick = (): void => {
+    setAddingNew(true);
+    setNewRowData({
+      tenDotThu: '',
+      ngayBatDau: '',
+      ngayKetThuc: '',
+      trangThai: 'DANG_DIEN_RA'
+    });
+  };
+
+  // Handle edit input change
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle new row input change
+  const handleNewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+    const { name, value } = e.target;
+    setNewRowData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Save new row
+  const handleSaveNewRow = async (): Promise<void> => {
+    if (!newRowData.tenDotThu.trim()) {
+      alert('Vui lòng nhập tên đợt thu.');
+      return;
+    }
+    if (!newRowData.ngayBatDau?.trim()) {
+      alert('Vui lòng nhập ngày bắt đầu.');
+      return;
+    }
+    if (!newRowData.trangThai?.trim()) {
+      alert('Vui lòng chọn trạng thái.');
+      return;
+    }
+
+    try {
+      const newDotThu: DotThu = {
+        tenDotThu: newRowData.tenDotThu,
+        ngayBatDau: newRowData.ngayBatDau ? formatDateISO(newRowData.ngayBatDau) : undefined,
+        ngayKetThuc: newRowData.ngayKetThuc ? formatDateISO(newRowData.ngayKetThuc) : undefined,
+        trangThai: newRowData.trangThai
+      };
+      await createDotThu(newDotThu);
+      await loadDotThu();
+      setAddingNew(false);
+      setNewRowData({
+        tenDotThu: '',
+        ngayBatDau: '',
+        ngayKetThuc: '',
+        trangThai: 'DANG_DIEN_RA'
+      });
+    } catch (err: any) {
+      alert('Có lỗi xảy ra khi tạo đợt thu: ' + (err.response?.data?.message || err.message));
+      console.error('Error creating dot thu:', err);
+    }
+  };
+
+  // Cancel new row
+  const handleCancelNewRow = (): void => {
+    setAddingNew(false);
+    setNewRowData({
+      tenDotThu: '',
+      ngayBatDau: '',
+      ngayKetThuc: '',
+      trangThai: 'DANG_DIEN_RA'
+    });
+  };
+
+  // Handle search
+  const handleSearch = (): void => {
+    if (!searchKeyword.trim()) {
+      setFilteredData(data); // Reset to full data if search keyword is empty
+      alert('Vui lòng nhập từ khóa tìm kiếm.');
+      return;
+    }
+    const crit = parseInt(searchCriteria, 10);
+    const filtered = data.filter(item => {
+      const fields = [
+        item.maDotThu?.toString() || '',
+        item.tenDotThu,
+        formatDateDisplay(item.ngayBatDau),
+        formatDateDisplay(item.ngayKetThuc),
+        getTrangThaiLabel(item.trangThai)
+      ];
+      return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
+    });
+
+    if (filtered.length > 0) {
+      setFilteredData(filtered);
+      setHighlightedRowId(filtered[0].maDotThu!);
+      setTimeout(() => setHighlightedRowId(null), 3000);
+      document.getElementById(`row-${filtered[0].maDotThu}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      setFilteredData([]);
+      alert('Không tìm thấy đợt thu phù hợp.');
+    }
+  };
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+    if (!value.trim()) {
+      setFilteredData(data); // Reset to full data when search input is cleared
+    }
+  };
+
+  // Handle search on Enter key
+  const handleSearchKeyDown = (e: React.KeyboardEvent): void => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const getSoKhoanThu = (maDotThu?: number, khoanThus?: KhoanThu[]): string => {
+    return khoanThus ? khoanThus.length.toString() : '0';
+  };
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="spinner-border" role="status">
+              <span className="sr-only">Đang tải...</span>
+            </div>
+            <p className="mt-2">Đang tải dữ liệu...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <MainLayout>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center text-red-600">
+            <p>{error}</p>
+            <button 
+              onClick={loadDotThu}
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Thử lại
+            </button>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
-      <div className="bg-white rounded-lg shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Quản lý đợt thu</h2>
-        </div>
+      <div className="flex-1 flex flex-col">
+        <main className="flex-1 p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Quản lý đợt thu</h2>
 
-        <div className="p-6">
-          {/* Search and Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex flex-1 gap-2">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center space-x-2">
               <select
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchCriteria}
-                onChange={(e) => setSearchCriteria(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={e => setSearchCriteria(e.target.value)}
               >
-                <option value="madotthu">Mã đợt thu</option>
-                <option value="thoigianbatdau">Thời gian bắt đầu</option>
-                <option value="thoigianketthuc">Thời gian kết thúc</option>
-                <option value="mota">Mô tả</option>
-                <option value="trangthai">Trạng thái</option>
+                <option value="0">Mã đợt thu</option>
+                <option value="1">Tên đợt thu</option>
+                <option value="2">Ngày bắt đầu</option>
+                <option value="3">Ngày kết thúc</option>
+                <option value="4">Trạng thái</option>
               </select>
               <input
                 type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Nhập từ khóa tìm kiếm"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={searchKeyword}
+                onChange={handleSearchChange} // Updated to handle input change
+                onKeyDown={handleSearchKeyDown}
               />
-              <button
+              <button 
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
                 onClick={handleSearch}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
               >
                 <FaSearch />
-                Tìm kiếm
+                <span>Tìm kiếm</span>
               </button>
             </div>
-            <button
-              onClick={handleAddNew}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+
+            <button 
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
+              onClick={handleAddNewClick}
             >
               <FaPlus />
-              Tạo mới
+              <span>Thêm đợt thu</span>
             </button>
           </div>
 
-          {/* Data Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full border border-gray-200 rounded-lg">
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b">ID</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b">Mã đợt thu</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b">Thời gian bắt đầu</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b">Thời gian kết thúc</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b">Mô tả</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b">Trạng thái</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 border-b">Hành động</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã đợt thu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Tên đợt thu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày bắt đầu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày kết thúc</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Trạng thái</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Số khoản thu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {/* Existing data rows */}
-                {dotThuList.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                     {item.id}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {editingId === item.id ? (
-                        <input
-                          type="text"
-                          value={editingData?.maDotThu || ""}
-                          onChange={(e) => updateEditingData("maDotThu", e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded"
-                        />
-                      ) : (
-                        item.maDotThu
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {editingId === item.id ? (
-                        <input
-                          type="date"
-                          value={editingData?.thoiGianBatDau || ""}
-                          onChange={(e) => updateEditingData("thoiGianBatDau", e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded"
-                        />
-                      ) : (
-                        item.thoiGianBatDau
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {editingId === item.id ? (
-                        <input
-                          type="date"
-                          value={editingData?.thoiGianKetThuc || ""}
-                          onChange={(e) => updateEditingData("thoiGianKetThuc", e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded"
-                        />
-                      ) : (
-                        item.thoiGianKetThuc
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {editingId === item.id ? (
-                        <input
-                          type="text"
-                          value={editingData?.moTa || ""}
-                          onChange={(e) => updateEditingData("moTa", e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded"
-                        />
-                      ) : (
-                        item.moTa
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {editingId === item.id ? (
-                        <select
-                        value={editingData?.trangThai}
-                        onChange={(e) => updateEditingData("trangThai", e.target.value as "Đã thanh toán" | "Chưa thanh toán" )}
-                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                      >
-                        <option value="Đã hoàn thành">Đã hoàn thành</option>
-                        <option value="Chưa hoàn thành">Chưa hoàn thành</option>
-                      </select>
+                {filteredData.map(row => ( // Use filteredData instead of data
+                  <tr
+                    key={row.maDotThu}
+                    id={`row-${row.maDotThu}`}
+                    className={`hover:bg-gray-50 ${highlightedRowId === row.maDotThu ? 'bg-yellow-100' : ''}`}
+                  >
+                    <td className="px-4 py-3 text-sm text-gray-900">{row.maDotThu}</td>
+                    {editRowId === row.maDotThu ? (
+                      <>
+                        <td className="px-4 py-3">
+                          <input 
+                            type="text" 
+                            name="tenDotThu" 
+                            value={editFormData.tenDotThu} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded" 
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input 
+                            type="text" 
+                            name="ngayBatDau" 
+                            value={editFormData.ngayBatDau || ''} 
+                            onChange={handleEditChange} 
+                            placeholder="DD/MM/YYYY"
+                            className="w-full px-2 py-1 border rounded" 
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input 
+                            type="text" 
+                            name="ngayKetThuc" 
+                            value={editFormData.ngayKetThuc || ''} 
+                            onChange={handleEditChange} 
+                            placeholder="DD/MM/YYYY"
+                            className="w-full px-2 py-1 border rounded" 
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <select 
+                            name="trangThai" 
+                            value={editFormData.trangThai || ''} 
+                            onChange={handleEditChange} 
+                            className="w-full px-2 py-1 border rounded"
+                          >
+                            {trangThaiOptions.map(option => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{getSoKhoanThu(row.maDotThu, row.khoanThus)}</td>
+                      </>
                     ) : (
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        item.trangThai === "Đã hoàn thành" 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-red-100 text-red-800"
-                      }`}>
-                        {item.trangThai}
-                      </span>
-                      //   <input
-                      //     type="text"
-                      //     value={editingData?.trangThai || ""}
-                      //     onChange={(e) => updateEditingData("trangThai", e.target.value)}
-                      //     className="w-full px-2 py-1 border border-gray-300 rounded"
-                      //   />
-                      // ) : (
-                      //   item.trangThai
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(item)}
+                      <>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.tenDotThu}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayBatDau)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayKetThuc)}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <span className={`px-2 py-1 text-xs rounded-full ${getTrangThaiColor(row.trangThai)}`}>
+                            {getTrangThaiLabel(row.trangThai)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{getSoKhoanThu(row.maDotThu, row.khoanThus)}</td>
+                      </>
+                    )}
+                    <td className="px-4 py-3">
+                      <div className="flex space-x-2">
+                        <button 
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                          title={editingId === item.id ? "Lưu" : "Sửa"}
+                          onClick={() => handleEditClick(row)}
+                          title={editRowId === row.maDotThu ? "Lưu" : "Chỉnh sửa"}
                         >
-                          {editingId === item.id ? <FaSave /> : <FaPen />}
+                          {editRowId === row.maDotThu ? <FaSave /> : <FaPen />}
                         </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
+                        <button 
                           className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                          onClick={() => handleDeleteClick(row.maDotThu!)}
                           title="Xóa"
                         >
                           <FaTrashAlt />
@@ -335,77 +491,66 @@ const QLDotThu: React.FC = () => {
                     </td>
                   </tr>
                 ))}
-
-                {/* Add new row */}
-                {isAdding && (
+                {addingNew && (
                   <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm text-gray-900">-</td>
                     <td className="px-4 py-3">
-                      {/* <input
-                        type="text"
-                        value={newDotThu.id}
-                        // onChange={(e) => setNewDotThu({...newDotThu, id: e.target.value})}
-                        placeholder="ID"
-                        className="w-full px-2 py-1 border border-gray-300 rounded"
-                      /> */}
-                      {newDotThu.id}
-                    </td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="text"
-                        value={newDotThu.maDotThu}
-                        onChange={(e) => setNewDotThu({...newDotThu, maDotThu: e.target.value})}
-                        placeholder="Mã đợt thu"
-                        className="w-full px-2 py-1 border border-gray-300 rounded"
+                      <input 
+                        type="text" 
+                        name="tenDotThu" 
+                        placeholder="Tên đợt thu" 
+                        value={newRowData.tenDotThu} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded" 
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input
-                        type="date"
-                        value={newDotThu.thoiGianBatDau}
-                        onChange={(e) => setNewDotThu({...newDotThu, thoiGianBatDau: e.target.value})}
-                        className="w-full px-2 py-1 border border-gray-300 rounded"
+                      <input 
+                        type="text" 
+                        name="ngayBatDau" 
+                        placeholder="DD/MM/YYYY" 
+                        value={newRowData.ngayBatDau || ''} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded" 
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input
-                        type="date"
-                        value={newDotThu.thoiGianKetThuc}
-                        onChange={(e) => setNewDotThu({...newDotThu, thoiGianKetThuc: e.target.value})}
-                        className="w-full px-2 py-1 border border-gray-300 rounded"
+                      <input 
+                        type="text" 
+                        name="ngayKetThuc" 
+                        placeholder="DD/MM/YYYY" 
+                        value={newRowData.ngayKetThuc || ''} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded" 
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input
-                        type="text"
-                        value={newDotThu.moTa}
-                        onChange={(e) => setNewDotThu({...newDotThu, moTa: e.target.value})}
-                        placeholder="Mô tả"
-                        className="w-full px-2 py-1 border border-gray-300 rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                    <select
-                         value={newDotThu.trangThai}
-                         onChange={(e) => setNewDotThu({...newDotThu, trangThai: e.target.value as "Đã hoàn thành" | "Chưa hoàn thành"})}
-                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      <select 
+                        name="trangThai" 
+                        value={newRowData.trangThai || ''} 
+                        onChange={handleNewChange} 
+                        className="w-full px-2 py-1 border rounded"
                       >
-                        <option value="Đã hoàn thành">Đã hoàn thành</option>
-                        <option value="Chưa hoàn thành">Chưa hoàn thành</option>
+                        {trangThaiOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
                       </select>
-                     
                     </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">0</td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleSaveNew}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded transition-colors"
+                      <div className="flex space-x-2">
+                        <button 
+                          className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
+                          onClick={handleSaveNewRow}
                           title="Lưu"
                         >
                           <FaSave />
                         </button>
-                        <button
-                          onClick={handleCancelAdd}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        <button 
+                          className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                          onClick={handleCancelNewRow}
                           title="Hủy"
                         >
                           <FaTimes />
@@ -418,25 +563,25 @@ const QLDotThu: React.FC = () => {
             </table>
           </div>
 
-          {/* Pagination */}
           <div className="mt-4 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-700">
-                Hiển thị
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                  className="mx-2 px-2 py-1 border border-gray-300 rounded"
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                </select>
-                mục
-              </label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-700">Hiển thị</span>
+              <select
+                className="border border-gray-300 rounded px-2 py-1 text-sm"
+                value={itemsPerPage}
+                onChange={e => setItemsPerPage(Number(e.target.value))}
+              >
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              <span className="text-sm text-gray-700">mục</span>
+            </div>
+            <div className="text-sm text-gray-700">
+              Tổng cộng: {filteredData.length} đợt thu {/* Updated to use filteredData.length */}
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </MainLayout>
   );

@@ -1,104 +1,62 @@
 package model;
 
-import java.sql.Date;
-import java.util.Objects;
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+@Entity
+@Table(name = "khoanthu")
 public class KhoanThu {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer maKhoanThu;
 
-	private String maKhoanThu;
-	private String maDotThu;
-	private Double soTienPhaiNop;
-	private Date ngayNop;
-	private String tenKhoanThu;
+    @Column(nullable = false, length = 100)
+    private String tenKhoanThu;
 
-	public KhoanThu(String maKhoanThu, String maDotThu, Double soTienPhaiNop, Date ngayNop, String tenKhoanThu) {
-		super();
-		this.maKhoanThu = maKhoanThu;
-		this.maDotThu = maDotThu;
-		this.soTienPhaiNop = soTienPhaiNop;
-		this.ngayNop = ngayNop;
-		this.tenKhoanThu = tenKhoanThu;
-	}
+    @Column(length = 50)
+    private String loaiKhoanThu;
 
-	public String getMaKhoanThu() {
-		return maKhoanThu;
-	}
+    private Float soTien;
 
-	public void setMaKhoanThu(String maKhoanThu) {
-		this.maKhoanThu = maKhoanThu;
-	}
+    private boolean batBuoc;
 
-	public String getMaDotThu() {
-		return maDotThu;
-	}
+    @Column(length = 1000)
+    private String ghiChu;
 
-	public void setMaDotThu(String maDotThu) {
-		this.maDotThu = maDotThu;
-	}
+    @ManyToOne
+    @JoinColumn(name = "maDotThu")
+    @JsonBackReference
+    private DotThu dotThu;
 
-	public Double getSoTienPhaiNop() {
-		return soTienPhaiNop;
-	}
+    @Transient // Not persisted in the database
+    @JsonProperty("maDotThu") // Include in JSON response
+    private Integer maDotThuTransient;
 
-	public void setSoTienPhaiNop(Double soTienPhaiNop) {
-		this.soTienPhaiNop = soTienPhaiNop;
-	}
+    // Initialize transient field after loading entity
+    @PostLoad
+    private void populateMaDotThu() {
+        this.maDotThuTransient = (dotThu != null) ? dotThu.getMaDotThu() : null;
+    }
 
-	public Date getNgayNop() {
-		return ngayNop;
-	}
-
-	public void setNgayNop(Date ngayNop) {
-		this.ngayNop = ngayNop;
-	}
-
-	public String getTenKhoanThu() {
-		return tenKhoanThu;
-	}
-
-	public void setTenKhoanThu(String tenKhoanThu) {
-		this.tenKhoanThu = tenKhoanThu;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(maDotThu, maKhoanThu, ngayNop, soTienPhaiNop, tenKhoanThu);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		KhoanThu other = (KhoanThu) obj;
-		return Objects.equals(maDotThu, other.maDotThu) && Objects.equals(maKhoanThu, other.maKhoanThu)
-				&& Objects.equals(ngayNop, other.ngayNop) && Objects.equals(soTienPhaiNop, other.soTienPhaiNop)
-				&& Objects.equals(tenKhoanThu, other.tenKhoanThu);
-	}
-
-	@Override
-	public String toString() {
-		return "KhoanThu [maKhoanThu=" + maKhoanThu + ", maDotThu=" + maDotThu + ", soTienPhaiNop=" + soTienPhaiNop
-				+ ", ngayNop=" + ngayNop + ", tenKhoanThu=" + tenKhoanThu + "]";
-	}
-
-	public static class TrangThaiThanhToan {
-		public static final int DA_NOP = 0;
-		public static final int CHUA_NOP = 1;
-
-		public static String toString(int id) {
-			switch (id) {
-			case DA_NOP:
-				return "đã thu";
-			case CHUA_NOP:
-				return "chưa thu";
-			default:
-				return "";
-			}
-		}
-	}
-
+    // Getters and Setters
+    public Integer getMaKhoanThu() { return maKhoanThu; }
+    public void setMaKhoanThu(Integer maKhoanThu) { this.maKhoanThu = maKhoanThu; }
+    public String getTenKhoanThu() { return tenKhoanThu; }
+    public void setTenKhoanThu(String tenKhoanThu) { this.tenKhoanThu = tenKhoanThu; }
+    public String getLoaiKhoanThu() { return loaiKhoanThu; }
+    public void setLoaiKhoanThu(String loaiKhoanThu) { this.loaiKhoanThu = loaiKhoanThu; }
+    public Float getSoTien() { return soTien; }
+    public void setSoTien(Float soTien) { this.soTien = soTien; }
+    public boolean isBatBuoc() { return batBuoc; }
+    public void setBatBuoc(boolean batBuoc) { this.batBuoc = batBuoc; }
+    public String getGhiChu() { return ghiChu; }
+    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
+    public DotThu getDotThu() { return dotThu; }
+    public void setDotThu(DotThu dotThu) { 
+        this.dotThu = dotThu; 
+        this.maDotThuTransient = (dotThu != null) ? dotThu.getMaDotThu() : null; 
+    }
+    public Integer getMaDotThuTransient() { return maDotThuTransient; }
+    public void setMaDotThuTransient(Integer maDotThuTransient) { this.maDotThuTransient = maDotThuTransient; }
 }
