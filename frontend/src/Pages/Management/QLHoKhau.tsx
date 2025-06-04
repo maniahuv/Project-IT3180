@@ -5,16 +5,17 @@ import {
   FaPen,
   FaTrashAlt,
   FaSave,
-  FaTimes
+  FaTimes,
+  FaChevronDown,
+  FaChevronUp,
 } from 'react-icons/fa';
 import MainLayout from '../../Layout/MainLayout';
-import { 
-  HoKhau, 
-  fetchAllHoKhau, 
-  // fetchHoKhauById, 
-  createHoKhau, 
-  updateHoKhau, 
-  deleteHoKhau 
+import {
+  HoKhau,
+  fetchAllHoKhau,
+  createHoKhau,
+  updateHoKhau,
+  deleteHoKhau,
 } from '../../api/HoKhauApi';
 
 // Interface for form data
@@ -25,6 +26,18 @@ interface EditFormData {
   ngayCapNhat?: string;
   dienTich: number;
   loaiThayDoi: number;
+}
+
+// Interface for NhanKhau (household member)
+interface NhanKhau {
+  maNhanKhau: number;
+  hoTen: string;
+  cmnd: string;
+  ngaySinh: string;
+  gioiTinh: boolean;
+  qhVoiChuHo: string;
+  trangThai: string;
+  maHoKhau: number;
 }
 
 // Utility functions
@@ -49,9 +62,9 @@ const formatDateDisplay = (dateStr?: string): string => {
 };
 
 const QLHoKhau: React.FC = () => {
-  const vaiTro = localStorage.getItem("vaiTro");
+  const vaiTro = localStorage.getItem('vaiTro');
   const [data, setData] = useState<HoKhau[]>([]);
-  const [filteredData, setFilteredData] = useState<HoKhau[]>([]); // New state for filtered data
+  const [filteredData, setFilteredData] = useState<HoKhau[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -61,7 +74,7 @@ const QLHoKhau: React.FC = () => {
     ngayLap: '',
     ngayCapNhat: '',
     dienTich: 0,
-    loaiThayDoi: 1
+    loaiThayDoi: 1,
   });
   const [addingNew, setAddingNew] = useState<boolean>(false);
   const [newRowData, setNewRowData] = useState<EditFormData>({
@@ -70,13 +83,13 @@ const QLHoKhau: React.FC = () => {
     ngayLap: '',
     ngayCapNhat: '',
     dienTich: 0,
-    loaiThayDoi: 1
+    loaiThayDoi: 1,
   });
-
   const [searchCriteria, setSearchCriteria] = useState<string>('0');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [expandedRowId, setExpandedRowId] = useState<number | null>(null); // New state for expanded row
 
   // Fetch data from API
   useEffect(() => {
@@ -85,7 +98,7 @@ const QLHoKhau: React.FC = () => {
 
   // Update filteredData when data changes
   useEffect(() => {
-    setFilteredData(data); // Reset filteredData to original data when data changes
+    setFilteredData(data);
   }, [data]);
 
   const loadHoKhau = async () => {
@@ -108,7 +121,7 @@ const QLHoKhau: React.FC = () => {
 
       if (Array.isArray(fetchedData)) {
         setData(fetchedData);
-        setFilteredData(fetchedData); // Initialize filteredData
+        setFilteredData(fetchedData);
         console.log('Fetched ho khau data:', fetchedData);
         setError('');
       } else {
@@ -136,9 +149,9 @@ const QLHoKhau: React.FC = () => {
           soNha: editFormData.soNha,
           ngayLap: formatDateISO(editFormData.ngayLap),
           ngayCapNhat: editFormData.ngayCapNhat ? formatDateISO(editFormData.ngayCapNhat) : undefined,
-          dienTich: editFormData.dienTich
+          dienTich: editFormData.dienTich,
         };
-        
+
         await updateHoKhau(row.maHoKhau!, updateData, editFormData.loaiThayDoi, editFormData.chuHo);
         await loadHoKhau();
         setEditRowId(null);
@@ -148,7 +161,7 @@ const QLHoKhau: React.FC = () => {
           ngayLap: '',
           ngayCapNhat: '',
           dienTich: 0,
-          loaiThayDoi: 1
+          loaiThayDoi: 1,
         });
       } catch (err: any) {
         alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
@@ -162,8 +175,9 @@ const QLHoKhau: React.FC = () => {
         ngayLap: formatDateDisplay(row.ngayLap),
         ngayCapNhat: formatDateDisplay(row.ngayCapNhat),
         dienTich: row.dienTich,
-        loaiThayDoi: 2
+        loaiThayDoi: 2,
       });
+      setExpandedRowId(null); // Close any expanded dropdown when editing
     }
   };
 
@@ -181,8 +195,11 @@ const QLHoKhau: React.FC = () => {
             ngayLap: '',
             ngayCapNhat: '',
             dienTich: 0,
-            loaiThayDoi: 1
+            loaiThayDoi: 1,
           });
+        }
+        if (expandedRowId === id) {
+          setExpandedRowId(null); // Close dropdown if deleted
         }
       } catch (err: any) {
         alert('Có lỗi xảy ra khi xóa: ' + (err.response?.data?.message || err.message));
@@ -194,9 +211,9 @@ const QLHoKhau: React.FC = () => {
   // Handle edit input change
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
-    setEditFormData(prev => ({ 
-      ...prev, 
-      [name]: name === 'chuHo' || name === 'dienTich' || name === 'loaiThayDoi' ? Number(value) : value 
+    setEditFormData((prev) => ({
+      ...prev,
+      [name]: name === 'chuHo' || name === 'dienTich' || name === 'loaiThayDoi' ? Number(value) : value,
     }));
   };
 
@@ -209,16 +226,17 @@ const QLHoKhau: React.FC = () => {
       ngayLap: '',
       ngayCapNhat: '',
       dienTich: 0,
-      loaiThayDoi: 1
+      loaiThayDoi: 1,
     });
+    setExpandedRowId(null); // Close any expanded dropdown when adding new
   };
 
   // Handle new row input change
   const handleNewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
-    setNewRowData(prev => ({ 
-      ...prev, 
-      [name]: name === 'chuHo' || name === 'dienTich' || name === 'loaiThayDoi' ? Number(value) : value 
+    setNewRowData((prev) => ({
+      ...prev,
+      [name]: name === 'chuHo' || name === 'dienTich' || name === 'loaiThayDoi' ? Number(value) : value,
     }));
   };
 
@@ -251,9 +269,9 @@ const QLHoKhau: React.FC = () => {
         soNha: newRowData.soNha,
         ngayLap: formatDateISO(newRowData.ngayLap),
         ngayCapNhat: newRowData.ngayCapNhat ? formatDateISO(newRowData.ngayCapNhat) : undefined,
-        dienTich: newRowData.dienTich
+        dienTich: newRowData.dienTich,
       };
-      
+
       await createHoKhau(newHoKhau, newRowData.loaiThayDoi);
       await loadHoKhau();
       setAddingNew(false);
@@ -263,7 +281,7 @@ const QLHoKhau: React.FC = () => {
         ngayLap: '',
         ngayCapNhat: '',
         dienTich: 0,
-        loaiThayDoi: 1
+        loaiThayDoi: 1,
       });
     } catch (err: any) {
       alert('Có lỗi xảy ra khi tạo hộ khẩu: ' + (err.response?.data?.message || err.message));
@@ -280,19 +298,27 @@ const QLHoKhau: React.FC = () => {
       ngayLap: '',
       ngayCapNhat: '',
       dienTich: 0,
-      loaiThayDoi: 1
+      loaiThayDoi: 1,
     });
+  };
+
+  // Handle row click to toggle dropdown
+  const handleRowClick = (maHoKhau: number): void => {
+    if (editRowId !== maHoKhau) {
+      // Only toggle if not in edit mode
+      setExpandedRowId((prev) => (prev === maHoKhau ? null : maHoKhau));
+    }
   };
 
   // Handle search
   const handleSearch = (): void => {
     if (!searchKeyword.trim()) {
-      setFilteredData(data); // Reset to full data if search keyword is empty
+      setFilteredData(data);
       alert('Vui lòng nhập từ khóa tìm kiếm.');
       return;
     }
     const crit = parseInt(searchCriteria, 10);
-    const filtered = data.filter(item => {
+    const filtered = data.filter((item) => {
       const fields = [
         item.maHoKhau?.toString() || '',
         item.chuHo.toString(),
@@ -300,7 +326,7 @@ const QLHoKhau: React.FC = () => {
         formatDateDisplay(item.ngayLap),
         formatDateDisplay(item.ngayCapNhat),
         item.dienTich.toString(),
-        item.danhSachNhanKhau?.length.toString() || '0'
+        item.danhSachNhanKhau?.length.toString() || '0',
       ];
       return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
     });
@@ -321,7 +347,7 @@ const QLHoKhau: React.FC = () => {
     const value = e.target.value;
     setSearchKeyword(value);
     if (!value.trim()) {
-      setFilteredData(data); // Reset to full data when search input is cleared
+      setFilteredData(data);
     }
   };
 
@@ -353,7 +379,7 @@ const QLHoKhau: React.FC = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-red-600">
             <p>{error}</p>
-            <button 
+            <button
               onClick={loadHoKhau}
               className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
@@ -376,7 +402,7 @@ const QLHoKhau: React.FC = () => {
               <select
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchCriteria}
-                onChange={e => setSearchCriteria(e.target.value)}
+                onChange={(e) => setSearchCriteria(e.target.value)}
               >
                 <option value="0">Mã hộ khẩu</option>
                 <option value="1">Mã chủ hộ</option>
@@ -390,10 +416,10 @@ const QLHoKhau: React.FC = () => {
                 placeholder="Nhập từ khóa tìm kiếm"
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchKeyword}
-                onChange={handleSearchChange} // Updated to handle input change
+                onChange={handleSearchChange}
                 onKeyDown={handleSearchKeyDown}
               />
-              <button 
+              <button
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
                 onClick={handleSearch}
               >
@@ -404,12 +430,12 @@ const QLHoKhau: React.FC = () => {
 
             <button
               className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
-                vaiTro === "3"
-                  ? "bg-green-400 text-gray-200 cursor-not-allowed"
-                  : "bg-green-600 text-white hover:bg-green-700"
+                vaiTro === '3'
+                  ? 'bg-green-400 text-gray-200 cursor-not-allowed'
+                  : 'bg-green-600 text-white hover:bg-green-700'
               }`}
               onClick={handleAddNewClick}
-              disabled={vaiTro === "3"}
+              disabled={vaiTro === '3'}
             >
               <FaPlus />
               <span>Thêm hộ khẩu</span>
@@ -420,6 +446,7 @@ const QLHoKhau: React.FC = () => {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700"></th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã hộ khẩu</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã chủ hộ</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Số nhà</th>
@@ -430,166 +457,219 @@ const QLHoKhau: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredData.map(row => ( // Use filteredData instead of data
-                  <tr
-                    key={row.maHoKhau}
-                    id={`row-${row.maHoKhau}`}
-                    className={`hover:bg-gray-50 ${highlightedRowId === row.maHoKhau ? 'bg-yellow-100' : ''}`}
-                  >
-                    <td className="px-4 py-3 text-sm text-gray-900">{row.maHoKhau}</td>
-                    {editRowId === row.maHoKhau ? (
-                      <>
-                        <td className="px-4 py-3">
-                          <input 
-                            type="number" 
-                            name="chuHo" 
-                            value={editFormData.chuHo} 
-                            onChange={handleEditChange} 
-                            className="w-full px-2 py-1 border rounded" 
-                          />
+                {filteredData.map((row) => (
+                  <React.Fragment key={row.maHoKhau}>
+                    <tr
+                      id={`row-${row.maHoKhau}`}
+                      className={`hover:bg-gray-50 cursor-pointer ${
+                        highlightedRowId === row.maHoKhau ? 'bg-yellow-100' : ''
+                      }`}
+                      onClick={() => handleRowClick(row.maHoKhau!)}
+                    >
+                      <td className="px-4 py-3">
+                        {row.danhSachNhanKhau && row.danhSachNhanKhau.length > 0 && (
+                          <span>
+                            {expandedRowId === row.maHoKhau ? <FaChevronUp /> : <FaChevronDown />}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{row.maHoKhau}</td>
+                      {editRowId === row.maHoKhau ? (
+                        <>
+                          <td className="px-4 py-3">
+                            <input
+                              type="number"
+                              name="chuHo"
+                              value={editFormData.chuHo}
+                              onChange={handleEditChange}
+                              className="w-full px-2 py-1 border rounded"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <input
+                              type="text"
+                              name="soNha"
+                              value={editFormData.soNha}
+                              onChange={handleEditChange}
+                              className="w-full px-2 py-1 border rounded"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <input
+                              type="text"
+                              name="ngayLap"
+                              value={editFormData.ngayLap}
+                              onChange={handleEditChange}
+                              placeholder="DD/MM/YYYY"
+                              className="w-full px-2 py-1 border rounded"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <input
+                              type="text"
+                              name="ngayCapNhat"
+                              value={editFormData.ngayCapNhat || ''}
+                              onChange={handleEditChange}
+                              placeholder="DD/MM/YYYY"
+                              className="w-full px-2 py-1 border rounded"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <input
+                              type="number"
+                              name="dienTich"
+                              value={editFormData.dienTich}
+                              onChange={handleEditChange}
+                              className="w-full px-2 py-1 border rounded"
+                            />
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-4 py-3 text-sm text-gray-900">{row.chuHo}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{row.soNha}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayLap)}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayCapNhat)}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{row.dienTich}</td>
+                        </>
+                      )}
+                      <td className="px-4 py-3">
+                        <div className="flex space-x-2">
+                          <button
+                            className={`p-2 rounded transition-colors ${
+                              vaiTro === '3'
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-blue-600 hover:bg-blue-50'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent row click from toggling dropdown
+                              handleEditClick(row);
+                            }}
+                            title={editRowId === row.maHoKhau ? 'Lưu' : 'Chỉnh sửa'}
+                            disabled={vaiTro === '3'}
+                          >
+                            {editRowId === row.maHoKhau ? <FaSave /> : <FaPen />}
+                          </button>
+                          <button
+                            className={`p-2 rounded transition-colors ${
+                              vaiTro === '3'
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-red-600 hover:bg-red-50'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent row click from toggling dropdown
+                              handleDeleteClick(row.maHoKhau!);
+                            }}
+                            title="Xóa"
+                            disabled={vaiTro === '3'}
+                          >
+                            <FaTrashAlt />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {expandedRowId === row.maHoKhau && row.danhSachNhanKhau && row.danhSachNhanKhau.length > 0 && (
+                      <tr>
+                        <td colSpan={8} className="px-4 py-3 bg-gray-100">
+                          <div className="pl-8">
+                            <h3 className="text-sm font-medium text-gray-700 mb-2">Danh sách nhân khẩu</h3>
+                            <table className="w-full border-t border-gray-200">
+                              <thead>
+                                <tr className="bg-gray-200">
+                                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Mã nhân khẩu</th>
+                                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Họ tên</th>
+                                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">CMND</th>
+                                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Ngày sinh</th>
+                                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Giới tính</th>
+                                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Quan hệ với chủ hộ</th>
+                                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Trạng thái</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200">
+                                {row.danhSachNhanKhau.map((nhanKhau: NhanKhau) => (
+                                  <tr key={nhanKhau.maNhanKhau} className="hover:bg-gray-50">
+                                    <td className="px-4 py-2 text-sm text-gray-900">{nhanKhau.maNhanKhau}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{nhanKhau.hoTen}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{nhanKhau.cmnd}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{formatDateDisplay(nhanKhau.ngaySinh)}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{nhanKhau.gioiTinh ? 'Nam' : 'Nữ'}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{nhanKhau.qhVoiChuHo}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{nhanKhau.trangThai}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
                         </td>
-                        <td className="px-4 py-3">
-                          <input 
-                            type="text" 
-                            name="soNha" 
-                            value={editFormData.soNha} 
-                            onChange={handleEditChange} 
-                            className="w-full px-2 py-1 border rounded" 
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input 
-                            type="text" 
-                            name="ngayLap" 
-                            value={editFormData.ngayLap} 
-                            onChange={handleEditChange} 
-                            placeholder="DD/MM/YYYY"
-                            className="w-full px-2 py-1 border rounded" 
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input 
-                            type="text" 
-                            name="ngayCapNhat" 
-                            value={editFormData.ngayCapNhat || ''} 
-                            onChange={handleEditChange} 
-                            placeholder="DD/MM/YYYY"
-                            className="w-full px-2 py-1 border rounded" 
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input 
-                            type="number" 
-                            name="dienTich" 
-                            value={editFormData.dienTich} 
-                            onChange={handleEditChange} 
-                            className="w-full px-2 py-1 border rounded" 
-                          />
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.chuHo}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.soNha}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayLap)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayCapNhat)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.dienTich}</td>
-                      </>
+                      </tr>
                     )}
-                    <td className="px-4 py-3">
-                      <div className="flex space-x-2">
-                        <button
-                          className={`p-2 rounded transition-colors ${
-                            vaiTro === "3"
-                              ? "text-gray-400 cursor-not-allowed"
-                              : "text-blue-600 hover:bg-blue-50"
-                          }`}
-                          onClick={() => handleEditClick(row)}
-                          title={editRowId === row.maHoKhau ? "Lưu" : "Chỉnh sửa"}
-                          disabled={vaiTro === "3"}
-                        >
-                          {editRowId === row.maHoKhau ? <FaSave /> : <FaPen />}
-                        </button>
-                        <button
-                          className={`p-2 rounded transition-colors ${
-                            vaiTro === "3"
-                              ? "text-gray-400 cursor-not-allowed"
-                              : "text-red-600 hover:bg-red-50"
-                          }`}
-                          onClick={() => handleDeleteClick(row.maHoKhau!)}
-                          title="Xóa"
-                          disabled={vaiTro === "3"}
-                        >
-                          <FaTrashAlt />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                  </React.Fragment>
                 ))}
 
                 {addingNew && (
                   <tr className="bg-blue-50">
                     <td className="px-4 py-3 text-sm text-gray-900">-</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">-</td>
                     <td className="px-4 py-3">
-                      <input 
-                        type="number" 
-                        name="chuHo" 
-                        placeholder="Mã chủ hộ" 
-                        value={newRowData.chuHo} 
-                        onChange={handleNewChange} 
-                        className="w-full px-2 py-1 border rounded" 
+                      <input
+                        type="number"
+                        name="chuHo"
+                        placeholder="Mã chủ hộ"
+                        value={newRowData.chuHo}
+                        onChange={handleNewChange}
+                        className="w-full px-2 py-1 border rounded"
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input 
-                        type="text" 
-                        name="soNha" 
-                        placeholder="Số nhà" 
-                        value={newRowData.soNha} 
-                        onChange={handleNewChange} 
-                        className="w-full px-2 py-1 border rounded" 
+                      <input
+                        type="text"
+                        name="soNha"
+                        placeholder="Số nhà"
+                        value={newRowData.soNha}
+                        onChange={handleNewChange}
+                        className="w-full px-2 py-1 border rounded"
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input 
-                        type="text" 
-                        name="ngayLap" 
-                        placeholder="DD/MM/YYYY" 
-                        value={newRowData.ngayLap} 
-                        onChange={handleNewChange} 
-                        className="w-full px-2 py-1 border rounded" 
+                      <input
+                        type="text"
+                        name="ngayLap"
+                        placeholder="DD/MM/YYYY"
+                        value={newRowData.ngayLap}
+                        onChange={handleNewChange}
+                        className="w-full px-2 py-1 border rounded"
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input 
-                        type="text" 
-                        name="ngayCapNhat" 
-                        placeholder="DD/MM/YYYY" 
-                        value={newRowData.ngayCapNhat || ''} 
-                        onChange={handleNewChange} 
-                        className="w-full px-2 py-1 border rounded" 
+                      <input
+                        type="text"
+                        name="ngayCapNhat"
+                        placeholder="DD/MM/YYYY"
+                        value={newRowData.ngayCapNhat || ''}
+                        onChange={handleNewChange}
+                        className="w-full px-2 py-1 border rounded"
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input 
-                        type="number" 
-                        name="dienTich" 
-                        placeholder="Diện tích" 
-                        value={newRowData.dienTich} 
-                        onChange={handleNewChange} 
-                        className="w-full px-2 py-1 border rounded" 
+                      <input
+                        type="number"
+                        name="dienTich"
+                        placeholder="Diện tích"
+                        value={newRowData.dienTich}
+                        onChange={handleNewChange}
+                        className="w-full px-2 py-1 border rounded"
                       />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex space-x-2">
-                        <button 
+                        <button
                           className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
                           onClick={handleSaveNewRow}
                           title="Lưu"
                         >
                           <FaSave />
                         </button>
-                        <button 
+                        <button
                           className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700"
                           onClick={handleCancelNewRow}
                           title="Hủy"
@@ -610,7 +690,7 @@ const QLHoKhau: React.FC = () => {
               <select
                 className="border border-gray-300 rounded px-2 py-1 text-sm"
                 value={itemsPerPage}
-                onChange={e => setItemsPerPage(Number(e.target.value))}
+                onChange={(e) => setItemsPerPage(Number(e.target.value))}
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>

@@ -5,7 +5,7 @@ import Register from './Pages/Auth/Register';
 import QLTaiKhoan from './Pages/Management/QLTaiKhoan';
 import QLDotThu from './Pages/Management/QLDotThu';
 import QLHoKhau from './Pages/Management/QLHoKhau';
-import QLKhoanThu from './Pages/Management/QLKhoanThu';
+// import QLKhoanThu from './Pages/Management/QLKhoanThu';
 import Account from './Pages/Account';
 import HomePage from './Pages/HomePage';
 import QLNhanKhau from './Pages/Management/QLNhanKhau';
@@ -114,7 +114,7 @@ export default function App() {
         <Route path="/management/qltaikhoan" element={<QLTaiKhoan />} />
         <Route path="/management/qldotthu" element={<QLDotThu />} />
         <Route path="/management/qlhokhau" element={<QLHoKhau />} />
-        <Route path="/management/qlkhoanthu" element={<QLKhoanThu />} />
+        {/* <Route path="/management/qlkhoanthu" element={<QLKhoanThu />} /> */}
         <Route path="/management/qlnhankhau" element={<QLNhanKhau />} />
         <Route path="/management/qltamtrutamvang" element={<QLTamTruTamVang />} />
         <Route path="/account" element={<Account />} />
