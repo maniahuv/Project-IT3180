@@ -21,6 +21,7 @@ public class NopPhiController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('KE_TOAN')")
     public List<NopPhi> getAll() {
         return service.findAll();
     }

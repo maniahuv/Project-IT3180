@@ -3,8 +3,13 @@ package model;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+
 import enums.VaiTro;
 
 @Entity
@@ -26,6 +31,10 @@ public class TaiKhoan implements UserDetails {
 
     @Column(name = "hoTen")
     private String hoTen;
+
+	@OneToMany(mappedBy = "nguoiThu", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	 @JsonBackReference
+	private List<NopPhi> danhSachNopPhi;
 
     // Constructors
     public TaiKhoan() {}

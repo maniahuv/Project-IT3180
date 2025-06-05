@@ -52,7 +52,6 @@ public class NopPhi {
     @JsonProperty("idNguoiThu")
     private Integer idNguoiThuTransient;
 
-  
     @PostLoad
     private void populateTransientFields() {
         this.maHoKhauTransient = (hoKhau != null) ? hoKhau.getMaHoKhau() : null;
@@ -120,6 +119,10 @@ public class NopPhi {
 
     public void setIdNguoiThuTransient(Integer idNguoiThuTransient) {
         this.idNguoiThuTransient = idNguoiThuTransient;
+    }
+
+    public HoKhau getHoKhau() {
+        return hoKhau;
     }
 
     public void setHoKhau(HoKhau hoKhau) {

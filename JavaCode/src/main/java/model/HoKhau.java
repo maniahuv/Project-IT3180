@@ -34,6 +34,10 @@ public class HoKhau {
     @JsonManagedReference(value = "hokhau-lichsu")
     private List<LichSuHoKhau> lichSuHoKhau;
 
+    @OneToMany(mappedBy = "hoKhau", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference(value = "hokhau-nopphi")
+    private List<NopPhi> danhSachNopPhi;
+
     // Constructors
     public HoKhau() {}
 

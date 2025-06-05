@@ -1,6 +1,9 @@
 package model;
 
 import jakarta.persistence.*;
+
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -38,6 +41,10 @@ public class KhoanThu {
     private void populateMaDotThu() {
         this.maDotThuTransient = (dotThu != null) ? dotThu.getMaDotThu() : null;
     }
+
+@OneToMany(mappedBy = "khoanThu", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonBackReference
+    private List<NopPhi> danhSachNopPhi;
 
     // Getters and Setters
     public Integer getMaKhoanThu() { return maKhoanThu; }

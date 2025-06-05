@@ -130,6 +130,8 @@ const QLNopPhi: React.FC = () => {
       setDotThuData(dotThuArray);
 
       const nopPhiResponse = await fetchAllNopPhi();
+      console.log('nopPhiResponse:', nopPhiResponse.data);
+      
       setNopPhiData(nopPhiResponse.data);
       setError('');
     } catch (err: any) {
