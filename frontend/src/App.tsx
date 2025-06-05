@@ -12,7 +12,7 @@ import QLNhanKhau from './Pages/Management/QLNhanKhau';
 import QLTamTruTamVang from './Pages/Management/QLTamTruTamVang';
 import QLNopPhi from './Pages/Management/QLNopPhi';
 import QLLichSuHoKhau from './Pages/Management/QLLichSuHoKhau';
-
+import QLxuatbaocao from './Pages/Management/QLxuatbaocao';
 // Service data for the "Dịch vụ của Bluemoon" section
 const services = [
   {
@@ -120,6 +120,7 @@ export default function App() {
         <Route path="/account" element={<Account />} />
         <Route path="/management/qlnopphi" element={<QLNopPhi />} />
         <Route path="/management/qllichsuhoKhau" element={<QLLichSuHoKhau />} />
+        <Route path="/management/qlxuatbaocao" element={<QLxuatbaocao />} />
       </Routes>
     </Router>
   );
