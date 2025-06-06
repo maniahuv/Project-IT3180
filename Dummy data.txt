@@ -1,36 +1,101 @@
 USE it3180;
 
--- 3. Insert dữ liệu cho bảng dotthu
+-- Thêm dữ liệu cho bảng dotthu
 INSERT INTO dotthu (ten_dot_thu, ngay_bat_dau, ngay_ket_thuc, trang_thai) VALUES
 ('Đợt thu tháng 5/2025', '2025-05-01', '2025-05-31', '1'),
-('Đợt thu tháng 6/2025', '2025-06-01', '2025-06-30', '2');
+('Đợt thu tháng 6/2025', '2025-06-01', '2025-06-30', '2'),
+('Đợt thu tháng 7/2025', '2025-07-01', '2025-07-31', '1'),
+('Đợt thu tháng 8/2025', '2025-08-01', '2025-08-31', '2'),
+('Đợt thu tháng 9/2025', '2025-09-01', '2025-09-30', '2'),
+('Đợt thu tháng 10/2025', '2025-10-01', '2025-10-31', '2'),
+('Đợt thu tháng 11/2025', '2025-11-01', '2025-11-30', '2'),
+('Đợt thu tháng 12/2025', '2025-12-01', '2025-12-31', '2');
 
--- 2. Insert dữ liệu cho bảng khoanthu
+-- Thêm dữ liệu cho bảng khoanthu
 INSERT INTO khoanthu (ten_khoan_thu, loai_khoan_thu, so_tien, bat_buoc, ghi_chu, ma_dot_thu) VALUES
-('Phí vệ sinh', 'Phí dịch vụ', 50000, TRUE, 'Phí vệ sinh hàng tháng', 2),
-('Phí điện nước', 'Phí dịch vụ', 150000, TRUE, 'Phí điện nước theo tiêu thụ', 1),
-('Phí giữ xe', 'Phí dịch vụ', 20000, FALSE, 'Phí giữ xe tháng', 2);
+('Phí vệ sinh', 'DICH_VU', 50000, TRUE, 'Phí vệ sinh hàng tháng', 2),
+('Phí điện nước', 'DICH_VU', 150000, TRUE, 'Phí điện nước theo tiêu thụ', 1),
+('Phí giữ xe', 'DONG_GOP', 20000, FALSE, 'Phí giữ xe tháng', 2),
+('Học phí lớp hè', 'HOC_PHI', 1000000, TRUE, 'Học phí lớp học hè cho trẻ em', 3),
+('Phí hoạt động cộng đồng', 'HOAT_DONG', 30000, FALSE, 'Phí tham gia hoạt động cộng đồng', 3),
+('Phí bảo trì thang máy', 'KHAC', 70000, TRUE, 'Phí bảo trì thang máy hàng tháng', 4),
+('Phí an ninh', 'DICH_VU', 60000, TRUE, 'Phí đảm bảo an ninh khu dân cư', 4),
+('Quyên góp từ thiện', 'DONG_GOP', 50000, FALSE, 'Quyên góp cho quỹ từ thiện', 5),
+('Phí nước sạch', 'DICH_VU', 120000, TRUE, 'Phí sử dụng nước sạch', 5),
+('Phí tổ chức trung thu', 'HOAT_DONG', 40000, FALSE, 'Phí tổ chức lễ trung thu', 6),
+('Học phí lớp học thêm', 'HOC_PHI', 800000, TRUE, 'Học phí lớp học thêm buổi tối', 6),
+('Phí sửa chữa đường', 'KHAC', 90000, TRUE, 'Phí sửa chữa đường nội khu', 7),
+('Phí quản lý khu dân cư', 'DICH_VU', 100000, TRUE, 'Phí quản lý chung', 7),
+('Quyên góp trường học', 'DONG_GOP', 20000, FALSE, 'Quyên góp xây trường', 8),
+('Phí vệ sinh khu vực chung', 'DICH_VU', 55000, TRUE, 'Phí vệ sinh khu vực công cộng', 8);
 
-
-
--- 5. Insert dữ liệu cho bảng hokhau
+-- Thêm dữ liệu cho bảng hokhau
 INSERT INTO hokhau (chu_ho, so_nha, ngay_lap, ngay_cap_nhat, dien_tich) VALUES
-(1, '12A Nguyen Trai', '2020-01-01', '2025-05-01', 75.5),
-(3, '45B Le Loi', '2021-06-15', '2025-05-10', 60.0);
+(1, '1220', '2020-01-01', '2025-05-01', 75.5),
+(2, '0615', '2020-01-01', '2025-05-01', 75.5),
+(3, '2002', '2021-06-15', '2025-05-10', 80.0),
+(4, '0412', '2022-03-10', '2025-06-01', 70.0),
+(5, '1508', '2023-01-15', '2025-06-02', 85.0),
+(6, '1805', '2024-05-20', '2025-06-03', 90.0),
+(7, '0210', '2021-07-01', '2025-06-04', 65.0),
+(8, '1003', '2022-09-10', '2025-06-05', 75.0),
+(9, '1706', '2023-02-15', '2025-06-06', 80.0),
+(10, '0607', '2021-11-20', '2025-06-07', 70.0),
+(11, '1304', '2022-12-01', '2025-06-08', 85.0),
+(12, '0908', '2023-04-05', '2025-06-09', 90.0),
+(13, '1109', '2024-01-10', '2025-06-10', 75.0);
 
--- 6. Insert dữ liệu cho bảng nhankhau
+-- Thêm dữ liệu cho bảng nhankhau
 INSERT INTO nhankhau (ho_ten, ngay_sinh, gioi_tinh, cmnd, qh_voi_chu_ho, trang_thai, ma_ho_khau) VALUES
 ('Nguyen Van A', '1980-04-20', TRUE, '123456789', 'Chủ hộ', 'Đang sống', 1),
 ('Nguyen Thi D', '1985-11-15', FALSE, '987654321', 'Vợ', 'Đang sống', 1),
-('Tran Van C', '1990-07-10', TRUE, '112233445', 'Chủ hộ', 'Đang sống', 2);
+('Tran Van C', '1990-07-10', TRUE, '112233445', 'Chủ hộ', 'Đang sống', 2),
+('Le Thi B', '1975-09-12', FALSE, '556677889', 'Chủ hộ', 'Đang sống', 4),
+('Pham Van E', '1988-03-25', TRUE, '998877665', 'Chủ hộ', 'Đang sống', 5),
+('Hoang Thi F', '1992-12-30', FALSE, '776655443', 'Chủ hộ', 'Đang sống', 6),
+('Nguyen Van G', '1983-06-15', TRUE, '334455667', 'Chủ hộ', 'Đang sống', 7),
+('Tran Thi H', '1987-08-20', FALSE, '445566778', 'Chủ hộ', 'Đang sống', 8),
+('Le Van I', '1990-04-10', TRUE, '667788990', 'Chủ hộ', 'Đang sống', 9),
+('Pham Thi J', '1978-11-05', FALSE, '889900112', 'Chủ hộ', 'Đang sống', 10),
+('Nguyen Van K', '1985-02-28', TRUE, '112233556', 'Chủ hộ', 'Đang sống', 11),
+('Tran Thi L', '1995-07-15', FALSE, '223344667', 'Chủ hộ', 'Đang sống', 12),
+('Hoang Van M', '1980-09-30', TRUE, '334455889', 'Chủ hộ', 'Đang sống', 13),
+('Le Thi N', '2000-03-12', FALSE, '445566990', 'Con', 'Đang sống', 4),
+('Pham Van O', '2010-05-25', TRUE, '556677001', 'Con', 'Đang sống', 5),
+('Nguyen Thi P', '1988-12-10', FALSE, '667788112', 'Vợ', 'Đang sống', 7),
+('Tran Van Q', '2015-01-20', TRUE, '778899223', 'Con', 'Đang sống', 8),
+('Hoang Thi R', '1993-06-30', FALSE, '889900334', 'Vợ', 'Đang sống', 9);
 
--- 7. Insert dữ liệu cho bảng tamtrutamvang
+-- Thêm dữ liệu cho bảng tamtrutamvang
 INSERT INTO tamtrutamvang (loai, ngay_bat_dau, ngay_ket_thuc, ly_do, ma_nhan_khau) VALUES
 ('Tạm trú', '2025-04-01', '2025-04-30', 'Đi công tác', 2),
-('Tạm vắng', '2025-05-01', '2025-05-15', 'Đi du lịch', 3);
+('Tạm vắng', '2025-05-01', '2025-05-15', 'Đi du lịch', 3),
+('Tạm trú', '2025-06-01', '2025-06-30', 'Thăm người thân', 4),
+('Tạm vắng', '2025-07-01', '2025-07-10', 'Công tác nước ngoài', 5),
+('Tạm trú', '2025-08-01', '2025-08-15', 'Chuyển công tác', 6),
+('Tạm vắng', '2025-09-01', '2025-09-07', 'Du lịch', 7),
+('Tạm trú', '2025-10-01', '2025-10-31', 'Thăm họ hàng', 8),
+('Tạm vắng', '2025-11-01', '2025-11-10', 'Công tác', 9),
+('Tạm trú', '2025-12-01', '2025-12-15', 'Nghỉ dưỡng', 10),
+('Tạm vắng', '2025-12-05', '2025-12-20', 'Du học ngắn hạn', 11);
 
--- 8. Insert dữ liệu cho bảng nopphi
-INSERT INTO nopphi (ngay_thu, so_tien, nguoi_nop, id_nguoi_thu, ma_ho_khau) VALUES
-('2025-05-05', 50000, 'Nguyen Van A', 2, 1),
-('2025-05-06', 150000, 'Nguyen Van A', 2, 1),
-('2025-05-07', 20000, 'Tran Van C', 2, 2);
+-- Thêm dữ liệu cho bảng nopphi
+INSERT INTO nopphi (ngay_thu, so_tien, nguoi_nop, id_nguoi_thu, ma_ho_khau, ma_khoan_thu) VALUES
+('2025-05-05', 50000, 'Nguyen Van A', 2, 1, 1),
+('2025-05-06', 150000, 'Nguyen Van A', 2, 1, 2),
+('2025-05-07', 20000, 'Tran Van C', 2, 2, 3),
+('2025-07-02', 1000000, 'Le Thi B', 2, 4, 4),
+('2025-07-03', 30000, 'Pham Van E', 2, 5, 5),
+('2025-07-04', 70000, 'Hoang Thi F', 2, 6, 6),
+('2025-08-01', 60000, 'Nguyen Van G', 2, 7, 7),
+('2025-08-02', 50000, 'Tran Thi H', 2, 8, 8),
+('2025-09-01', 120000, 'Le Van I', 2, 9, 9),
+('2025-09-02', 40000, 'Pham Thi J', 2, 10, 10),
+('2025-10-01', 800000, 'Nguyen Van K', 2, 11, 11),
+('2025-10-02', 90000, 'Tran Thi L', 2, 12, 12),
+('2025-11-01', 100000, 'Hoang Van M', 2, 13, 13),
+('2025-11-02', 55000, 'Le Thi B', 2, 4, 14),
+('2025-12-01', 20000, 'Pham Van E', 2, 5, 15),
+('2025-12-02', 60000, 'Nguyen Van G', 2, 7, 7),
+('2025-12-03', 120000, 'Tran Thi H', 2, 8, 9),
+('2025-12-04', 70000, 'Le Van I', 2, 9, 6);
