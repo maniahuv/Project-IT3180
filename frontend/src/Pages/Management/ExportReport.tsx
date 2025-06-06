@@ -236,7 +236,7 @@ const ExportReport: React.FC = () => {
             <h3 className="text-xl font-semibold mb-4 text-pink-500 border-b-2 border-pink-500 pb-2">
               Báo cáo thống kê
             </h3>
-            <p className="mb-4 text-gray-600">Báo cáo tổng hộ đã đóng và tổng số hộ chưa đóng.</p>
+            <p className="mb-4 text-gray-600 pb-5">Báo cáo tổng hộ đã đóng và tổng số hộ chưa đóng.</p>
             <button
               onClick={() => openExportModal("statistic")}
               className="flex items-center justify-center bg-pink-500 text-white px-4 py-2 rounded-md hover:bg-pink-600 transition-colors"

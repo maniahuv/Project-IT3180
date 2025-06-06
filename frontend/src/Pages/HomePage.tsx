@@ -278,7 +278,7 @@ const HomePage: React.FC = () => {
                 {/* Chart for Floors 1–10 */}
                 <div>
                   <h4 className="text-md font-medium mb-2">Tầng 1–10</h4>
-                  <div style={{ width: '600px', height: '300px' }}>
+                  <div style={{ width: '500px', height: '300px' }}>
                     <Bar
                       data={getResidentsByFloor(1, 10)}
                       options={{
@@ -305,7 +305,7 @@ const HomePage: React.FC = () => {
                 {/* Chart for Floors 11–20 */}
                 <div>
                   <h4 className="text-md font-medium mb-2">Tầng 11–20</h4>
-                  <div style={{ width: '600px', height: '300px' }}>
+                  <div style={{ width: '500px', height: '300px' }}>
                     <Bar
                       data={getResidentsByFloor(11, 20)}
                       options={{
