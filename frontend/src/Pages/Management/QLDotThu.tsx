@@ -41,11 +41,14 @@ const trangThaiOptions = [
   { value: 'TAM_HOAN', label: 'Tạm hoãn', color: 'bg-yellow-100 text-yellow-800' },
 ];
 
-const loaiKhoanThuOptions = [
+const loaiKhoanThuOptions: { value: string; label: string }[] = [
   { value: 'HOC_PHI', label: 'Học phí' },
   { value: 'HOAT_DONG', label: 'Hoạt động' },
+  { value: 'DICH_VU', label: 'Dịch vụ' },
+  { value: 'DONG_GOP', label: 'Đóng góp' },
   { value: 'KHAC', label: 'Khác' },
 ];
+
 
 const getTrangThaiLabel = (trangThai?: string): string => {
   const option = trangThaiOptions.find((opt) => opt.value === trangThai);

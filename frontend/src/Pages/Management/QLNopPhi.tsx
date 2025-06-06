@@ -23,6 +23,35 @@ import {
   deleteNopPhi,
 } from '../../api/NopPhiApi';
 
+// Define interfaces for type safety
+interface KhoanThu {
+  maKhoanThu?: number;
+  tenKhoanThu?: string;
+  loaiKhoanThu?: 'HOC_PHI' | 'HOAT_DONG' | 'DICH_VU' | 'DONG_GOP' | 'KHAC';
+  soTien?: number;
+  batBuoc?: boolean;
+  ghiChu?: string;
+  maDotThu?: number;
+}
+
+interface DotThu {
+  maDotThu?: number;
+  tenDotThu?: string;
+}
+
+interface NopPhi {
+  id?: number;
+  ngayThu?: string;
+  soTien?: number;
+  nguoiNop?: string;
+  idNguoiThu?: number;
+  maHoKhau?: number;
+  maKhoanThu?: number;
+  nguoiThu?: { id: number };
+  hoKhau?: { maHoKhau: number };
+  khoanThu?: { maKhoanThu: number };
+}
+
 interface EditNopPhiFormData {
   ngayThu: string;
   soTien: number;
@@ -32,15 +61,21 @@ interface EditNopPhiFormData {
   khoanThuMaKhoanThu: number;
 }
 
-const loaiKhoanThuOptions = [
+// Define loaiKhoanThuOptions with explicit types
+const loaiKhoanThuOptions: { value: string; label: string }[] = [
   { value: 'HOC_PHI', label: 'Học phí' },
   { value: 'HOAT_DONG', label: 'Hoạt động' },
+  { value: 'DICH_VU', label: 'Dịch vụ' },
+  { value: 'DONG_GOP', label: 'Đóng góp' },
   { value: 'KHAC', label: 'Khác' },
 ];
 
+// Normalize loaiKhoanThu and handle edge cases
 const getLoaiKhoanThuLabel = (loai?: string): string => {
-  const option = loaiKhoanThuOptions.find((opt) => opt.value === loai);
-  return option ? option.label : 'Không xác định';
+  if (!loai) return 'Khác'; // Handle null or undefined
+  const normalizedLoai = loai.toUpperCase(); // Normalize to uppercase
+  const option = loaiKhoanThuOptions.find((opt) => opt.value === normalizedLoai);
+  return option ? option.label : 'Khác'; // Default to 'Khác' if not found
 };
 
 const formatDateISO = (dateStr: string): string => {
@@ -103,7 +138,6 @@ const QLNopPhi: React.FC = () => {
 
   useEffect(() => {
     setFilteredKhoanThuData(khoanThuData);
-    // Initialize filteredNopPhiData for each khoanThu
     const initialFilteredNopPhi: { [key: number]: NopPhi[] } = {};
     khoanThuData.forEach((kt) => {
       if (kt.maKhoanThu) {
@@ -117,8 +151,19 @@ const QLNopPhi: React.FC = () => {
     try {
       setLoading(true);
       const khoanThuResponse = await fetchAllKhoanThu();
-      setKhoanThuData(khoanThuResponse.data);
-      setFilteredKhoanThuData(khoanThuResponse.data);
+      console.log('Khoan Thu Response:', khoanThuResponse.data);
+      
+      // Ensure khoanThuData is an array and log loaiKhoanThu values
+      const khoanThuArray = Array.isArray(khoanThuResponse.data)
+        ? khoanThuResponse.data
+        : [];
+      console.log(
+        'loaiKhoanThu Values:',
+        khoanThuArray.map((kt: KhoanThu) => kt.loaiKhoanThu)
+      );
+      
+      setKhoanThuData(khoanThuArray);
+      setFilteredKhoanThuData(khoanThuArray);
 
       const dotThuResponse = await fetchAllDotThu();
       let dotThuArray: DotThu[] = [];
@@ -153,7 +198,6 @@ const QLNopPhi: React.FC = () => {
     return dotThu ? `${dotThu.maDotThu} - ${dotThu.tenDotThu}` : `${maDotThu}`;
   };
 
-  // Calculate number of payers and total amount collected for a khoanThu
   const getNopPhiStats = (maKhoanThu: number) => {
     const relatedNopPhi = nopPhiData.filter((np) => np.maKhoanThu === maKhoanThu);
     const soNguoiDaNop = relatedNopPhi.length;
@@ -328,7 +372,7 @@ const QLNopPhi: React.FC = () => {
     const filtered = khoanThuData.filter((item) => {
       const fields = [
         item.maKhoanThu?.toString() || '',
-        item.tenKhoanThu,
+        item.tenKhoanThu || '',
         getLoaiKhoanThuLabel(item.loaiKhoanThu),
         item.soTien?.toString() || '',
         item.batBuoc ? 'Có' : 'Không',
@@ -528,6 +572,10 @@ const QLNopPhi: React.FC = () => {
                                 ? 'bg-blue-100 text-blue-800'
                                 : row.loaiKhoanThu === 'HOAT_DONG'
                                 ? 'bg-purple-100 text-purple-800'
+                                : row.loaiKhoanThu === 'DICH_VU'
+                                ? 'bg-green-100 text-green-800'
+                                : row.loaiKhoanThu === 'DONG_GOP'
+                                ? 'bg-yellow-100 text-yellow-800'
                                 : 'bg-gray-100 text-gray-800'
                             }`}
                           >
