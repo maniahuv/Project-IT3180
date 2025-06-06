@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 import { FaFilePdf } from "react-icons/fa";
-import MainLayout from "../../Layout/MainLayout"; // Import MainLayout
-import "./ExportReport.css"; // CSS file for styles
+import MainLayout from "../../Layout/MainLayout";
 
 const ExportReport: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -97,7 +96,7 @@ const ExportReport: React.FC = () => {
     };
 
     const content = document.createElement("div");
-    content.style.fontFamily = "' frequent, sans-serif";
+    content.style.fontFamily = "'Arial', sans-serif";
     content.style.padding = "20px";
     content.style.width = "210mm";
     content.innerHTML = `
@@ -205,13 +204,15 @@ const ExportReport: React.FC = () => {
 
   return (
     <MainLayout>
-      <section className="content p-6">
-        <h2 className="text-2xl font-bold mb-6">Xuất báo cáo</h2>
-        <div className="export-boxes grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="p-6">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Xuất báo cáo</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Box xuất phiếu thu */}
-          <div className="export-box bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-4">Xuất phiếu thu của hộ khẩu</h3>
-            <label htmlFor="householdId" className="block font-semibold mb-2">
+          <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+            <h3 className="text-xl font-semibold mb-4 text-pink-500 border-b-2 border-pink-500 pb-2">
+              Xuất phiếu thu của hộ khẩu
+            </h3>
+            <label htmlFor="householdId" className="block font-semibold mb-2 text-sm text-gray-700">
               Nhập mã hộ khẩu
             </label>
             <input
@@ -220,32 +221,36 @@ const ExportReport: React.FC = () => {
               value={householdId}
               onChange={(e) => setHouseholdId(e.target.value)}
               placeholder="Nhập mã hộ khẩu..."
-              className="w-full p-2 border rounded-md mb-4"
+              className="w-full p-2 border border-gray-300 rounded-md mb-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
             />
             <button
               onClick={() => openExportModal("receipt")}
-              className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              className="flex items-center justify-center bg-pink-500 text-white px-4 py-2 rounded-md hover:bg-pink-600 transition-colors"
             >
               <FaFilePdf className="mr-2" /> Xuất file PDF
             </button>
           </div>
 
           {/* Box xuất thống kê */}
-          <div className="export-box bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-4">Báo cáo thống kê</h3>
-            <p className="mb-4">Báo cáo tổng hộ đã đóng và tổng số hộ chưa đóng.</p>
+          <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+            <h3 className="text-xl font-semibold mb-4 text-pink-500 border-b-2 border-pink-500 pb-2">
+              Báo cáo thống kê
+            </h3>
+            <p className="mb-4 text-gray-600">Báo cáo tổng hộ đã đóng và tổng số hộ chưa đóng.</p>
             <button
               onClick={() => openExportModal("statistic")}
-              className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              className="flex items-center justify-center bg-pink-500 text-white px-4 py-2 rounded-md hover:bg-pink-600 transition-colors"
             >
               <FaFilePdf className="mr-2" /> Xuất thống kê
             </button>
           </div>
 
           {/* Box xuất tạm trú tạm vắng */}
-          <div className="export-box bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-4">Xuất báo cáo tạm trú tạm vắng</h3>
-            <label htmlFor="residentId" className="block font-semibold mb-2">
+          <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+            <h3 className="text-xl font-semibold mb-4 text-pink-500 border-b-2 border-pink-500 pb-2">
+              Xuất báo cáo tạm trú tạm vắng
+            </h3>
+            <label htmlFor="residentId" className="block font-semibold mb-2 text-sm text-gray-700">
               Nhập mã nhân khẩu
             </label>
             <input
@@ -254,11 +259,11 @@ const ExportReport: React.FC = () => {
               value={residentId}
               onChange={(e) => setResidentId(e.target.value)}
               placeholder="Nhập mã nhân khẩu..."
-              className="w-full p-2 border rounded-md mb-4"
+              className="w-full p-2 border border-gray-300 rounded-md mb-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
             />
             <button
               onClick={() => openExportModal("resident")}
-              className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              className="flex items-center justify-center bg-pink-500 text-white px-4 py-2 rounded-md hover:bg-pink-600 transition-colors"
             >
               <FaFilePdf className="mr-2" /> Xuất file PDF
             </button>
@@ -267,9 +272,9 @@ const ExportReport: React.FC = () => {
 
         {/* Modal */}
         {modalOpen && (
-          <div className="modal fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-            <div className="modal-content bg-white p-6 rounded-lg shadow-lg w-96">
-              <h3 className="text-lg font-semibold mb-4">
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">
                 {modalType === "receipt"
                   ? "Xuất phiếu thu của hộ khẩu"
                   : modalType === "statistic"
@@ -280,7 +285,7 @@ const ExportReport: React.FC = () => {
                 <div>
                   {modalType === "receipt" && (
                     <>
-                      <label htmlFor="modalHouseholdId" className="block font-semibold mb-2">
+                      <label htmlFor="modalHouseholdId" className="block font-semibold mb-2 text-sm text-gray-700">
                         Nhập mã hộ khẩu
                       </label>
                       <input
@@ -289,19 +294,19 @@ const ExportReport: React.FC = () => {
                         value={householdId}
                         onChange={(e) => setHouseholdId(e.target.value)}
                         placeholder="Nhập mã hộ khẩu..."
-                        className="w-full p-2 border rounded-md mb-4"
+                        className="w-full p-2 border border-gray-300 rounded-md mb-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                         required
                       />
                     </>
                   )}
                   {modalType === "statistic" && (
-                    <p className="mb-4">
+                    <p className="mb-4 text-gray-600">
                       Báo cáo tổng số hộ đã đóng và tổng số hộ chưa đóng sẽ được xuất.
                     </p>
                   )}
                   {modalType === "resident" && (
                     <>
-                      <label htmlFor="modalResidentId" className="block font-semibold mb-2">
+                      <label htmlFor="modalResidentId" className="block font-semibold mb-2 text-sm text-gray-700">
                         Nhập mã nhân khẩu
                       </label>
                       <input
@@ -310,23 +315,23 @@ const ExportReport: React.FC = () => {
                         value={residentId}
                         onChange={(e) => setResidentId(e.target.value)}
                         placeholder="Nhập mã nhân khẩu..."
-                        className="w-full p-2 border rounded-md mb-4"
+                        className="w-full p-2 border border-gray-300 rounded-md mb-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                         required
                       />
                     </>
                   )}
                 </div>
-                <div className="modal-actions flex justify-end gap-3 mt-4">
+                <div className="flex justify-end gap-3 mt-4">
                   <button
                     type="button"
                     onClick={closeExportModal}
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
                   >
                     Hủy
                   </button>
                   <button
                     type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                    className="bg-pink-500 text-white px-4 py-2 rounded-md hover:bg-pink-600 transition-colors"
                   >
                     Xuất file PDF
                   </button>
