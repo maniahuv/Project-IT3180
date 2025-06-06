@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import {
-  FaPlus,
   FaSearch,
+  FaPlus,
   FaPen,
   FaTrashAlt,
   FaSave,
-  FaTimes
+  FaTimes,
+  FaChevronDown,
+  FaChevronUp,
 } from 'react-icons/fa';
 import MainLayout from '../../Layout/MainLayout';
+import {
+  KhoanThu,
+  fetchAllKhoanThu,
+} from '../../api/KhoanThuApi';
+import { DotThu, fetchAllDotThu } from '../../api/DotThuApi';
 import {
   NopPhi,
   fetchAllNopPhi,
   createNopPhi,
   updateNopPhi,
-  deleteNopPhi
+  deleteNopPhi,
 } from '../../api/NopPhiApi';
 
-interface EditFormData {
+interface EditNopPhiFormData {
   ngayThu: string;
   soTien: number;
   nguoiNop: string;
@@ -24,6 +31,17 @@ interface EditFormData {
   hoKhauMaHoKhau: number;
   khoanThuMaKhoanThu: number;
 }
+
+const loaiKhoanThuOptions = [
+  { value: 'HOC_PHI', label: 'Học phí' },
+  { value: 'HOAT_DONG', label: 'Hoạt động' },
+  { value: 'KHAC', label: 'Khác' },
+];
+
+const getLoaiKhoanThuLabel = (loai?: string): string => {
+  const option = loaiKhoanThuOptions.find((opt) => opt.value === loai);
+  return option ? option.label : 'Không xác định';
+};
 
 const formatDateISO = (dateStr: string): string => {
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
@@ -46,56 +64,80 @@ const formatDateDisplay = (dateStr?: string): string => {
 };
 
 const QLNopPhi: React.FC = () => {
-  const [data, setData] = useState<NopPhi[]>([]);
-  const [filteredData, setFilteredData] = useState<NopPhi[]>([]); // New state for filtered data
+  const [khoanThuData, setKhoanThuData] = useState<KhoanThu[]>([]);
+  const [filteredKhoanThuData, setFilteredKhoanThuData] = useState<KhoanThu[]>([]);
+  const [nopPhiData, setNopPhiData] = useState<NopPhi[]>([]);
+  const [filteredNopPhiData, setFilteredNopPhiData] = useState<{ [key: number]: NopPhi[] }>({});
+  const [dotThuData, setDotThuData] = useState<DotThu[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [editFormData, setEditFormData] = useState<EditFormData>({
+  const [editNopPhiId, setEditNopPhiId] = useState<number | null>(null);
+  const [editNopPhiFormData, setEditNopPhiFormData] = useState<EditNopPhiFormData>({
     ngayThu: '',
     soTien: 0,
     nguoiNop: '',
     nguoiThuId: 0,
     hoKhauMaHoKhau: 0,
-    khoanThuMaKhoanThu: 0
+    khoanThuMaKhoanThu: 0,
   });
-  const [addingNew, setAddingNew] = useState<boolean>(false);
-  const [newRowData, setNewRowData] = useState<EditFormData>({
+  const [addingNewNopPhi, setAddingNewNopPhi] = useState<number | null>(null);
+  const [newNopPhiData, setNewNopPhiData] = useState<EditNopPhiFormData>({
     ngayThu: '',
     soTien: 0,
     nguoiNop: '',
     nguoiThuId: 0,
     hoKhauMaHoKhau: 0,
-    khoanThuMaKhoanThu: 0
+    khoanThuMaKhoanThu: 0,
   });
   const [searchCriteria, setSearchCriteria] = useState<string>('0');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [nopPhiSearchCriteria, setNopPhiSearchCriteria] = useState<{ [key: number]: string }>({});
+  const [nopPhiSearchKeyword, setNopPhiSearchKeyword] = useState<{ [key: number]: string }>({});
   const [highlightedRowId, setHighlightedRowId] = useState<number | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
 
-  // Fetch data from API
   useEffect(() => {
-    loadNopPhi();
+    loadData();
   }, []);
 
-  // Update filteredData when data changes
   useEffect(() => {
-    setFilteredData(data); // Reset filteredData to original data when data changes
-  }, [data]);
+    setFilteredKhoanThuData(khoanThuData);
+    // Initialize filteredNopPhiData for each khoanThu
+    const initialFilteredNopPhi: { [key: number]: NopPhi[] } = {};
+    khoanThuData.forEach((kt) => {
+      if (kt.maKhoanThu) {
+        initialFilteredNopPhi[kt.maKhoanThu] = nopPhiData.filter((np) => np.maKhoanThu === kt.maKhoanThu);
+      }
+    });
+    setFilteredNopPhiData(initialFilteredNopPhi);
+  }, [khoanThuData, nopPhiData]);
 
-  const loadNopPhi = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetchAllNopPhi();
-      console.log('NopPhi response:', response.data);
-      setData(response.data);
-      setFilteredData(response.data); // Initialize filteredData
+      const khoanThuResponse = await fetchAllKhoanThu();
+      setKhoanThuData(khoanThuResponse.data);
+      setFilteredKhoanThuData(khoanThuResponse.data);
+
+      const dotThuResponse = await fetchAllDotThu();
+      let dotThuArray: DotThu[] = [];
+      if (typeof dotThuResponse.data === 'string') {
+        dotThuArray = JSON.parse(dotThuResponse.data);
+      } else if (Array.isArray(dotThuResponse.data)) {
+        dotThuArray = dotThuResponse.data;
+      }
+      setDotThuData(dotThuArray);
+
+      const nopPhiResponse = await fetchAllNopPhi();
+      setNopPhiData(nopPhiResponse.data);
       setError('');
     } catch (err: any) {
-      console.error('Error loading nop phi:', err);
-      setError('Có lỗi xảy ra khi tải dữ liệu.');
-      setData([]);
-      setFilteredData([]);
+      setError('Có lỗi xảy ra khi tải dữ liệu: ' + (err.response?.data?.message || err.message));
+      console.error('Error loading data:', err);
+      setKhoanThuData([]);
+      setFilteredKhoanThuData([]);
+      setNopPhiData([]);
       if (err.response?.status === 401) {
         setError('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
         localStorage.removeItem('token');
@@ -105,202 +147,204 @@ const QLNopPhi: React.FC = () => {
     }
   };
 
-  const handleEditClick = async (row: NopPhi): Promise<void> => {
+  const getTenDotThu = (maDotThu?: number): string => {
+    if (!maDotThu) return '-';
+    const dotThu = dotThuData.find((dt) => dt.maDotThu === maDotThu);
+    return dotThu ? `${dotThu.maDotThu} - ${dotThu.tenDotThu}` : `${maDotThu}`;
+  };
+
+  // Calculate number of payers and total amount collected for a khoanThu
+  const getNopPhiStats = (maKhoanThu: number) => {
+    const relatedNopPhi = nopPhiData.filter((np) => np.maKhoanThu === maKhoanThu);
+    const soNguoiDaNop = relatedNopPhi.length;
+    const soTienDaThu = relatedNopPhi.reduce((sum, np) => sum + (np.soTien || 0), 0);
+    return { soNguoiDaNop, soTienDaThu };
+  };
+
+  const handleEditNopPhiClick = async (row: NopPhi): Promise<void> => {
     if (!row.id) return;
-    if (editRowId === row.id) {
+    if (editNopPhiId === row.id) {
       try {
         const updateData: NopPhi = {
           id: row.id,
-          ngayThu: editFormData.ngayThu ? formatDateISO(editFormData.ngayThu) : undefined,
-          soTien: editFormData.soTien,
-          nguoiNop: editFormData.nguoiNop || undefined,
-          nguoiThu: { id: editFormData.nguoiThuId },
-          hoKhau: { maHoKhau: editFormData.hoKhauMaHoKhau },
-          khoanThu: { maKhoanThu: editFormData.khoanThuMaKhoanThu }
+          ngayThu: editNopPhiFormData.ngayThu ? formatDateISO(editNopPhiFormData.ngayThu) : undefined,
+          soTien: editNopPhiFormData.soTien,
+          nguoiNop: editNopPhiFormData.nguoiNop || undefined,
+          nguoiThu: { id: editNopPhiFormData.nguoiThuId },
+          hoKhau: { maHoKhau: editNopPhiFormData.hoKhauMaHoKhau },
+          khoanThu: { maKhoanThu: editNopPhiFormData.khoanThuMaKhoanThu },
         };
         await updateNopPhi(row.id, updateData);
-        await loadNopPhi();
-        setEditRowId(null);
-        setEditFormData({
+        await loadData();
+        setEditNopPhiId(null);
+        setEditNopPhiFormData({
           ngayThu: '',
           soTien: 0,
           nguoiNop: '',
           nguoiThuId: 0,
           hoKhauMaHoKhau: 0,
-          khoanThuMaKhoanThu: 0
+          khoanThuMaKhoanThu: 0,
         });
       } catch (err: any) {
-        alert('Có lỗi xảy ra khi cập nhật: ' + (err.response?.data?.message || err.message));
+        alert('Có lỗi xảy ra khi cập nhật nộp phí: ' + (err.response?.data?.message || err.message));
         console.error('Error updating nop phi:', err);
-        if (err.response?.status === 401) {
-          setError('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
-          localStorage.removeItem('token');
-        }
       }
     } else {
-      setEditRowId(row.id);
-      setEditFormData({
+      setEditNopPhiId(row.id);
+      setEditNopPhiFormData({
         ngayThu: row.ngayThu ? formatDateDisplay(row.ngayThu) : '',
         soTien: row.soTien || 0,
         nguoiNop: row.nguoiNop || '',
         nguoiThuId: row.idNguoiThu || 0,
         hoKhauMaHoKhau: row.maHoKhau || 0,
-        khoanThuMaKhoanThu: row.maKhoanThu || 0
+        khoanThuMaKhoanThu: row.maKhoanThu || 0,
       });
     }
   };
 
-  const handleDeleteClick = async (id: number): Promise<void> => {
-    if (window.confirm('Bạn có chắc muốn xóa bản ghi này?')) {
+  const handleDeleteNopPhiClick = async (id: number): Promise<void> => {
+    if (window.confirm('Bạn có chắc muốn xóa bản ghi nộp phí này?')) {
       try {
         await deleteNopPhi(id);
-        await loadNopPhi();
-        if (editRowId === id) {
-          setEditRowId(null);
-          setEditFormData({
+        await loadData();
+        if (editNopPhiId === id) {
+          setEditNopPhiId(null);
+          setEditNopPhiFormData({
             ngayThu: '',
             soTien: 0,
             nguoiNop: '',
             nguoiThuId: 0,
             hoKhauMaHoKhau: 0,
-            khoanThuMaKhoanThu: 0
+            khoanThuMaKhoanThu: 0,
           });
         }
       } catch (err: any) {
-        alert('Có lỗi xảy ra khi xóa: ' + (err.response?.data?.message || err.message));
+        alert('Có lỗi xảy ra khi xóa nộp phí: ' + (err.response?.data?.message || err.message));
         console.error('Error deleting nop phi:', err);
-        if (err.response?.status === 401) {
-          setError('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
-          localStorage.removeItem('token');
-        }
       }
     }
   };
 
-  const handleAddNewClick = (): void => {
-    setAddingNew(true);
-    setNewRowData({
+  const handleAddNewNopPhiClick = (maKhoanThu: number): void => {
+    setAddingNewNopPhi(maKhoanThu);
+    setNewNopPhiData({
       ngayThu: '',
       soTien: 0,
       nguoiNop: '',
       nguoiThuId: 0,
       hoKhauMaHoKhau: 0,
-      khoanThuMaKhoanThu: 0
+      khoanThuMaKhoanThu: maKhoanThu,
     });
   };
 
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+  const handleNopPhiChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    isNew: boolean,
+  ): void => {
     const { name, value } = e.target;
-    setEditFormData(prev => ({
+    const setFormData = isNew ? setNewNopPhiData : setEditNopPhiFormData;
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'soTien' || name === 'nguoiThuId' || name === 'hoKhauMaHoKhau' || name === 'khoanThuMaKhoanThu' ? Number(value) : value
+      [name]:
+        name === 'soTien' || name === 'nguoiThuId' || name === 'hoKhauMaHoKhau' || name === 'khoanThuMaKhoanThu'
+          ? Number(value)
+          : value,
     }));
   };
 
-  const handleNewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
-    const { name, value } = e.target;
-    setNewRowData(prev => ({
-      ...prev,
-      [name]: name === 'soTien' || name === 'nguoiThuId' || name === 'hoKhauMaHoKhau' || name === 'khoanThuMaKhoanThu' ? Number(value) : value
-    }));
-  };
-
-  const handleSaveNewRow = async (): Promise<void> => {
-    if (!newRowData.ngayThu.trim()) {
+  const handleSaveNewNopPhi = async (maKhoanThu: number | null): Promise<void> => {
+    if (!newNopPhiData.ngayThu.trim()) {
       alert('Vui lòng nhập ngày thu.');
       return;
     }
-    if (newRowData.soTien <= 0) {
+    if (newNopPhiData.soTien <= 0) {
       alert('Vui lòng nhập số tiền hợp lệ.');
       return;
     }
-    if (!newRowData.nguoiNop.trim()) {
+    if (!newNopPhiData.nguoiNop.trim()) {
       alert('Vui lòng nhập người nộp.');
       return;
     }
-    if (newRowData.nguoiThuId <= 0) {
+    if (newNopPhiData.nguoiThuId <= 0) {
       alert('Vui lòng nhập mã người thu hợp lệ.');
       return;
     }
-    if (newRowData.hoKhauMaHoKhau <= 0) {
+    if (newNopPhiData.hoKhauMaHoKhau <= 0) {
       alert('Vui lòng nhập mã hộ khẩu hợp lệ.');
-      return;
-    }
-    if (newRowData.khoanThuMaKhoanThu <= 0) {
-      alert('Vui lòng nhập mã khoản thu hợp lệ.');
       return;
     }
 
     try {
       const newNopPhi: NopPhi = {
-        ngayThu: formatDateISO(newRowData.ngayThu),
-        soTien: newRowData.soTien,
-        nguoiNop: newRowData.nguoiNop,
-        idNguoiThu: newRowData.nguoiThuId,
-        maHoKhau: newRowData.hoKhauMaHoKhau,
-        maKhoanThu: newRowData.khoanThuMaKhoanThu
+        ngayThu: formatDateISO(newNopPhiData.ngayThu),
+        soTien: newNopPhiData.soTien,
+        nguoiNop: newNopPhiData.nguoiNop,
+        idNguoiThu: newNopPhiData.nguoiThuId,
+        maHoKhau: newNopPhiData.hoKhauMaHoKhau,
+        maKhoanThu: newNopPhiData.khoanThuMaKhoanThu,
       };
       await createNopPhi(newNopPhi);
-      await loadNopPhi();
-      setAddingNew(false);
-      setNewRowData({
+      await loadData();
+      setAddingNewNopPhi(null);
+      setNewNopPhiData({
         ngayThu: '',
         soTien: 0,
         nguoiNop: '',
         nguoiThuId: 0,
         hoKhauMaHoKhau: 0,
-        khoanThuMaKhoanThu: 0
+        khoanThuMaKhoanThu: 0,
       });
     } catch (err: any) {
-      alert('Có lỗi xảy ra khi tạo bản ghi: ' + (err.response?.data?.message || err.message));
+      alert('Có lỗi xảy ra khi tạo bản ghi nộp phí: ' + (err.response?.data?.message || err.message));
       console.error('Error creating nop phi:', err);
-      if (err.response?.status === 401) {
-        setError('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
-        localStorage.removeItem('token');
-      }
     }
   };
 
-  const handleCancelNewRow = (): void => {
-    setAddingNew(false);
-    setNewRowData({
+  const handleCancelNewNopPhi = (): void => {
+    setAddingNewNopPhi(null);
+    setNewNopPhiData({
       ngayThu: '',
       soTien: 0,
       nguoiNop: '',
       nguoiThuId: 0,
       hoKhauMaHoKhau: 0,
-      khoanThuMaKhoanThu: 0
+      khoanThuMaKhoanThu: 0,
     });
+  };
+
+  const handleRowClick = (maKhoanThu: number): void => {
+    if (editNopPhiId === null) {
+      setExpandedRowId((prev) => (prev === maKhoanThu ? null : maKhoanThu));
+    }
   };
 
   const handleSearch = (): void => {
     if (!searchKeyword.trim()) {
-      setFilteredData(data); // Reset to full data if search keyword is empty
+      setFilteredKhoanThuData(khoanThuData);
       alert('Vui lòng nhập từ khóa tìm kiếm.');
       return;
     }
     const crit = parseInt(searchCriteria, 10);
-    const filtered = data.filter(item => {
+    const filtered = khoanThuData.filter((item) => {
       const fields = [
-        item.id?.toString() || '',
-        formatDateDisplay(item.ngayThu),
+        item.maKhoanThu?.toString() || '',
+        item.tenKhoanThu,
+        getLoaiKhoanThuLabel(item.loaiKhoanThu),
         item.soTien?.toString() || '',
-        item.nguoiNop || '',
-        item.idNguoiThu?.toString() || '',
-        item.maHoKhau?.toString() || '',
-        item.maKhoanThu?.toString() || ''
+        item.batBuoc ? 'Có' : 'Không',
+        getTenDotThu(item.maDotThu),
       ];
-      return fields[crit]?.toLowerCase().includes(searchKeyword.toLowerCase());
+      return fields[crit]?.toString().toLowerCase().includes(searchKeyword.toLowerCase());
     });
 
     if (filtered.length > 0) {
-      setFilteredData(filtered);
-      setHighlightedRowId(filtered[0].id!);
+      setFilteredKhoanThuData(filtered);
+      setHighlightedRowId(filtered[0].maKhoanThu!);
       setTimeout(() => setHighlightedRowId(null), 3000);
-      document.getElementById(`row-${filtered[0].id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById(`row-${filtered[0].maKhoanThu}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
-      setFilteredData([]);
-      alert('Không tìm thấy bản ghi phù hợp.');
+      setFilteredKhoanThuData([]);
+      alert('Không tìm thấy khoản thu phù hợp.');
     }
   };
 
@@ -308,13 +352,63 @@ const QLNopPhi: React.FC = () => {
     const value = e.target.value;
     setSearchKeyword(value);
     if (!value.trim()) {
-      setFilteredData(data); // Reset to full data when search input is cleared
+      setFilteredKhoanThuData(khoanThuData);
     }
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent): void => {
     if (e.key === 'Enter') {
       handleSearch();
+    }
+  };
+
+  const handleNopPhiSearch = (maKhoanThu: number): void => {
+    const keyword = nopPhiSearchKeyword[maKhoanThu] || '';
+    const crit = parseInt(nopPhiSearchCriteria[maKhoanThu] || '0', 10);
+    if (!keyword.trim()) {
+      setFilteredNopPhiData((prev) => ({
+        ...prev,
+        [maKhoanThu]: nopPhiData.filter((np) => np.maKhoanThu === maKhoanThu),
+      }));
+      alert('Vui lòng nhập từ khóa tìm kiếm nộp phí.');
+      return;
+    }
+
+    const filtered = nopPhiData
+      .filter((np) => np.maKhoanThu === maKhoanThu)
+      .filter((np) => {
+        const fields = [
+          np.id?.toString() || '',
+          formatDateDisplay(np.ngayThu),
+          np.soTien?.toString() || '',
+          np.nguoiNop || '',
+          np.idNguoiThu?.toString() || '',
+          np.maHoKhau?.toString() || '',
+        ];
+        return fields[crit]?.toString().toLowerCase().includes(keyword.toLowerCase());
+      });
+
+    if (filtered.length > 0) {
+      setFilteredNopPhiData((prev) => ({ ...prev, [maKhoanThu]: filtered }));
+    } else {
+      setFilteredNopPhiData((prev) => ({ ...prev, [maKhoanThu]: [] }));
+      alert('Không tìm thấy bản ghi nộp phí phù hợp.');
+    }
+  };
+
+  const handleNopPhiSearchChange = (maKhoanThu: number, value: string): void => {
+    setNopPhiSearchKeyword((prev) => ({ ...prev, [maKhoanThu]: value }));
+    if (!value.trim()) {
+      setFilteredNopPhiData((prev) => ({
+        ...prev,
+        [maKhoanThu]: nopPhiData.filter((np) => np.maKhoanThu === maKhoanThu),
+      }));
+    }
+  };
+
+  const handleNopPhiSearchKeyDown = (maKhoanThu: number, e: React.KeyboardEvent): void => {
+    if (e.key === 'Enter') {
+      handleNopPhiSearch(maKhoanThu);
     }
   };
 
@@ -367,22 +461,21 @@ const QLNopPhi: React.FC = () => {
               <select
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchCriteria}
-                onChange={e => setSearchCriteria(e.target.value)}
+                onChange={(e) => setSearchCriteria(e.target.value)}
               >
-                <option value="0">Mã bản ghi</option>
-                <option value="1">Ngày thu</option>
-                <option value="2">Số tiền</option>
-                <option value="3">Người nộp</option>
-                <option value="4">Mã người thu</option>
-                <option value="5">Mã hộ khẩu</option>
-                <option value="6">Mã khoản thu</option>
+                <option value="0">Mã khoản thu</option>
+                <option value="1">Tên khoản thu</option>
+                <option value="2">Loại khoản thu</option>
+                <option value="3">Số tiền</option>
+                <option value="4">Bắt buộc</option>
+                <option value="5">Đợt thu</option>
               </select>
               <input
                 type="text"
                 placeholder="Nhập từ khóa tìm kiếm"
                 className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchKeyword}
-                onChange={handleSearchChange} // Updated to handle input change
+                onChange={handleSearchChange}
                 onKeyDown={handleSearchKeyDown}
               />
               <button
@@ -393,211 +486,291 @@ const QLNopPhi: React.FC = () => {
                 <span>Tìm kiếm</span>
               </button>
             </div>
-
-            <button
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
-              onClick={handleAddNewClick}
-            >
-              <FaPlus />
-              <span>Thêm bản ghi</span>
-            </button>
           </div>
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã bản ghi</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày thu</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Số tiền</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Người nộp</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã người thu</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã hộ khẩu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700"></th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã khoản thu</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hành động</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Tên khoản thu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Loại khoản thu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Số tiền</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Bắt buộc</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Số người đã nộp</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Số tiền đã thu</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ghi chú</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Đợt thu</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredData.map(row => ( // Use filteredData instead of data
-                  <tr
-                    key={row.id || Math.random()}
-                    id={`row-${row.id}`}
-                    className={`hover:bg-gray-50 ${highlightedRowId === row.id ? 'bg-yellow-100' : ''}`}
-                  >
-                    <td className="px-4 py-3 text-sm text-gray-900">{row.id || '-'}</td>
-                    {editRowId === row.id ? (
-                      <>
+                {filteredKhoanThuData.map((row) => {
+                  const { soNguoiDaNop, soTienDaThu } = getNopPhiStats(row.maKhoanThu!);
+                  return (
+                    <React.Fragment key={row.maKhoanThu}>
+                      <tr
+                        id={`row-${row.maKhoanThu}`}
+                        className={`hover:bg-gray-50 cursor-pointer ${
+                          highlightedRowId === row.maKhoanThu ? 'bg-yellow-100' : ''
+                        }`}
+                        onClick={() => handleRowClick(row.maKhoanThu!)}
+                      >
                         <td className="px-4 py-3">
-                          <input
-                            type="text"
-                            name="ngayThu"
-                            value={editFormData.ngayThu || ''}
-                            onChange={handleEditChange}
-                            placeholder="DD/MM/YYYY"
-                            className="w-full px-2 py-1 border rounded"
-                          />
+                          <span>{expandedRowId === row.maKhoanThu ? <FaChevronUp /> : <FaChevronDown />}</span>
                         </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.maKhoanThu}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.tenKhoanThu}</td>
                         <td className="px-4 py-3">
-                          <input
-                            type="number"
-                            name="soTien"
-                            value={editFormData.soTien || 0}
-                            onChange={handleEditChange}
-                            className="w-full px-2 py-1 border rounded"
-                          />
+                          <span
+                            className={`px-2 py-1 text-xs rounded-full ${
+                              row.loaiKhoanThu === 'HOC_PHI'
+                                ? 'bg-blue-100 text-blue-800'
+                                : row.loaiKhoanThu === 'HOAT_DONG'
+                                ? 'bg-purple-100 text-purple-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {getLoaiKhoanThuLabel(row.loaiKhoanThu)}
+                          </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="text"
-                            name="nguoiNop"
-                            value={editFormData.nguoiNop || ''}
-                            onChange={handleEditChange}
-                            className="w-full px-2 py-1 border rounded"
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="number"
-                            name="nguoiThuId"
-                            value={editFormData.nguoiThuId || 0}
-                            onChange={handleEditChange}
-                            className="w-full px-2 py-1 border rounded"
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="number"
-                            name="hoKhauMaHoKhau"
-                            value={editFormData.hoKhauMaHoKhau || 0}
-                            onChange={handleEditChange}
-                            className="w-full px-2 py-1 border rounded"
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <input
-                            type="number"
-                            name="khoanThuMaKhoanThu"
-                            value={editFormData.khoanThuMaKhoanThu || 0}
-                            onChange={handleEditChange}
-                            className="w-full px-2 py-1 border rounded"
-                          />
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayThu)}</td>
                         <td className="px-4 py-3 text-sm text-gray-900">{row.soTien?.toLocaleString() || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.nguoiNop || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.idNguoiThu || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.maHoKhau || '-'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{row.maKhoanThu || '-'}</td>
-                      </>
-                    )}
-                    <td className="px-4 py-3">
-                      <div className="flex space-x-2">
-                        <button
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                          onClick={() => handleEditClick(row)}
-                          title={editRowId === row.id ? "Lưu" : "Chỉnh sửa"}
-                          disabled={!row.id}
-                        >
-                          {editRowId === row.id ? <FaSave /> : <FaPen />}
-                        </button>
-                        <button
-                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
-                          onClick={() => row.id && handleDeleteClick(row.id)}
-                          title="Xóa"
-                          disabled={!row.id}
-                        >
-                          <FaTrashAlt />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {addingNew && (
-                  <tr className="bg-blue-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">-</td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="text"
-                        name="ngayThu"
-                        placeholder="DD/MM/YYYY"
-                        value={newRowData.ngayThu || ''}
-                        onChange={handleNewChange}
-                        className="w-full px-2 py-1 border rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="number"
-                        name="soTien"
-                        placeholder="Số tiền"
-                        value={newRowData.soTien || 0}
-                        onChange={handleNewChange}
-                        className="w-full px-2 py-1 border rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="text"
-                        name="nguoiNop"
-                        placeholder="Người nộp"
-                        value={newRowData.nguoiNop || ''}
-                        onChange={handleNewChange}
-                        className="w-full px-2 py-1 border rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="number"
-                        name="nguoiThuId"
-                        placeholder="Mã người thu"
-                        value={newRowData.nguoiThuId || 0}
-                        onChange={handleNewChange}
-                        className="w-full px-2 py-1 border rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="number"
-                        name="hoKhauMaHoKhau"
-                        placeholder="Mã hộ khẩu"
-                        value={newRowData.hoKhauMaHoKhau || 0}
-                        onChange={handleNewChange}
-                        className="w-full px-2 py-1 border rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="number"
-                        name="khoanThuMaKhoanThu"
-                        placeholder="Mã khoản thu"
-                        value={newRowData.khoanThuMaKhoanThu || 0}
-                        onChange={handleNewChange}
-                        className="w-full px-2 py-1 border rounded"
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex space-x-2">
-                        <button
-                          className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
-                          onClick={handleSaveNewRow}
-                          title="Lưu"
-                        >
-                          <FaSave />
-                        </button>
-                        <button
-                          className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-                          onClick={handleCancelNewRow}
-                          title="Hủy"
-                        >
-                          <FaTimes />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )}
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.batBuoc ? 'Có' : 'Không'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{soNguoiDaNop}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{soTienDaThu.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.ghiChu || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{getTenDotThu(row.maDotThu)}</td>
+                      </tr>
+                      {expandedRowId === row.maKhoanThu && (
+                        <tr>
+                          <td colSpan={10} className="px-4 py-3 bg-gray-100">
+                            <div className="pl-8">
+                              <div className="flex items-center space-x-2 mb-4">
+                                <select
+                                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  value={nopPhiSearchCriteria[row.maKhoanThu!] || '0'}
+                                  onChange={(e) =>
+                                    setNopPhiSearchCriteria((prev) => ({
+                                      ...prev,
+                                      [row.maKhoanThu!]: e.target.value,
+                                    }))
+                                  }
+                                >
+                                  <option value="0">Mã bản ghi</option>
+                                  <option value="1">Ngày thu</option>
+                                  <option value="2">Số tiền</option>
+                                  <option value="3">Người nộp</option>
+                                  <option value="4">Mã người thu</option>
+                                  <option value="5">Mã hộ khẩu</option>
+                                </select>
+                                <input
+                                  type="text"
+                                  placeholder="Tìm kiếm nộp phí"
+                                  className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  value={nopPhiSearchKeyword[row.maKhoanThu!] || ''}
+                                  onChange={(e) => handleNopPhiSearchChange(row.maKhoanThu!, e.target.value)}
+                                  onKeyDown={(e) => handleNopPhiSearchKeyDown(row.maKhoanThu!, e)}
+                                />
+                                <button
+                                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                                  onClick={() => handleNopPhiSearch(row.maKhoanThu!)}
+                                >
+                                  <FaSearch />
+                                  <span>Tìm kiếm</span>
+                                </button>
+                              </div>
+                              <h3 className="text-sm font-medium text-gray-700 mb-2">Danh sách nộp phí</h3>
+                              <table className="w-full border-t border-gray-200">
+                                <thead>
+                                  <tr className="bg-gray-200">
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Mã bản ghi</th>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Ngày thu</th>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Số tiền</th>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Người nộp</th>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Mã người thu</th>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Mã hộ khẩu</th>
+                                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Hành động</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200">
+                                  {(filteredNopPhiData[row.maKhoanThu!] || []).map((np) => (
+                                    <tr key={np.id || Math.random()} className="hover:bg-gray-50">
+                                      <td className="px-4 py-2 text-sm text-gray-900">{np.id || '-'}</td>
+                                      {editNopPhiId === np.id ? (
+                                        <>
+                                          <td className="px-4 py-2">
+                                            <input
+                                              type="text"
+                                              name="ngayThu"
+                                              value={editNopPhiFormData.ngayThu || ''}
+                                              onChange={(e) => handleNopPhiChange(e, false)}
+                                              placeholder="DD/MM/YYYY"
+                                              className="w-full px-2 py-1 border rounded"
+                                            />
+                                          </td>
+                                          <td className="px-4 py-2">
+                                            <input
+                                              type="number"
+                                              name="soTien"
+                                              value={editNopPhiFormData.soTien || 0}
+                                              onChange={(e) => handleNopPhiChange(e, false)}
+                                              className="w-full px-2 py-1 border rounded"
+                                            />
+                                          </td>
+                                          <td className="px-4 py-2">
+                                            <input
+                                              type="text"
+                                              name="nguoiNop"
+                                              value={editNopPhiFormData.nguoiNop || ''}
+                                              onChange={(e) => handleNopPhiChange(e, false)}
+                                              className="w-full px-2 py-1 border rounded"
+                                            />
+                                          </td>
+                                          <td className="px-4 py-2">
+                                            <input
+                                              type="number"
+                                              name="nguoiThuId"
+                                              value={editNopPhiFormData.nguoiThuId || 0}
+                                              onChange={(e) => handleNopPhiChange(e, false)}
+                                              className="w-full px-2 py-1 border rounded"
+                                            />
+                                          </td>
+                                          <td className="px-4 py-2">
+                                            <input
+                                              type="number"
+                                              name="hoKhauMaHoKhau"
+                                              value={editNopPhiFormData.hoKhauMaHoKhau || 0}
+                                              onChange={(e) => handleNopPhiChange(e, false)}
+                                              className="w-full px-2 py-1 border rounded"
+                                            />
+                                          </td>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <td className="px-4 py-2 text-sm text-gray-900">{formatDateDisplay(np.ngayThu)}</td>
+                                          <td className="px-4 py-2 text-sm text-gray-900">{np.soTien?.toLocaleString() || '-'}</td>
+                                          <td className="px-4 py-2 text-sm text-gray-900">{np.nguoiNop || '-'}</td>
+                                          <td className="px-4 py-2 text-sm text-gray-900">{np.idNguoiThu || '-'}</td>
+                                          <td className="px-4 py-2 text-sm text-gray-900">{np.maHoKhau || '-'}</td>
+                                        </>
+                                      )}
+                                      <td className="px-4 py-2">
+                                        <div className="flex space-x-2">
+                                          <button
+                                            className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleEditNopPhiClick(np);
+                                            }}
+                                            title={editNopPhiId === np.id ? 'Lưu' : 'Chỉnh sửa'}
+                                            disabled={!np.id}
+                                          >
+                                            {editNopPhiId === np.id ? <FaSave /> : <FaPen />}
+                                          </button>
+                                          <button
+                                            className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              np.id && handleDeleteNopPhiClick(np.id);
+                                            }}
+                                            title="Xóa"
+                                            disabled={!np.id}
+                                          >
+                                            <FaTrashAlt />
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                  {addingNewNopPhi === row.maKhoanThu && (
+                                    <tr className="bg-blue-50">
+                                      <td className="px-4 py-2 text-sm text-gray-900">-</td>
+                                      <td className="px-4 py-2">
+                                        <input
+                                          type="text"
+                                          name="ngayThu"
+                                          placeholder="DD/MM/YYYY"
+                                          value={newNopPhiData.ngayThu || ''}
+                                          onChange={(e) => handleNopPhiChange(e, true)}
+                                          className="w-full px-2 py-1 border rounded"
+                                        />
+                                      </td>
+                                      <td className="px-4 py-2">
+                                        <input
+                                          type="number"
+                                          name="soTien"
+                                          placeholder="Số tiền"
+                                          value={newNopPhiData.soTien || 0}
+                                          onChange={(e) => handleNopPhiChange(e, true)}
+                                          className="w-full px-2 py-1 border rounded"
+                                        />
+                                      </td>
+                                      <td className="px-4 py-2">
+                                        <input
+                                          type="text"
+                                          name="nguoiNop"
+                                          placeholder="Người nộp"
+                                          value={newNopPhiData.nguoiNop || ''}
+                                          onChange={(e) => handleNopPhiChange(e, true)}
+                                          className="w-full px-2 py-1 border rounded"
+                                        />
+                                      </td>
+                                      <td className="px-4 py-2">
+                                        <input
+                                          type="number"
+                                          name="nguoiThuId"
+                                          placeholder="Mã người thu"
+                                          value={newNopPhiData.nguoiThuId || 0}
+                                          onChange={(e) => handleNopPhiChange(e, true)}
+                                          className="w-full px-2 py-1 border rounded"
+                                        />
+                                      </td>
+                                      <td className="px-4 py-2">
+                                        <input
+                                          type="number"
+                                          name="hoKhauMaHoKhau"
+                                          placeholder="Mã hộ khẩu"
+                                          value={newNopPhiData.hoKhauMaHoKhau || 0}
+                                          onChange={(e) => handleNopPhiChange(e, true)}
+                                          className="w-full px-2 py-1 border rounded"
+                                        />
+                                      </td>
+                                      <td className="px-4 py-2">
+                                        <div className="flex space-x-2">
+                                          <button
+                                            className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
+                                            onClick={() => handleSaveNewNopPhi(row.maKhoanThu)}
+                                            title="Lưu"
+                                          >
+                                            <FaSave />
+                                          </button>
+                                          <button
+                                            className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                                            onClick={handleCancelNewNopPhi}
+                                            title="Hủy"
+                                          >
+                                            <FaTimes />
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                              <button
+                                className="mt-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
+                                onClick={() => handleAddNewNopPhiClick(row.maKhoanThu!)}
+                              >
+                                <FaPlus />
+                                <span>Thêm nộp phí</span>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -608,7 +781,7 @@ const QLNopPhi: React.FC = () => {
               <select
                 className="border border-gray-300 rounded px-2 py-1 text-sm"
                 value={itemsPerPage}
-                onChange={e => setItemsPerPage(Number(e.target.value))}
+                onChange={(e) => setItemsPerPage(Number(e.target.value))}
               >
                 <option value="10">10</option>
                 <option value="25">25</option>
@@ -616,9 +789,7 @@ const QLNopPhi: React.FC = () => {
               </select>
               <span className="text-sm text-gray-700">mục</span>
             </div>
-            <div className="text-sm text-gray-700">
-              Tổng cộng: {filteredData.length} bản ghi {/* Updated to use filteredData.length */}
-            </div>
+            <div className="text-sm text-gray-700">Tổng cộng: {filteredKhoanThuData.length} khoản thu</div>
           </div>
         </main>
       </div>

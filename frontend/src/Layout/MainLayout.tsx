@@ -130,7 +130,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     </Link>
                   </li>
                   )}
-                     {vaiTro === "3" && ( 
+                     {/* {vaiTro === "3" && ( 
                   <li>
                     <Link
                       to="/management/qlkhoanthu"
@@ -139,7 +139,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                       Quản lí khoản thu
                     </Link>
                   </li>
-                  )}
+                  )} */}
                   {vaiTro === "1" && ( /* Tổ trưởng */
                   
                     <li>
