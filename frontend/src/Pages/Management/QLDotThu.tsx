@@ -42,9 +42,11 @@ const trangThaiOptions = [
 ];
 
 const loaiKhoanThuOptions: { value: string; label: string }[] = [
-  { value: 'HOC_PHI', label: 'Học phí' },
-  { value: 'HOAT_DONG', label: 'Hoạt động' },
+  { value: 'BAO_TRI', label: 'Bảo trì' },
+  { value: 'TIEN_ICH', label: 'Tiện ích' },
   { value: 'DICH_VU', label: 'Dịch vụ' },
+  { value: 'DIEN_NUOC', label: 'Điện nước'},
+  { value: 'GUI_XE', label: 'Gửi xe' },
   { value: 'DONG_GOP', label: 'Đóng góp' },
   { value: 'KHAC', label: 'Khác' },
 ];

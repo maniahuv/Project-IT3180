@@ -1,7 +1,11 @@
 package model;
 
 import jakarta.persistence.*;
+
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
@@ -23,6 +27,10 @@ public class KhoanThu {
 
     @Column(length = 1000)
     private String ghiChu;
+
+    @OneToMany(mappedBy = "khoanThu", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<NopPhi> nopPhis;
 
     @ManyToOne
     @JoinColumn(name = "maDotThu")
