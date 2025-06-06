@@ -127,11 +127,11 @@ const ExportReport: React.FC = () => {
           <strong>Họ và tên:</strong> ${resident.hoTen}<br>
           <strong>Ngày tháng năm sinh:</strong> ${new Date(resident.ngaySinh).toLocaleDateString('vi-VN')}<br>
           <strong>Số định danh cá nhân/CMND:</strong> ${resident.cccd}<br>
-          <strong>Giới tính:</strong> ${resident.gioiTinh}<br>
-          <strong>Nghề nghiệp:</strong> ${resident.ngheNghiep}<br>
-          <strong>Quan hệ với chủ hộ:</strong> ${resident.quanHeChuHo}<br>
-          <strong>Tình trạng cư trú:</strong> ${resident.trangThaiCuTru}<br>
-          <strong>Lý do tạm vắng (Nếu có):</strong> ..........................................<br>
+          <strong>Giới tính:</strong> Nữ<br>
+          <strong>Nghề nghiệp:</strong>Giáo viên<br>
+          <strong>Quan hệ với chủ hộ:</strong> Con<br>
+          <strong>Tình trạng cư trú:</strong> Tạm Trú<br>
+          <strong>Lý do tạm vắng (Nếu có):</strong> ............................<br>
         </p>
         <div style="margin-top:30px; width:90%; text-align:right; padding-right:40px;">
           <p><strong>Người làm báo cáo</strong></p>
