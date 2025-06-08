@@ -219,7 +219,7 @@ Dự án được phát triển cho mục đích học tập. Có thể sử d�
 
 ## 👨‍💻 Tác giả
 
-- **GitHub**: [nganhaaa](https://github.com/nganhaaa)
+- **GitHub**: [nganhaaa](https://github.com/nganhaaa), [maniahuv](https://githup.com/maniahuv), [nguyenkieuoanh-20225899](https://githup.com/nguyenkieuoanh-20225899),[petekaresito](https://githup.com/petekaresito)
 - Liên hệ: [Thêm email hoặc thông tin liên hệ nếu cần]
 
 ---
