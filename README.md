@@ -68,7 +68,7 @@ Hệ thống bao gồm hai thành phần chính:
 ### 1. Clone dự án
 
 ```bash
-git clone https://github.com/nganhaaa/ktpm.git
+git clone [https://github.com/nganhaaa/ktpm.git](https://github.com/maniahuv/Project-IT4082.git)
 cd ktpm
 ```
 
