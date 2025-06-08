@@ -75,6 +75,7 @@ const ExportReport: React.FC = () => {
         <div style="margin-top:30px; width:90%; text-align:right; padding-right:40px;">
           <p><strong>Người làm phiếu</strong></p>
           <p style="margin-top:60px;">(Ký và ghi rõ họ tên)</p>
+          <p style="margin-top:60px;">Trần văn B</p>
         </div>
       `;
 
