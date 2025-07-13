@@ -14,6 +14,7 @@ import MainLayout from '../../Layout/MainLayout';
 import { SanPham, fetchAllSanPham, createSanPham, updateSanPham, deleteSanPham, tinhLoiNhuan } from '../../api/SanPhamAPI';
 
 interface EditSanPhamFormData {
+  
   ten: string;
   ngayNhapHang?: string;
   donGiaGoc: number;
@@ -60,6 +61,7 @@ const QLSanPham: React.FC = () => {
   });
   const [addingNewSanPham, setAddingNewSanPham] = useState<boolean>(false);
   const [newSanPhamData, setNewSanPhamData] = useState<EditSanPhamFormData>({
+    
     ten: '',
     ngayNhapHang: '',
     donGiaGoc: 0,

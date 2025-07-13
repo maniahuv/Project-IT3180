@@ -11,11 +11,11 @@ axios.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
-);
+)
 
 // Interface cho SanPham
 export interface SanPham {
-  idSp?: string;
+  idSp?:string
   ten: string;
   ngayNhapHang?: string;
   donGiaGoc: number;
