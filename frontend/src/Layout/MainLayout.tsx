@@ -184,6 +184,22 @@ export default function MainLayout({ children }: MainLayoutProps) {
                       Xuất báo cáo
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      to="/management/qlsanpham"
+                      className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                    >
+                      Quản lí sản phẩm
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/management/qlhoadon"
+                      className="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                    >
+                      Quản lí hoá đơn
+                    </Link>
+                  </li>
                 </ul>
               )}
             </li>
