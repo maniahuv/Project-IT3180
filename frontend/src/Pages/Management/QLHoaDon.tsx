@@ -152,8 +152,21 @@ const HoaDon: React.FC = () => {
         printWindow.focus();
         printWindow.print();
         printWindow.close();
+
+        // Hiển thị nút "Tạo hóa đơn mới" sau khi in
+        setShowNewInvoiceButton(true);
       }
     }
+  };
+
+  const [showNewInvoiceButton, setShowNewInvoiceButton] = useState<boolean>(false);
+
+  const handleNewInvoice = () => {
+    setProducts([]);
+    setProductId('');
+    setQuantity(1);
+    setError(null);
+    setShowNewInvoiceButton(false);
   };
 
   return (
@@ -230,10 +243,18 @@ const HoaDon: React.FC = () => {
         <div className="text-right">
           <button
             onClick={handlePrint}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mr-2"
           >
             In hóa đơn (PDF)
           </button>
+          {showNewInvoiceButton && (
+            <button
+              onClick={handleNewInvoice}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+            >
+              Tạo hóa đơn mới
+            </button>
+          )}
         </div>
 
         {/* Phần tử ẩn để in */}

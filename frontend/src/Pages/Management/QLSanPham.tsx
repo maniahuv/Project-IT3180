@@ -1,6 +1,5 @@
 
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FaSearch,
   FaPlus,
@@ -8,8 +7,6 @@ import {
   FaTrashAlt,
   FaSave,
   FaTimes,
-  FaChevronDown,
-  FaChevronUp,
 } from 'react-icons/fa';
 import MainLayout from '../../Layout/MainLayout';
 import { SanPham, fetchAllSanPham, createSanPham, updateSanPham, deleteSanPham, tinhLoiNhuan } from '../../api/SanPhamAPI';
@@ -73,8 +70,10 @@ const QLSanPham: React.FC = () => {
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const [loiNhuan, setLoiNhuan] = useState<{ [key: string]: number }>({});
+
+  const barChartRef = useRef<HTMLCanvasElement>(null);
+  const pieChartRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     loadData();
@@ -82,7 +81,8 @@ const QLSanPham: React.FC = () => {
 
   useEffect(() => {
     setFilteredSanPhamData(sanPhamData);
-  }, [sanPhamData]);
+    drawCharts();
+  }, [sanPhamData, loiNhuan]);
 
   const loadData = async () => {
     try {
@@ -102,7 +102,6 @@ const QLSanPham: React.FC = () => {
       setSanPhamData(sanPhamArray);
       setFilteredSanPhamData(sanPhamArray);
 
-      // Tính lợi nhuận cho từng sản phẩm
       const loiNhuanData: { [key: string]: number } = {};
       for (const sp of sanPhamArray) {
         if (sp.idSp) {
@@ -217,7 +216,7 @@ const QLSanPham: React.FC = () => {
       ...prev,
       [name]:
         name === 'donGiaGoc' || name === 'giaBan' || name === 'tonKho' || name === 'daBan'
-          ? Number(value)
+          ? Number(value) || 0
           : value,
     }));
   };
@@ -251,7 +250,7 @@ const QLSanPham: React.FC = () => {
     try {
       const newSanPham: SanPham = {
         ten: newSanPhamData.ten,
-        ngayNhapHang: newSanPhamData.ngayNhapHang ? formatDateISO(newSanPhamData.ngayNhapHang) : undefined,
+        ngayNhapHang: newSanPhamData.ngayNhapHang,
         donGiaGoc: newSanPhamData.donGiaGoc,
         giaBan: newSanPhamData.giaBan,
         tonKho: newSanPhamData.tonKho,
@@ -340,6 +339,95 @@ const QLSanPham: React.FC = () => {
     window.location.href = '/login';
   };
 
+  const drawCharts = () => {
+    // Biểu đồ cột
+    const barCanvas = barChartRef.current;
+    if (barCanvas) {
+      const barCtx = barCanvas.getContext('2d');
+      if (barCtx) {
+        barCtx.clearRect(0, 0, barCanvas.width, barCanvas.height);
+
+        const von = filteredSanPhamData.reduce((sum, row) => sum + (row.donGiaGoc * (row.tonKho + row.daBan)), 0);
+        const thu = filteredSanPhamData.reduce((sum, row) => sum + (row.giaBan * row.daBan), 0);
+        const lai = thu - von;
+
+        const data = [von, thu, lai];
+        const labels = ['Vốn', 'Thu', 'Lãi'];
+        const barWidth = 50;
+        const gap = 20;
+        const maxValue = Math.max(...data.filter(v => v >= 0), 1); // Tránh chia cho 0
+        const heightScale = (barCanvas.height - 40) / maxValue;
+
+        barCtx.font = '14px Arial';
+        barCtx.textAlign = 'center';
+
+        data.forEach((value, index) => {
+          const x = 50 + index * (barWidth + gap);
+          const height = Math.max(value, 0) * heightScale; // Đảm bảo chiều cao không âm
+          const y = barCanvas.height - 20 - height;
+
+          barCtx.fillStyle = index === 0 ? '#ff6384' : index === 1 ? '#4bc0c0' : '#36a2eb';
+          barCtx.fillRect(x, y, barWidth, height);
+
+          barCtx.fillStyle = '#000';
+          barCtx.fillText(value.toLocaleString(), x + barWidth / 2, y - 5);
+          barCtx.fillText(labels[index], x + barWidth / 2, barCanvas.height - 5);
+        });
+
+        barCtx.beginPath();
+        barCtx.moveTo(30, 10);
+        barCtx.lineTo(30, barCanvas.height - 20);
+        barCtx.lineTo(barCanvas.width - 30, barCanvas.height - 20);
+        barCtx.stroke();
+      }
+    }
+
+    // Biểu đồ tròn
+    const pieCanvas = pieChartRef.current;
+    if (pieCanvas) {
+      const pieCtx = pieCanvas.getContext('2d');
+      if (pieCtx) {
+        pieCtx.clearRect(0, 0, pieCanvas.width, pieCanvas.height);
+
+        const von = filteredSanPhamData.reduce((sum, row) => sum + (row.donGiaGoc * (row.tonKho + row.daBan)), 0);
+        const thu = filteredSanPhamData.reduce((sum, row) => sum + (row.giaBan * row.daBan), 0);
+        const phanTramHoanVon = von > 0 ? (thu / von) * 100 : 0;
+        const phanTramChuaHoanVon = 100 - phanTramHoanVon;
+
+        const centerX = pieCanvas.width / 2;
+        const centerY = pieCanvas.height / 2;
+        const radius = Math.min(centerX, centerY) - 10;
+        let startAngle = 0;
+
+        pieCtx.font = '14px Arial';
+        pieCtx.textAlign = 'center';
+
+        // Vẽ phần đã hoàn vốn
+        const hoanVonAngle = ((phanTramHoanVon / 100) * 2 * Math.PI);
+        pieCtx.fillStyle = '#4bc0c0';
+        pieCtx.beginPath();
+        pieCtx.moveTo(centerX, centerY);
+        pieCtx.arc(centerX, centerY, radius, startAngle, startAngle + hoanVonAngle);
+        pieCtx.closePath();
+        pieCtx.fill();
+        startAngle += hoanVonAngle;
+
+        // Vẽ phần chưa hoàn vốn
+        pieCtx.fillStyle = '#d3d3d3';
+        pieCtx.beginPath();
+        pieCtx.moveTo(centerX, centerY);
+        pieCtx.arc(centerX, centerY, radius, startAngle, startAngle + ((phanTramChuaHoanVon / 100) * 2 * Math.PI));
+        pieCtx.closePath();
+        pieCtx.fill();
+
+        // Thêm nhãn phần trăm
+        pieCtx.fillStyle = '#000';
+        pieCtx.fillText(`${phanTramHoanVon.toFixed(1)}%`, centerX, centerY - 10);
+        pieCtx.fillText('Đã hoàn vốn', centerX, centerY + 20);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <MainLayout>
@@ -424,7 +512,6 @@ const QLSanPham: React.FC = () => {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700"></th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mã sản phẩm</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Tên sản phẩm</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Ngày nhập hàng</th>
@@ -432,140 +519,132 @@ const QLSanPham: React.FC = () => {
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Giá bán</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Tồn kho</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Đã bán</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Mô tả</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Lợi nhuận</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredSanPhamData.map((row) => (
-                  <React.Fragment key={row.idSp}>
-                    <tr
-                      id={`row-${row.idSp}`}
-                      className={`hover:bg-gray-50 cursor-pointer ${
-                        highlightedRowId === row.idSp ? 'bg-yellow-100' : ''
-                      }`}
-                      onClick={() => {
-                        if (!row.idSp) return;
-                        setExpandedRowId(prev =>
-                          prev === row.idSp! ? null : row.idSp!
-                        );
-                      }}
-                    >
-                      <td className="px-4 py-3">
-                        <span>{expandedRowId === row.idSp ? <FaChevronUp /> : <FaChevronDown />}</span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{row.idSp}</td>
-                      {editSanPhamId === row.idSp ? (
-                        <>
-                          <td className="px-4 py-3">
-                            <input
-                              type="text"
-                              name="ten"
-                              value={editSanPhamFormData.ten}
-                              onChange={(e) => handleSanPhamChange(e, false)}
-                              className="w-full px-2 py-1 border rounded"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input
-                              type="text"
-                              name="ngayNhapHang"
-                              value={editSanPhamFormData.ngayNhapHang || ''}
-                              onChange={(e) => handleSanPhamChange(e, false)}
-                              placeholder="DD/MM/YYYY"
-                              className="w-full px-2 py-1 border rounded"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input
-                              type="number"
-                              name="donGiaGoc"
-                              value={editSanPhamFormData.donGiaGoc}
-                              onChange={(e) => handleSanPhamChange(e, false)}
-                              className="w-full px-2 py-1 border rounded"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input
-                              type="number"
-                              name="giaBan"
-                              value={editSanPhamFormData.giaBan}
-                              onChange={(e) => handleSanPhamChange(e, false)}
-                              className="w-full px-2 py-1 border rounded"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input
-                              type="number"
-                              name="tonKho"
-                              value={editSanPhamFormData.tonKho}
-                              onChange={(e) => handleSanPhamChange(e, false)}
-                              className="w-full px-2 py-1 border rounded"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input
-                              type="number"
-                              name="daBan"
-                              value={editSanPhamFormData.daBan}
-                              onChange={(e) => handleSanPhamChange(e, false)}
-                              className="w-full px-2 py-1 border rounded"
-                            />
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900">{loiNhuan[row.idSp!]?.toLocaleString() || '-'}</td>
-                        </>
-                      ) : (
-                        <>
-                          <td className="px-4 py-3 text-sm text-gray-900">{row.ten}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayNhapHang)}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900">{row.donGiaGoc.toLocaleString()}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900">{row.giaBan.toLocaleString()}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900">{row.tonKho}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900">{row.daBan}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900">{loiNhuan[row.idSp!]?.toLocaleString() || '-'}</td>
-                        </>
-                      )}
-                      <td className="px-4 py-3">
-                        <div className="flex space-x-2">
-                          <button
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditSanPhamClick(row);
-                            }}
-                            title={editSanPhamId === row.idSp ? 'Lưu' : 'Chỉnh sửa'}
-                          >
-                            {editSanPhamId === row.idSp ? <FaSave /> : <FaPen />}
-                          </button>
-                          <button
-                            className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              row.idSp && handleDeleteSanPhamClick(row.idSp);
-                            }}
-                            title="Xóa"
-                          >
-                            <FaTrashAlt />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {expandedRowId === row.idSp && (
-                      <tr>
-                        <td colSpan={10} className="px-4 py-3 bg-gray-100">
-                          <div className="pl-8">
-                            <h3 className="text-sm font-medium text-gray-700 mb-2">Chi tiết sản phẩm</h3>
-                            <p><strong>Mô tả:</strong> {row.moTa || 'Không có'}</p>
-                            <p><strong>Lợi nhuận:</strong> {loiNhuan[row.idSp!]?.toLocaleString() || '-'} VNĐ</p>
-                          </div>
+                  <tr
+                    id={`row-${row.idSp}`}
+                    className={`hover:bg-gray-50 ${
+                      highlightedRowId === row.idSp ? 'bg-yellow-100' : ''
+                    }`}
+                    key={row.idSp}
+                  >
+                    <td className="px-4 py-3 text-sm text-gray-900">{row.idSp}</td>
+                    {editSanPhamId === row.idSp ? (
+                      <>
+                        <td className="px-4 py-3">
+                          <input
+                            type="text"
+                            name="ten"
+                            value={editSanPhamFormData.ten}
+                            onChange={(e) => handleSanPhamChange(e, false)}
+                            className="w-full px-2 py-1 border rounded"
+                          />
                         </td>
-                      </tr>
+                        <td className="px-4 py-3">
+                          <input
+                            type="date"
+                            name="ngayNhapHang"
+                            value={editSanPhamFormData.ngayNhapHang || ''}
+                            onChange={(e) => handleSanPhamChange(e, false)}
+                            className="w-full px-2 py-1 border rounded"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input
+                            type="number"
+                            name="donGiaGoc"
+                            value={editSanPhamFormData.donGiaGoc}
+                            onChange={(e) => handleSanPhamChange(e, false)}
+                            className="w-full px-2 py-1 border rounded"
+                            min="0"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input
+                            type="number"
+                            name="giaBan"
+                            value={editSanPhamFormData.giaBan}
+                            onChange={(e) => handleSanPhamChange(e, false)}
+                            className="w-full px-2 py-1 border rounded"
+                            min="0"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input
+                            type="number"
+                            name="tonKho"
+                            value={editSanPhamFormData.tonKho}
+                            onChange={(e) => handleSanPhamChange(e, false)}
+                            className="w-full px-2 py-1 border rounded"
+                            min="0"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input
+                            type="number"
+                            name="daBan"
+                            value={editSanPhamFormData.daBan}
+                            onChange={(e) => handleSanPhamChange(e, false)}
+                            className="w-full px-2 py-1 border rounded"
+                            min="0"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input
+                            type="text"
+                            name="moTa"
+                            value={editSanPhamFormData.moTa}
+                            onChange={(e) => handleSanPhamChange(e, false)}
+                            className="w-full px-2 py-1 border rounded"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{loiNhuan[row.idSp!]?.toLocaleString() || '-'}</td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.ten}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{formatDateDisplay(row.ngayNhapHang)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.donGiaGoc.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.giaBan.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.tonKho}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.daBan}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{row.moTa || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900">{loiNhuan[row.idSp!]?.toLocaleString() || '-'}</td>
+                      </>
                     )}
-                  </React.Fragment>
+                    <td className="px-4 py-3">
+                      <div className="flex space-x-2">
+                        <button
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditSanPhamClick(row);
+                          }}
+                          title={editSanPhamId === row.idSp ? 'Lưu' : 'Chỉnh sửa'}
+                        >
+                          {editSanPhamId === row.idSp ? <FaSave /> : <FaPen />}
+                        </button>
+                        <button
+                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            row.idSp && handleDeleteSanPhamClick(row.idSp);
+                          }}
+                          title="Xóa"
+                        >
+                          <FaTrashAlt />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
                 {addingNewSanPham && (
                   <tr className="bg-blue-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">-</td>
                     <td className="px-4 py-3 text-sm text-gray-900">-</td>
                     <td className="px-4 py-3">
                       <input
@@ -579,9 +658,8 @@ const QLSanPham: React.FC = () => {
                     </td>
                     <td className="px-4 py-3">
                       <input
-                        type="text"
+                        type="date"
                         name="ngayNhapHang"
-                        placeholder="DD/MM/YYYY"
                         value={newSanPhamData.ngayNhapHang || ''}
                         onChange={(e) => handleSanPhamChange(e, true)}
                         className="w-full px-2 py-1 border rounded"
@@ -595,6 +673,7 @@ const QLSanPham: React.FC = () => {
                         value={newSanPhamData.donGiaGoc}
                         onChange={(e) => handleSanPhamChange(e, true)}
                         className="w-full px-2 py-1 border rounded"
+                        min="0"
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -605,6 +684,7 @@ const QLSanPham: React.FC = () => {
                         value={newSanPhamData.giaBan}
                         onChange={(e) => handleSanPhamChange(e, true)}
                         className="w-full px-2 py-1 border rounded"
+                        min="0"
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -615,6 +695,7 @@ const QLSanPham: React.FC = () => {
                         value={newSanPhamData.tonKho}
                         onChange={(e) => handleSanPhamChange(e, true)}
                         className="w-full px-2 py-1 border rounded"
+                        min="0"
                       />
                     </td>
                     <td className="px-4 py-3">
@@ -623,6 +704,17 @@ const QLSanPham: React.FC = () => {
                         name="daBan"
                         placeholder="Đã bán"
                         value={newSanPhamData.daBan}
+                        onChange={(e) => handleSanPhamChange(e, true)}
+                        className="w-full px-2 py-1 border rounded"
+                        min="0"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        name="moTa"
+                        placeholder="Mô tả"
+                        value={newSanPhamData.moTa}
                         onChange={(e) => handleSanPhamChange(e, true)}
                         className="w-full px-2 py-1 border rounded"
                       />
@@ -652,7 +744,7 @@ const QLSanPham: React.FC = () => {
             </table>
           </div>
 
-          <div className="mt-4 flex justify-between items-center">
+          <div className="mt-4 flex justify-between items-center mb-6">
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-700">Hiển thị</span>
               <select
@@ -668,6 +760,17 @@ const QLSanPham: React.FC = () => {
             </div>
             <div className="text-sm text-gray-700">Tổng cộng: {filteredSanPhamData.length} sản phẩm</div>
           </div>
+
+          <div className="flex space-x-6 mb-6">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Biểu đồ Cột</h3>
+              <canvas ref={barChartRef} width="400" height="200"></canvas>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Biểu đồ Tròn - % Hoàn vốn</h3>
+              <canvas ref={pieChartRef} width="200" height="200"></canvas>
+            </div>
+          </div>
         </main>
       </div>
     </MainLayout>
@@ -675,3 +778,5 @@ const QLSanPham: React.FC = () => {
 };
 
 export default React.memo(QLSanPham);
+
+
