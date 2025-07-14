@@ -1,3 +1,5 @@
+
+
 package service;
 
 import model.SanPham;
@@ -41,7 +43,6 @@ public class SanPhamService {
                     .orElse("SP000");
             int nextId = Integer.parseInt(lastId.replace("SP", "")) + 1;
             sp.setIdSp(String.format("SP%03d", nextId));
-            throw new IllegalArgumentException("Vui lòng nhập mã sản phẩm (idSp).");
         }
         System.out.println("Creating SanPham: " + sp.getTen());
         return repository.save(sp);
